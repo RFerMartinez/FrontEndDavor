@@ -57,7 +57,12 @@
 
     <!-- MENSAJE DE ÉXITO -->
     <div class="mensaje-exito" id="mensajeExito" v-else >
-     <div class="checkmark">&#10004;</div>
+     <div class="checkmark">
+        <svg class="check-icon" viewBox="0 0 52 52">
+          <circle class="check-circle" cx="26" cy="26" r="24" fill="none"/>
+          <path class="check-mark" fill="none" d="M14 27l7 7 16-16"/>
+        </svg>
+      </div>
         <h3 >¡Registro Exitoso!</h3>
         <p>Gracias por registrarte en <strong>GYM Abito</strong>.<br>
         Tu cuenta ha sido creada exitosamente.<br>
@@ -190,4 +195,47 @@ label {
   text-align: center;
   color: white;
 }
+
+.checkmark {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+}
+
+.check-icon {
+  width: 100%;
+  height: 100%;
+  stroke: #a5dc86;
+  stroke-width: 4;
+  stroke-miterlimit: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.check-circle {
+  stroke-dasharray: 150;
+  stroke-dashoffset: 150;
+  animation: stroke-circle 0.6s ease-in-out forwards;
+}
+
+.check-mark {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: stroke-check 0.4s 0.6s ease-in-out forwards;
+}
+
+/* Animaciones */
+@keyframes stroke-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes stroke-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 </style>
