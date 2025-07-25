@@ -1,7 +1,7 @@
 <template>
   <div>
     <NavBar />
-    <HeroSection />
+    <HeroSection/>
 
     <section class="black-section">
       <div class="container">
@@ -27,58 +27,76 @@
         </div>
       </div>
     </transition>
+      <section class="black-section">
+    <div class="container">
+      <h2 class="section-title">Precios</h2>
+      <div class="precios-grid">
+        <Precio
+          v-for="(item, index) in precios"
+          :key="index"
+          :precio="item"
+        />
+      </div>
+    </div>
+  </section>
+  <Footer />
   </div> 
+
+
+  
 </template>
 
 
 <script setup>
+import Footer from '../components/Footer.vue'
 import NavBar from '@/components/NavBar.vue'
 import HeroSection from '@/components/HeroSection.vue'
 import Metodologia from '../components/Metodologias.vue'
-
-
+import Precio from '../components/Precio.vue'
 import { ref, onMounted } from 'vue'
 
+// Metodologías
 const metodologias = ref([])
 const modalVisible = ref(false)
 const modalData = ref({})
 
 fetch('/data/metodologias.json')
-  .then(res => {
-    if (!res.ok) throw new Error('Error al cargar JSON')
-    return res.json()
-  })
+  .then(res => res.json())
   .then(data => {
     metodologias.value = data
   })
-  .catch(error => {
-    console.error('Error cargando metodologías:', error)
-  })
 
-function abrirModal(metodo) { 
+function abrirModal(metodo) {
   modalData.value = metodo
   modalVisible.value = true
 }
-
 function cerrarModal() {
   modalVisible.value = false
 }
-defineProps({
-  metodo: Object
-})
+
+// Precios
+const precios = ref([])
+
+fetch('/data/precios.json')
+  .then(res => res.json())
+  .then(data => {
+    precios.value = data
+  })
 </script>
 
 <style scoped>
 .black-section {
   background-color: #000;
   color: white;
-  padding: 100px 20px;
+  padding: 60px 20px 100px; /* menos padding arriba */
   min-height: 500px;
 }
 
 .section-title {
   text-align: center;
-  padding-top: 30px;
+  padding-top: 10px;
+  font-size: 2.5rem;
+  font-family: 'Poppins', sans-serif;
 }
 
 .grid {
@@ -148,6 +166,14 @@ defineProps({
 .modal-fade-leave-from {
   opacity: 1;
   transform: scale(1);
+}
+
+.precios-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-top: 30px;
 }
 
 </style>
