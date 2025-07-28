@@ -5,7 +5,7 @@ import PantallaUsuario from '../views/PantallaUsuario.vue'
 
 const routes = [
   {
-    path: '/',
+    path: '/Inicio',
     name: 'Inicio',
     component: PantallaInicio
   },
