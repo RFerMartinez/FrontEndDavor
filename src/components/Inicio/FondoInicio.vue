@@ -6,7 +6,7 @@
 
 <style scoped>
 .hero-section {
-  background: url('../assets/fondo.jpg') no-repeat center center;
+  background: url('../../assets/fondo.jpg') no-repeat center center;
   background-size: cover;
   background-attachment: fixed;
   height: 100vh;

@@ -1,9 +1,15 @@
 <template>
   <nav ref="navbar" class="navbar sticky-top bg-dark text-white p-3" id="navbar">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-      <a class="navbar-brand text-white" href="#">GIMNASIO Abito</a>
-
-      <!-- Botones visibles en pantallas grandes -->
+  <!-- IZQUIERDA: Logo y navegación -->
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand text-white me-5" href="#">GIMNASIO Abito</a>
+        <!-- Links de navegación -->
+        <div class="d-none d-md-flex gap-3">
+          <a href="#metodologias" class="nav-link nav-item-link">Metodologías</a>
+          <a href="#precios" class="nav-link nav-item-link">Precios</a>
+        </div>
+      </div>
       <div class="d-none d-md-block">
         <a @click="irLogin('login')" class="btn btn-outline-light me-2">Iniciar Sesión</a>
         <a @click="irLogin('registro')" class="btn btn-danger">Registrarse</a>
@@ -17,9 +23,11 @@
 
     <!-- Menú móvil colapsable (fuera del container-fluid, pero dentro del nav) -->
     <div class="collapse navbar-collapse d-md-none" id="mobileMenu">
-      <div class="d-flex flex-column align-items-end p-3">
-        <a @click="irLogin('login')" class="btn btn-outline-light me-2">Iniciar Sesión</a>
-        <a @click="irLogin('registro')" class="btn btn-danger">Registrarse</a>
+      <div class="d-flex flex-column align-items-center p-3">
+        <a href="#metodologias" class="nav-link text-white mb-2">Metodologías</a>
+        <a href="#precios" class="nav-link text-white mb-3">Precios</a>
+        <a @click="irLogin('login')" class="btn btn-outline-light mb-2 w-100">Iniciar Sesión</a>
+        <a @click="irLogin('registro')" class="btn btn-danger w-100">Registrarse</a>
       </div>
     </div>
   </nav>
@@ -68,5 +76,19 @@ function irLogin(modo) {
 
 .navbar-toggler {
   filter: invert(1);
+}
+
+.nav-item-link {
+  color: white;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.5rem;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-item-link:hover {
+  color: #ff4757; /* rojo suave o el color de tu marca */
+  border-bottom: 2px solid #ff4757;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
   <div>
     <NavBar />
-    <HeroSection/>
+    <FondoInicio/>
 
-    <section class="black-section">
+    <section id="metodologias" class="black-section">
       <div class="container">
         <h2 class="section-title">Metodologías de trabajo</h2>
         <div class="grid">
@@ -27,7 +27,7 @@
         </div>
       </div>
     </transition>
-      <section class="black-section">
+   <section id="precios" class="black-section">
     <div class="container">
       <h2 class="section-title">Precios</h2>
       <div class="precios-grid">
@@ -48,11 +48,11 @@
 
 
 <script setup>
-import Footer from '../components/Footer.vue'
-import NavBar from '@/components/NavBar.vue'
-import HeroSection from '@/components/HeroSection.vue'
-import Metodologia from '../components/Metodologias.vue'
-import Precio from '../components/Precio.vue'
+import Footer from '../components/Inicio/Footer.vue'
+import NavBar from '@/components/Inicio/NavBar.vue'
+import FondoInicio from '@/components/Inicio/FondoInicio.vue'
+import Metodologia from '../components/Inicio/Metodologias.vue'
+import Precio from '../components/Inicio/Precio.vue'
 import { ref, onMounted } from 'vue'
 
 // Metodologías

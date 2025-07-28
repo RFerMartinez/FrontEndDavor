@@ -1,17 +1,22 @@
 <template>
-  <HeroSection>
-    <LoginRegistro :modo="$route.query.modo" />
-  </HeroSection>
+  <div class="login-layout">
+    <FondoInicio>
+      <LoginRegistro :modo="$route.query.modo" />
+    </FondoInicio>
+    <Footer />
+  </div>
 </template>
 
 <script>
-import HeroSection from '@/components/HeroSection.vue'
-import LoginRegistro from '@/components/LoginRegistro.vue'
+import FondoInicio from '@/components/Inicio/FondoInicio.vue'
+import LoginRegistro from '@/components/Inicio/LoginRegistro.vue'
+import Footer from '@/components/Inicio/Footer.vue';
 
 export default {
   components: {
-    HeroSection,
-    LoginRegistro
+    FondoInicio,
+    LoginRegistro,
+    Footer
   }
 }
 
