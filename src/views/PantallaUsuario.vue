@@ -1,30 +1,82 @@
 <template>
   <Background>
     <div class="dashboard">
-      <Sidebar :nombre="usuario.nombre" :apellido="usuario.apellido">
-        <button class="menu-btn">Cuotas</button>
-        <button class="menu-btn">Pagos</button>
-        <button class="menu-btn">Informacion Personal</button>
-        <button class="menu-btn">Modificar Datos</button>
-        <!-- Otros botones según el rol -->
+      <Sidebar :nombre="usuario.nombre" :apellido="usuario.apellido" :vistaActiva="vistaActiva">
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'informacion' }"
+          @click="vistaActiva = 'informacion'"
+        >
+          Información Personal
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'cuotas' }"
+          @click="vistaActiva = 'cuotas'"
+        >
+          Cuotas Pendientes
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'pagos' }"
+          @click="vistaActiva = 'pagos'"
+        >
+          Pagos
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'modificar' }"
+          @click="vistaActiva = 'modificar'"
+        >
+          Modificar Datos
+        </button>
       </Sidebar>
 
       <div class="contenido">
-        <!-- Aquí va la info dinámica de la pantalla -->
+        <component :is="vistaComponente" />
       </div>
     </div>
   </Background>
 </template>
 
 <script setup>
-import Background from '@/components/Administracion/Background.vue';
+import { ref, computed } from 'vue'
+import Background from '@/components/Administracion/Background.vue'
 import Sidebar from '@/components/Administracion/Sidebar.vue'
 
+import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
+//import CuotasPendientes from '@/components/Usuario/CuotasPendientes.vue'
+//import Pagos from '@/components/Usuario/Pagos.vue'
+//import ModificarDatos from '@/components/Usuario/ModificarDatos.vue'
 
 const usuario = {
   nombre: 'Juan',
   apellido: 'Pérez'
 }
+
+const vistaActiva = ref('informacion')
+
+const vistaComponente = computed(() => {
+  switch (vistaActiva.value) {
+    case 'informacion':
+      return InformacionPersonal
+    //case 'cuotas':
+      //return CuotasPendientes
+    //case 'pagos':
+      //return Pagos
+    //case 'modificar':
+      //return ModificarDatos
+    default:
+      return InformacionPersonal
+  }
+})
+
+const props = defineProps({
+  nombre: String,
+  apellido: String,
+  vistaActiva: String
+})
+
 </script>
 
 <style scoped>
@@ -37,6 +89,7 @@ const usuario = {
   padding: 2rem;
   color: white;
   flex: 1;
+  overflow-y: auto;
 }
 
 .menu-btn {
@@ -56,5 +109,9 @@ const usuario = {
 .menu-btn:hover {
   color: #ff4757;
   background: rgba(255, 255, 255, 0.05);
+}
+.menu-btn.activo {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ff4757;
 }
 </style>

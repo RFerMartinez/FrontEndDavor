@@ -2,10 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import PantallaInicio from '../views/PantallaInicio.vue'
 import LoginView from '../views/LoginView.vue'
 import PantallaUsuario from '../views/PantallaUsuario.vue'
+import PantallaAdmin from '@/views/PantallaAdmin.vue'
 
 const routes = [
   {
-    path: '/Inicio',
+    path: '/',
     name: 'Inicio',
     component: PantallaInicio
   },
@@ -15,9 +16,14 @@ const routes = [
     component: LoginView
   },
   {
-    path: '/PantallaUsuario',
+    path: '/Usuario',
     name: 'PantallaUsuario',  
     component: PantallaUsuario
+  },
+  {
+    path: '/Admin',
+    name: 'PantallaAdmin',
+    component: PantallaAdmin
   }
 
 ]
