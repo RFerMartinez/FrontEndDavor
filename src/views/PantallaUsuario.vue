@@ -14,26 +14,21 @@
           :class="{ activo: vistaActiva === 'cuotas' }"
           @click="vistaActiva = 'cuotas'"
         >
-          Cuotas Pendientes
+          Cuotas
         </button>
         <button
           class="menu-btn"
-          :class="{ activo: vistaActiva === 'pagos' }"
-          @click="vistaActiva = 'pagos'"
+          :class="{ activo: vistaActiva === 'reclamos' }"
+          @click="vistaActiva = 'reclamos'"
         >
-          Pagos
-        </button>
-        <button
-          class="menu-btn"
-          :class="{ activo: vistaActiva === 'modificar' }"
-          @click="vistaActiva = 'modificar'"
-        >
-          Modificar Datos
+          Reclamos
         </button>
       </Sidebar>
 
       <div class="contenido">
-        <component :is="vistaComponente" />
+        <Transition name="fade" mode="out-in">
+          <component :is="vistaComponente" :key="vistaActiva" />
+        </Transition>
       </div>
     </div>
   </Background>
@@ -45,9 +40,8 @@ import Background from '@/components/Administracion/Background.vue'
 import Sidebar from '@/components/Administracion/Sidebar.vue'
 
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
-//import CuotasPendientes from '@/components/Usuario/CuotasPendientes.vue'
-//import Pagos from '@/components/Usuario/Pagos.vue'
-//import ModificarDatos from '@/components/Usuario/ModificarDatos.vue'
+import Cuotas from '@/components/Administracion/Usuario/Cuotas.vue'
+// import ReclamosUser from '@/components/Usuario/Pagos.vue'
 
 const usuario = {
   nombre: 'Juan',
@@ -60,12 +54,10 @@ const vistaComponente = computed(() => {
   switch (vistaActiva.value) {
     case 'informacion':
       return InformacionPersonal
-    //case 'cuotas':
-      //return CuotasPendientes
-    //case 'pagos':
-      //return Pagos
-    //case 'modificar':
-      //return ModificarDatos
+    case 'cuotas':
+      return Cuotas
+    // case 'reclamos':
+    //   return ReclamosUser
     default:
       return InformacionPersonal
   }
@@ -76,7 +68,6 @@ const props = defineProps({
   apellido: String,
   vistaActiva: String
 })
-
 </script>
 
 <style scoped>
@@ -113,5 +104,15 @@ const props = defineProps({
 .menu-btn.activo {
   background: rgba(255, 255, 255, 0.1);
   color: #ff4757;
+}
+
+/* Animación fade */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
