@@ -41,7 +41,7 @@ import Sidebar from '@/components/Administracion/Sidebar.vue'
 
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
 import Cuotas from '@/components/Administracion/Usuario/Cuotas.vue'
-// import ReclamosUser from '@/components/Usuario/Pagos.vue'
+import Reclamos from '@/components/Administracion/Usuario/Reclamos.vue'
 
 const usuario = {
   nombre: 'Juan',
@@ -56,8 +56,8 @@ const vistaComponente = computed(() => {
       return InformacionPersonal
     case 'cuotas':
       return Cuotas
-    // case 'reclamos':
-    //   return ReclamosUser
+     case 'reclamos':
+       return Reclamos
     default:
       return InformacionPersonal
   }
