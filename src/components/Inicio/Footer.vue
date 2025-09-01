@@ -38,7 +38,20 @@
   margin: 0 auto;
   padding: 0 40px;
 }
+@media (max-width: 767px) {
+  .footer-container {
+    flex-direction: column;   /* ✅ apila verticalmente */
+    text-align: center;
+    gap: 15px; /* espacio entre los bloques */
+  }
 
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    justify-content: center; /* centramos cada bloque */
+    min-width: auto; /* quitamos ancho mínimo */
+  }
+}
 .footer-left,
 .footer-right {
   flex: 1;

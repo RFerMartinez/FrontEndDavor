@@ -27,7 +27,23 @@ defineProps({
   width: 70%; /* MÁS angosto */
   max-width: 600px; /* límite para pantallas grandes */
 }
+@media (max-width: 767px) {
+  .precio-item {
+    flex-direction: column;   /* ✅ apila elementos */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 10px; /* espacio entre nombre y precio */
+  }
 
+  .descripcion {
+    font-size: 1.2rem; /* un poco más chico para móvil */
+  }
+
+  .valor {
+    font-size: 1.4rem;
+  }
+}
 .precio-item:hover {
   transform: scale(1.02);
   box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);

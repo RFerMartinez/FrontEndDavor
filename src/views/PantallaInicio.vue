@@ -107,6 +107,13 @@ fetch('/data/precios.json')
   padding: 0 20px;
 }
 
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: 1fr; /* ✅ ahora sí se aplica en móvil */
+    gap: 20px;
+  }
+}
+
 /* Modal */
 .modal {
   position: fixed;
