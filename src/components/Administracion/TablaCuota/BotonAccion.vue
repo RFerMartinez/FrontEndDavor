@@ -1,11 +1,10 @@
-<!-- src/components/Alumno/BotonAccion.vue -->
 <template>
   <button
     class="boton"
     :class="pagada ? 'descargar' : 'pagar'"
     @click="manejarClick"
   >
-    {{ pagada ? 'Descargar comprobante' : 'PAGAR' }}
+    {{ pagada ? 'Ver Comprobante' : 'PAGAR' }}
   </button>
 </template>
 
@@ -15,22 +14,24 @@ defineProps({
 })
 
 function manejarClick() {
-  if (pagada) {
-    // Lógica futura para descargar comprobante
-  } else {
-    // Lógica futura para abrir pantalla de pago
-  }
+  // Lógica futura para pago/descarga
 }
 </script>
 
 <style scoped>
 .boton {
   padding: 8px 12px;
-  font-size: 0.9em;
+  font-size: 0.9rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  white-space: nowrap;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .boton:hover {
@@ -40,11 +41,19 @@ function manejarClick() {
 .pagar {
   background: white;
   border: 1px solid #000;
-  font-weight: bold;
 }
 
 .descargar {
   background: #f0f0f0;
   color: #000;
+}
+
+@media (max-width: 768px) {
+  .boton {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    min-height: 42px;
+    min-width: 120px;
+  }
 }
 </style>

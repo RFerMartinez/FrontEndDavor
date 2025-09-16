@@ -1,5 +1,5 @@
 <template>
-  <div class="contenedor">
+  <div class="contenedor" :class="{ 'mobile': isMobile }">
     <h2 class="titulo">Información Personal</h2>
 
     <!-- DATOS PERSONALES -->
@@ -61,15 +61,35 @@
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+
+const isMobile = ref(false)
+
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+onMounted(() => {
+  checkIsMobile()
+  window.addEventListener('resize', checkIsMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkIsMobile)
+})
+</script>
+
 <style scoped>
 .contenedor {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
   border-radius: 20px;
-  max-width: 900px; /* Ancho aumentado ligeramente */
+  max-width: 900px;
   margin: auto;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  overflow-y: auto; /* Scroll interno */
+  overflow-y: auto;
+  width: 100%;
 }
 
 .titulo {
@@ -110,5 +130,23 @@ input {
   border-radius: 10px;
   background-color: #f5f5f5;
   color: #333;
+}
+
+/* Media query para dispositivos móviles */
+@media (max-width: 768px) {
+  .contenedor {
+    width: 95%;
+    max-width: 900px;
+    padding: 1.5rem;
+    margin: 0 auto;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .titulo {
+    font-size: 1.8rem;
+  }
 }
 </style>

@@ -10,6 +10,15 @@
               url('../../assets/fondo2.jpg') no-repeat center center fixed;
   background-size: cover;
   min-height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Media queries simplificados */
+@media (max-width: 768px) {
+  .background {
+    overflow-y: auto;
+  }
 }
 </style>

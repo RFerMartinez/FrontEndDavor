@@ -1,7 +1,13 @@
 <template>
   <Background>
     <div class="dashboard">
-      <Sidebar :nombre="usuario.nombre" :apellido="usuario.apellido" :vistaActiva="vistaActiva">
+      <!-- Sidebar para desktop -->
+      <Sidebar
+        v-if="!isMobile"
+        :nombre="usuario.nombre"
+        :apellido="usuario.apellido"
+        @logout="cerrarSesion"
+      >
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'informacion' }"
@@ -25,7 +31,37 @@
         </button>
       </Sidebar>
 
-      <div class="contenido">
+      <!-- Navbar para móviles -->
+      <NavbarMobile
+        v-else
+        :nombre="usuario.nombre"
+        :apellido="usuario.apellido"
+        @logout="cerrarSesion"
+      >
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'informacion' }"
+          @click="cambiarVista('informacion')"
+        >
+          Información Personal
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'cuotas' }"
+          @click="cambiarVista('cuotas')"
+        >
+          Cuotas
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'reclamos' }"
+          @click="cambiarVista('reclamos')"
+        >
+          Reclamos
+        </button>
+      </NavbarMobile>
+
+      <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
         <Transition name="fade" mode="out-in">
           <component :is="vistaComponente" :key="vistaActiva" />
         </Transition>
@@ -35,10 +71,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Background from '@/components/Administracion/Background.vue'
 import Sidebar from '@/components/Administracion/Sidebar.vue'
-
+import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
 import Cuotas from '@/components/Administracion/Usuario/Cuotas.vue'
 import Reclamos from '@/components/Administracion/Usuario/Reclamos.vue'
@@ -49,70 +85,88 @@ const usuario = {
 }
 
 const vistaActiva = ref('informacion')
+const isMobile = ref(false)
+
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+const cambiarVista = (vista) => {
+  vistaActiva.value = vista
+}
+
+const cerrarSesion = () => {
+  console.log('Cerrando sesión...')
+}
 
 const vistaComponente = computed(() => {
   switch (vistaActiva.value) {
-    case 'informacion':
-      return InformacionPersonal
-    case 'cuotas':
-      return Cuotas
-     case 'reclamos':
-       return Reclamos
-    default:
-      return InformacionPersonal
+    case 'informacion': return InformacionPersonal
+    case 'cuotas': return Cuotas
+    case 'reclamos': return Reclamos
+    default: return InformacionPersonal
   }
 })
 
-const props = defineProps({
-  nombre: String,
-  apellido: String,
-  vistaActiva: String
+onMounted(() => {
+  checkIsMobile()
+  window.addEventListener('resize', checkIsMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkIsMobile)
 })
 </script>
 
 <style scoped>
 .dashboard {
   display: flex;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .contenido {
   margin-left: 250px;
   padding: 2rem;
-  color: white;
   flex: 1;
   overflow-y: auto;
+  min-height: 100vh;
+  width: calc(100% - 250px);
+  display: flex;
+  flex-direction: column;
 }
 
-.menu-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  text-align: left;
-  padding: 0.5rem 0.9rem;
-  cursor: pointer;
-  transition: color 0.3s, background 0.3s;
-  border-radius: 4px;
-  font-weight: 500;
+.contenido-mobile {
+  margin-left: 0;
+  padding-top: 5rem;
+  width: 100%;
 }
 
-.menu-btn:hover {
-  color: #ff4757;
-  background: rgba(255, 255, 255, 0.05);
-}
-.menu-btn.activo {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ff4757;
-}
-
-/* Animación fade */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.4s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+@media (min-width: 1200px) {
+  .contenido {
+    padding: 2rem 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contenido {
+    padding: 1rem;
+    width: 100%;
+  }
+  
+  .contenido-mobile {
+    padding: 1rem;
+    padding-top: 5rem;
+  }
 }
 </style>

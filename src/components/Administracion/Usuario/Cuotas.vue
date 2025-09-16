@@ -1,6 +1,6 @@
 <template>
   <div class="contenedor-cuotas">
-    <h1 class="titulo">CUOTAS   </h1>
+    <h1 class="titulo">CUOTAS</h1>
     <TablaCuotas :cuotas="cuotas" />
   </div>
 </template>
@@ -65,11 +65,13 @@ const cuotas = [
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
   border-radius: 20px;
-  max-width: 1100px;
-  margin: auto;
+  width: 100%; /* ✅ Cambiado a 100% */
+  max-width: none; /* ✅ Eliminado el límite máximo */
+  margin: 0; /* ✅ Sin márgenes */
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  min-height: 80vh; /* ✅ Deja que el contenido crezca */
+  min-height: 80vh;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .titulo {
@@ -78,5 +80,30 @@ const cuotas = [
   margin-bottom: 1rem;
   text-align: center;
   font-family: 'Poppins', sans-serif;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .contenedor-cuotas {
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .titulo {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .contenedor-cuotas {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .titulo {
+    font-size: 1.6rem;
+  }
 }
 </style>

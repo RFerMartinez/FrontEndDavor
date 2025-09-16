@@ -1,4 +1,3 @@
-<!-- src/components/Alumno/EstadoPago.vue -->
 <template>
   <div
     class="estado"
@@ -17,10 +16,12 @@ defineProps({
 <style scoped>
 .estado {
   font-weight: bold;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 5px 8px;
+  border-radius: 4px;
   text-align: center;
   color: black;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .pagada {
@@ -29,5 +30,12 @@ defineProps({
 
 .pendiente {
   background-color: #ff4d4d;
+}
+
+@media (max-width: 768px) {
+  .estado {
+    padding: 4px 7px;
+    font-size: 0.8rem;
+  }
 }
 </style>
