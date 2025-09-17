@@ -22,6 +22,8 @@ defineProps({
   color: black;
   font-size: 0.85rem;
   white-space: nowrap;
+  display: inline-block; /* ✅ CORRECCIÓN: Para que ocupe solo el espacio necesario */
+  margin: 0 auto; /* ✅ CORRECCIÓN: Para centrar horizontalmente */
 }
 
 .pagada {

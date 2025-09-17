@@ -2,20 +2,27 @@
   <div class="nuevo-reclamo-container">
     <h2 class="subtitulo">Nuevo Reclamo</h2>
     
-    <!-- FORMULARIO COMPACTO (SOLO ELIMINAR ESPACIADO) -->
-    <div class="form-group compacto">  <!-- Clase adicional -->
+    <!-- FORMULARIO COMPACTO -->
+    <div class="form-group compacto">
       <label>Descripción:</label>
       <textarea 
         v-model="descripcion" 
         class="campo-texto"
         rows="4"
         required
+        placeholder="Describe tu reclamo aquí..."
       ></textarea>
     </div>
     
     <div class="acciones">
-      <button type="submit" @click="guardar" class="btn-guardar">Guardar</button>
-      <button type="button" @click="cancelar" class="btn-cancelar">Cancelar</button>
+      <button type="submit" @click="guardar" class="btn-guardar">
+        <i class="fas fa-check"></i>
+        Guardar
+      </button>
+      <button type="button" @click="cancelar" class="btn-cancelar">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
     </div>
   </div>
 </template>
@@ -28,6 +35,8 @@ const emit = defineEmits(['guardar', 'cancelar'])
 const descripcion = ref('')
 
 const guardar = () => {
+  if (!descripcion.value.trim()) return
+  
   const nuevoReclamo = {
     id: Math.floor(Math.random() * 900) + 100,
     fecha: new Date().toLocaleDateString('es-AR'),
@@ -56,10 +65,6 @@ const cancelar = () => {
   color: #e91e63;
   margin-bottom: 1rem;
   font-family: 'Poppins', sans-serif;
-}
-
-.formulario-reclamo {
-  margin-bottom: 1.5rem;
 }
 
 .form-group {
@@ -99,6 +104,9 @@ const cancelar = () => {
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-guardar:hover {
@@ -115,27 +123,17 @@ const cancelar = () => {
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
   transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-cancelar:hover {
   background-color: #e53935;
 }
 
-.ejemplo-reclamo {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 1.5rem;
-  font-family: 'Poppins', sans-serif;
-}
-
-.ejemplo-reclamo h3 {
-  margin-top: 0;
-  color: #555;
-  font-size: 1.1rem;
-}
 .compacto {
-  margin-top: 0; /* Elimina espacio superior */
-  padding-top: 0; /* Elimina padding superior */
+  margin-top: 0;
+  padding-top: 0;
 }
 </style>

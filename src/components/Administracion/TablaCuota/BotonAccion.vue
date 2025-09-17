@@ -32,6 +32,8 @@ function manejarClick() {
   align-items: center;
   justify-content: center;
   font-weight: bold;
+  margin: 0 auto; /* ✅ CORRECCIÓN: Añadido para centrar */
+  width: fit-content; /* ✅ CORRECCIÓN: Ajusta al contenido */
 }
 
 .boton:hover {
