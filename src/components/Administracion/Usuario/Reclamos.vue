@@ -71,8 +71,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import ListaReclamos from '../CompReclamos/ListaReclamos.vue'
-import NuevoReclamo from '../CompReclamos/NuevoReclamo.vue'
+import ListaReclamos from './ListaReclamos.vue'
+import NuevoReclamo from './NuevoReclamo.vue'
 
 const reclamos = ref([
   { id: 234, fecha: '16/04/2025', hora: '21:32:00', descripcion: 'Aca iría todo el texto del reclamo para que se muestre en la tabla' },

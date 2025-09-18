@@ -1,62 +1,156 @@
 <template>
   <Background>
     <div class="dashboard">
-      <Sidebar :nombre="usuario.nombre" :apellido="usuario.apellido">
-        <button class="menu-btn">Alumnos</button>
-        <button class="menu-btn">Deudores</button>
-        <button class="menu-btn">Trabajos</button>
-        <button class="menu-btn">Subscripciones</button>
-        <button class="menu-btn">Empleados</button>
-        <button class="menu-btn">Grupos/Horarios</button>
-        <!-- Otros botones según el rol -->
+      <!-- Sidebar para desktop -->
+      <Sidebar
+        v-if="!isMobile"
+        :nombre="usuario.nombre"
+        :apellido="usuario.apellido"
+        @logout="cerrarSesion"
+      >
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'informacion' }"
+          @click="vistaActiva = 'informacion'"
+        >
+          Información Personal
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'alumnos' }"
+          @click="vistaActiva = 'alumnos'"
+        >
+          Alumnos
+        </button>
       </Sidebar>
 
-      <div class="contenido">
-        <!-- Aquí va la info dinámica de la pantalla -->
+      <!-- Navbar para móviles -->
+      <NavbarMobile
+        v-else
+        :nombre="usuario.nombre"
+        :apellido="usuario.apellido"
+        @logout="cerrarSesion"
+      >
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'informacion' }"
+          @click="cambiarVista('informacion')"
+        >
+          Información Personal
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'alumnos' }"
+          @click="vistaActiva = 'alumnos'"
+        >
+          Alumnos
+        </button>
+      </NavbarMobile>
+
+      <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
+        <Transition name="fade" mode="out-in">
+          <component :is="vistaComponente" :key="vistaActiva" />
+        </Transition>
       </div>
     </div>
   </Background>
 </template>
 
 <script setup>
-import Background from '@/components/Administracion/Background.vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import Background from '@/components/Administracion/Background.vue'
 import Sidebar from '@/components/Administracion/Sidebar.vue'
-
+import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
+import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
+import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
 
 const usuario = {
-  nombre: 'Juan',
-  apellido: 'Pérez'
+  nombre: 'Beto',
+  apellido: 'Cristoff'
 }
+
+const vistaActiva = ref('informacion')
+const isMobile = ref(false)
+
+const checkIsMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+const cambiarVista = (vista) => {
+  vistaActiva.value = vista
+}
+
+const cerrarSesion = () => {
+  console.log('Cerrando sesión...')
+}
+
+const vistaComponente = computed(() => {
+  switch (vistaActiva.value) {
+    case 'informacion': return InformacionPersonal
+    case 'alumnos': return Alumnos
+    default: return InformacionPersonal
+  }
+})
+
+onMounted(() => {
+  checkIsMobile()
+  window.addEventListener('resize', checkIsMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkIsMobile)
+})
 </script>
 
 <style scoped>
 .dashboard {
   display: flex;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .contenido {
   margin-left: 250px;
   padding: 2rem;
-  color: white;
   flex: 1;
+  overflow-y: auto;
+  min-height: 100vh;
+  width: calc(100% - 250px);
+  display: flex;
+  flex-direction: column;
 }
 
-.menu-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  text-align: left;
-  padding: 0.5rem 0.9rem;
-  cursor: pointer;
-  transition: color 0.3s, background 0.3s;
-  border-radius: 4px;
-  font-weight: 500;
+.contenido-mobile {
+  margin-left: 0;
+  padding-top: 5rem;
+  width: 100%;
 }
 
-.menu-btn:hover {
-  color: #ff4757;
-  background: rgba(255, 255, 255, 0.05);
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@media (min-width: 1200px) {
+  .contenido {
+    padding: 2rem 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contenido {
+    padding: 1rem;
+    width: 100%;
+  }
+  
+  .contenido-mobile {
+    padding: 1rem;
+    padding-top: 5rem;
+  }
 }
 </style>

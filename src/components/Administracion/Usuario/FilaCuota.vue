@@ -25,7 +25,7 @@
     </td>
     <td class="col-estado">
       <div class="estado-container">
-        <EstadoPago :pagada="cuota.pagada" />
+        <Estado :positivo="cuota.pagada" :texto="cuota.pagada ? 'PAGADA' : 'PENDIENTE'" />
       </div>
     </td>
   </tr>
@@ -40,7 +40,7 @@
       
       <div class="monto-estado">
         <span class="monto">${{ cuota.monto.toLocaleString('es-AR') }}</span>
-        <EstadoPago :pagada="cuota.pagada" />
+        <Estado :positivo="cuota.pagada" :texto="cuota.pagada ? 'PAGADA' : 'PENDIENTE'" />
       </div>
       
       <div class="expand-icon">
@@ -70,7 +70,7 @@
 <script setup>
 import { ref } from 'vue'
 import BotonAccion from './BotonAccion.vue'
-import EstadoPago from './EstadoPago.vue'
+import Estado from '../Estado.vue' // Cambiado de EstadoPago a Estado
 
 const props = defineProps({
   cuota: Object,
@@ -85,10 +85,12 @@ const toggleExpandida = () => {
 
 const obtenerNombreMes = (mes) => {
   const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+                 'Julio', 'Agusto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   return meses[mes - 1] || mes
 }
 </script>
+
+<!-- Los estilos se mantienen igual -->
 
 <style scoped>
 /* ESTILOS PARA VISTA DESKTOP - CORREGIDOS */

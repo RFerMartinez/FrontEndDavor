@@ -4,6 +4,7 @@ import LoginView from '../views/LoginView.vue'
 import PantallaUsuario from '../views/PantallaUsuario.vue'
 import PantallaAdmin from '@/views/PantallaAdmin.vue'
 
+
 const routes = [
   {
     path: '/',

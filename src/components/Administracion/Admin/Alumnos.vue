@@ -1,44 +1,44 @@
 <template>
-  <div class="contenedor-cuotas">
-    <!-- Encabezado con información de cuotas - Versión sutil -->
-    <div class="encabezado-cuotas">
-      <h1 class="titulo">CUOTAS</h1>
+  <div class="contenedor-alumnos">
+    <!-- Encabezado con información de alumnos -->
+    <div class="encabezado-alumnos">
+      <h1 class="titulo">ALUMNOS</h1>
       
       <div class="controles-superiores">
-        <div class="estado-cuotas-sutil">
-          <div class="info-cuota-sutil">
-            <span class="numero-sutil">{{ cuotas.length }}</span>
+        <div class="estado-alumnos-sutil">
+          <div class="info-alumno-sutil">
+            <span class="numero-sutil">{{ alumnos.length }}</span>
             <span class="texto-sutil">Total</span>
           </div>
           <div class="separador"></div>
-          <div class="info-cuota-sutil">
-            <span class="numero-sutil pendiente">{{ cuotasPendientes }}</span>
-            <span class="texto-sutil">Pendientes</span>
+          <div class="info-alumno-sutil">
+            <span class="numero-sutil activo">{{ alumnosActivos }}</span>
+            <span class="texto-sutil">Activos</span>
           </div>
           <div class="separador"></div>
-          <div class="info-cuota-sutil">
-            <span class="numero-sutil pagada">{{ cuotasPagadas }}</span>
-            <span class="texto-sutil">Pagadas</span>
+          <div class="info-alumno-sutil">
+            <span class="numero-sutil inactivo">{{ alumnosInactivos }}</span>
+            <span class="texto-sutil">Inactivos</span>
           </div>
         </div>
 
         <button 
           class="btn-filtrar"
-          :class="{ 'activo': mostrarSoloPendientes }"
-          @click="toggleFiltroPendientes"
-          aria-label="Filtrar cuotas pendientes"
+          :class="{ 'activo': mostrarSoloActivos }"
+          @click="toggleFiltroActivos"
+          aria-label="Filtrar alumnos activos"
         >
           <i class="fas fa-filter"></i>
-          <span class="btn-texto">Solo pendientes</span>
-          <span class="btn-badge" v-if="mostrarSoloPendientes">{{ cuotasPendientes }}</span>
+          <span class="btn-texto">Solo activos</span>
+          <span class="btn-badge" v-if="mostrarSoloActivos">{{ alumnosActivos }}</span>
         </button>
       </div>
     </div>
 
-    <!-- Tabla con las cuotas paginadas -->
-    <TablaCuotas :cuotas="cuotasPaginadas" />
+    <!-- Tabla con los alumnos paginados -->
+    <TablaAlumnos :alumnos="alumnosPaginados" />
     
-    <!-- Controles de paginación inferiores - Solo navegación -->
+    <!-- Controles de paginación inferiores -->
     <div class="paginacion-inferior" v-if="totalPaginas > 1">
       <div class="paginacion-controles">
         <button 
@@ -77,183 +77,123 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import TablaCuotas from './TablaCuotas.vue'
+import TablaAlumnos from './TablaAlumnos.vue'
 
-const cuotas = [
+const alumnos = [
   {
-    mes: "Junio",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
+    dni: "12345678",
+    nombre: "Juan",
+    apellido: "Pérez",
+    activo: true,
+    cuotasPendientes: 2
   },
   {
-    mes: "Mayo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
+    dni: "87654321", 
+    nombre: "María",
+    apellido: "Gómez",
+    activo: true,
+    cuotasPendientes: 0
   },
   {
-    mes: "Abril",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "45678912",
+    nombre: "Carlos",
+    apellido: "Rodríguez",
+    activo: false,
+    cuotasPendientes: 5
   },
   {
-    mes: "Marzo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "78912345",
+    nombre: "Ana",
+    apellido: "López",
+    activo: true,
+    cuotasPendientes: 1
   },
   {
-    mes: "Febrero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "32165497",
+    nombre: "Pedro",
+    apellido: "Martínez",
+    activo: false,
+    cuotasPendientes: 3
   },
   {
-    mes: "Enero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "65498732",
+    nombre: "Laura",
+    apellido: "García",
+    activo: true,
+    cuotasPendientes: 0
   },
   {
-    mes: "Junio",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
+    dni: "98732165",
+    nombre: "Miguel",
+    apellido: "Fernández",
+    activo: true,
+    cuotasPendientes: 2
   },
   {
-    mes: "Mayo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
+    dni: "14725836",
+    nombre: "Sofía",
+    apellido: "Díaz",
+    activo: false,
+    cuotasPendientes: 4
   },
   {
-    mes: "Abril",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "25836914",
+    nombre: "Diego",
+    apellido: "Romero",
+    activo: true,
+    cuotasPendientes: 1
   },
   {
-    mes: "Marzo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "36925814",
+    nombre: "Elena",
+    apellido: "Sánchez",
+    activo: true,
+    cuotasPendientes: 0
   },
   {
-    mes: "Febrero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "48263917",
+    nombre: "Javier",
+    apellido: "Torres",
+    activo: false,
+    cuotasPendientes: 6
   },
   {
-    mes: "Enero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Junio",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Mayo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Abril",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Marzo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Febrero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Enero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
+    dni: "59283746",
+    nombre: "Carmen",
+    apellido: "Navarro",
+    activo: true,
+    cuotasPendientes: 1
   }
 ]
 
 const paginaActual = ref(1)
 const elementosPorPagina = 6
-const mostrarSoloPendientes = ref(false)
+const mostrarSoloActivos = ref(false)
 
 // Computed properties para la información de estado
-const cuotasPendientes = computed(() => 
-  cuotas.filter(cuota => !cuota.pagada).length
+const alumnosActivos = computed(() => 
+  alumnos.filter(alumno => alumno.activo).length
 )
 
-const cuotasPagadas = computed(() => 
-  cuotas.filter(cuota => cuota.pagada).length
+const alumnosInactivos = computed(() => 
+  alumnos.filter(alumno => !alumno.activo).length
 )
 
-const cuotasMostradas = computed(() => 
-  mostrarSoloPendientes.value 
-    ? cuotas.filter(cuota => !cuota.pagada)
-    : cuotas
+const alumnosMostrados = computed(() => 
+  mostrarSoloActivos.value 
+    ? alumnos.filter(alumno => alumno.activo)
+    : alumnos
 )
 
 // Computed properties para la paginación
 const totalPaginas = computed(() => 
-  Math.ceil(cuotasMostradas.value.length / elementosPorPagina)
+  Math.ceil(alumnosMostrados.value.length / elementosPorPagina)
 )
 
-const cuotasPaginadas = computed(() => {
+const alumnosPaginados = computed(() => {
   const inicio = (paginaActual.value - 1) * elementosPorPagina
   const fin = inicio + elementosPorPagina
-  return cuotasMostradas.value.slice(inicio, fin)
+  return alumnosMostrados.value.slice(inicio, fin)
 })
 
 const numerosPaginas = computed(() => {
@@ -280,8 +220,8 @@ const numerosPaginas = computed(() => {
 })
 
 // Métodos
-const toggleFiltroPendientes = () => {
-  mostrarSoloPendientes.value = !mostrarSoloPendientes.value
+const toggleFiltroActivos = () => {
+  mostrarSoloActivos.value = !mostrarSoloActivos.value
   paginaActual.value = 1 // Resetear a la primera página al cambiar filtro
 }
 
@@ -289,7 +229,7 @@ const cambiarPagina = (nuevaPagina) => {
   if (nuevaPagina !== '...' && nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
     paginaActual.value = nuevaPagina
     // Scroll suave al principio del contenedor
-    document.querySelector('.contenedor-cuotas').scrollIntoView({ 
+    document.querySelector('.contenedor-alumnos').scrollIntoView({ 
       behavior: 'smooth', 
       block: 'start' 
     })
@@ -298,7 +238,7 @@ const cambiarPagina = (nuevaPagina) => {
 </script>
 
 <style scoped>
-.contenedor-cuotas {
+.contenedor-alumnos {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
   border-radius: 20px;
@@ -311,15 +251,15 @@ const cambiarPagina = (nuevaPagina) => {
   box-sizing: border-box;
 }
 
-/* Encabezado con información de cuotas - Versión sutil */
-.encabezado-cuotas {
+/* Encabezado con información de alumnos */
+.encabezado-alumnos {
   text-align: center;
   margin-bottom: 2rem;
 }
 
 .titulo {
   font-size: 2rem;
-  color: #e91e63;
+  color: #e91e63; /* Azul en lugar de rosa */
   margin-bottom: 1.2rem;
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -335,7 +275,7 @@ const cambiarPagina = (nuevaPagina) => {
   margin: 0 auto;
 }
 
-.estado-cuotas-sutil {
+.estado-alumnos-sutil {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -347,7 +287,7 @@ const cambiarPagina = (nuevaPagina) => {
   flex: 1;
 }
 
-.info-cuota-sutil {
+.info-alumno-sutil {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -363,12 +303,12 @@ const cambiarPagina = (nuevaPagina) => {
   margin-bottom: 0.3rem;
 }
 
-.numero-sutil.pendiente {
-  color: #ff4d4d;
+.numero-sutil.activo {
+  color: #4caf50; /* Verde para activos */
 }
 
-.numero-sutil.pagada {
-  color: #4caf50;
+.numero-sutil.inactivo {
+  color: #ff4d4d; /* Rojo para inactivos */
 }
 
 .texto-sutil {
@@ -386,36 +326,36 @@ const cambiarPagina = (nuevaPagina) => {
   margin: 0 0.5rem;
 }
 
-/* Botón de filtrar pendientes */
+/* Botón de filtrar activos */
 .btn-filtrar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.2rem;
-  border: 2px solid #e91e63;
+  border: 2px solid #e91e63; /* Azul en lugar de rosa */
   background: white;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
-  color: #e91e63;
+  color: #e91e63; /* Azul en lugar de rosa */
   white-space: nowrap;
   position: relative;
 }
 
 .btn-filtrar:hover {
-  background: #fce4ec;
+  background: #e3f2fd;
   transform: translateY(-1px);
 }
 
 .btn-filtrar.activo {
-  background: #e91e63;
+  background: #e91e63; /* Azul en lugar de rosa */
   color: white;
 }
 
 .btn-filtrar.activo:hover {
-  background: #d81b60;
+  background: #e91e63;
   transform: translateY(-1px);
 }
 
@@ -424,7 +364,7 @@ const cambiarPagina = (nuevaPagina) => {
 }
 
 .btn-badge {
-  background: #ff4d4d;
+  background: #4caf50; /* Verde para el badge */
   color: white;
   border-radius: 12px;
   padding: 0.2rem 0.6rem;
@@ -433,7 +373,7 @@ const cambiarPagina = (nuevaPagina) => {
   margin-left: 0.3rem;
 }
 
-/* Paginación inferior - Solo navegación */
+/* Paginación inferior */
 .paginacion-inferior {
   margin-top: 2.5rem;
   padding: 1.2rem;
@@ -454,7 +394,7 @@ const cambiarPagina = (nuevaPagina) => {
 .btn-paginacion {
   width: 40px;
   height: 40px;
-  border: 2px solid #e91e63;
+  border: 2px solid #e91e63; /* Azul en lugar de rosa */
   background: white;
   border-radius: 50%;
   cursor: pointer;
@@ -462,15 +402,15 @@ const cambiarPagina = (nuevaPagina) => {
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  color: #e91e63;
+  color: #e91e63; /* Azul en lugar de rosa */
   font-size: 0.9rem;
 }
 
 .btn-paginacion:hover:not(:disabled) {
-  background: #e91e63;
+  background: #e91e63; /* Azul en lugar de rosa */
   color: white;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
 }
 
 .btn-paginacion:disabled {
@@ -503,21 +443,21 @@ const cambiarPagina = (nuevaPagina) => {
 }
 
 .numero-pagina:hover {
-  border-color: #e91e63;
-  color: #e91e63;
+  border-color: #e91e63; /* Azul en lugar de rosa */
+  color: #e91e63; /* Azul en lugar de rosa */
   transform: scale(1.05);
 }
 
 .numero-pagina.activa {
-  background: #e91e63;
-  border-color: #e91e63;
+  background: #e91e63; /* Azul en lugar de rosa */
+  border-color: #e91e63; /* Azul en lugar de rosa */
   color: white;
   transform: scale(1.1);
 }
 
 /* Ajustes responsivos */
 @media (max-width: 768px) {
-  .contenedor-cuotas {
+  .contenedor-alumnos {
     padding: 1.5rem;
   }
   
@@ -531,12 +471,12 @@ const cambiarPagina = (nuevaPagina) => {
     gap: 1rem;
   }
   
-  .estado-cuotas-sutil {
+  .estado-alumnos-sutil {
     padding: 0.7rem 1.2rem;
     width: 100%;
   }
   
-  .info-cuota-sutil {
+  .info-alumno-sutil {
     padding: 0.4rem 0.8rem;
   }
   
@@ -577,7 +517,7 @@ const cambiarPagina = (nuevaPagina) => {
 }
 
 @media (max-width: 480px) {
-  .contenedor-cuotas {
+  .contenedor-alumnos {
     padding: 1rem;
   }
   
@@ -585,11 +525,11 @@ const cambiarPagina = (nuevaPagina) => {
     font-size: 1.6rem;
   }
   
-  .estado-cuotas-sutil {
+  .estado-alumnos-sutil {
     padding: 0.6rem 1rem;
   }
   
-  .info-cuota-sutil {
+  .info-alumno-sutil {
     padding: 0.3rem 0.6rem;
   }
   
