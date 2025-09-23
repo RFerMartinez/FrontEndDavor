@@ -16,6 +16,7 @@
           :key="index"
           :alumno="alumno"
           :is-mobile="isMobile"
+          @ver-detalles="$emit('verDetalles', alumno)"
         />
       </tbody>
     </table>
@@ -27,6 +28,7 @@
         :key="index"
         :alumno="alumno"
         :is-mobile="isMobile"
+        @ver-detalles="$emit('verDetalles', alumno)"
       />
     </div>
   </div>
@@ -39,6 +41,8 @@ import FilaAlumno from './FilaAlumno.vue'
 defineProps({
   alumnos: Array
 })
+
+defineEmits(['verDetalles'])
 
 const isMobile = ref(false)
 
@@ -55,6 +59,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkIsMobile)
 })
 </script>
+
 
 <style scoped>
 .tabla-container {

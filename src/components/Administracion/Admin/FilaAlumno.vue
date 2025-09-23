@@ -96,6 +96,8 @@ const props = defineProps({
   isMobile: Boolean
 })
 
+const emit = defineEmits(['verDetalles'])
+
 const expandida = ref(false)
 
 const toggleExpandida = () => {
@@ -103,8 +105,7 @@ const toggleExpandida = () => {
 }
 
 const verDetalles = () => {
-  console.log('Ver detalles del alumno:', props.alumno)
-  // Lógica para ver detalles del alumno
+  emit('verDetalles', props.alumno)
 }
 </script>
 

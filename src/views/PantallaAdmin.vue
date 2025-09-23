@@ -11,14 +11,14 @@
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'informacion' }"
-          @click="vistaActiva = 'informacion'"
+          @click="cambiarVista('informacion')"
         >
           Información Personal
         </button>
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
-          @click="vistaActiva = 'alumnos'"
+          @click="cambiarVista('alumnos')"
         >
           Alumnos
         </button>
@@ -41,7 +41,7 @@
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
-          @click="vistaActiva = 'alumnos'"
+          @click="cambiarVista('alumnos')"
         >
           Alumnos
         </button>
@@ -49,7 +49,13 @@
 
       <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
         <Transition name="fade" mode="out-in">
-          <component :is="vistaComponente" :key="vistaActiva" />
+          <component 
+            :is="vistaComponente" 
+            :key="vistaActiva + (alumnoSeleccionado ? alumnoSeleccionado.dni : '')"
+            :alumno-seleccionado="alumnoSeleccionado"
+            @ver-alumno="verAlumno"
+            @volver-alumnos="volverAlumnos"
+          />
         </Transition>
       </div>
     </div>
@@ -63,6 +69,7 @@ import Sidebar from '@/components/Administracion/Sidebar.vue'
 import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
 import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
+import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
 
 const usuario = {
   nombre: 'Beto',
@@ -71,6 +78,7 @@ const usuario = {
 
 const vistaActiva = ref('informacion')
 const isMobile = ref(false)
+const alumnoSeleccionado = ref(null)
 
 const checkIsMobile = () => {
   isMobile.value = window.innerWidth <= 768
@@ -78,6 +86,17 @@ const checkIsMobile = () => {
 
 const cambiarVista = (vista) => {
   vistaActiva.value = vista
+  alumnoSeleccionado.value = null // Resetear alumno seleccionado al cambiar vista
+}
+
+const verAlumno = (alumno) => {
+  alumnoSeleccionado.value = alumno
+  vistaActiva.value = 'infoAlumno'
+}
+
+const volverAlumnos = () => {
+  vistaActiva.value = 'alumnos'
+  alumnoSeleccionado.value = null
 }
 
 const cerrarSesion = () => {
@@ -88,6 +107,7 @@ const vistaComponente = computed(() => {
   switch (vistaActiva.value) {
     case 'informacion': return InformacionPersonal
     case 'alumnos': return Alumnos
+    case 'infoAlumno': return InfoAlumno
     default: return InformacionPersonal
   }
 })
