@@ -23,3 +23,10 @@ git status
 git add .
 git commit -m "Descripción clara de los cambios"
 git push 
+
+
+git branch
+git fetch
+git pull origin main
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
