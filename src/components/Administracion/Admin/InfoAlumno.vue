@@ -44,6 +44,10 @@
               <span class="info-label">Turno:</span>
               <span class="info-value">{{ alumno.turno }}</span>
             </div>
+            <div class="info-item">
+              <span class="info-label">Suscripción:</span>
+              <span class="info-value">{{ alumno.suscripcion }}</span>
+            </div>
           </div>
         </div>
 
@@ -70,16 +74,23 @@
           </div>
         </div>
 
-        <!-- Sección para información adicional (futura expansión) -->
+        <!-- Sección de Horarios -->
+        <div class="seccion-info">
+          
+          <TablaHorarios 
+            :horarios-alumno="horariosAlumno"
+            :suscripcion="alumno.suscripcion"
+            @horarios-actualizados="manejarHorariosActualizados"
+          />
+        </div>
+
+        <!-- Sección de Historial de Cuotas -->
         <div class="seccion-info">
           <h3 class="seccion-titulo">
             <i class="fas fa-history"></i>
             Historial de Cuotas
           </h3>
-          <div class="mensaje-futuro">
-            <i class="fas fa-clock"></i>
-            <p>Esta sección estará disponible próximamente</p>
-          </div>
+          <TablaCuota :modo="'infoAlumno'" :cuotas="cuotas" />
         </div>
       </div>
     </div>
@@ -98,19 +109,96 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import Estado from '../Estado.vue'
+import TablaCuota from '../Usuario/TablaCuotas.vue'
+import TablaHorarios from '../TablaHorarios.vue' // Importar el nuevo componente
 
 const props = defineProps({
   alumnoSeleccionado: Object
 })
 
-const emit = defineEmits(['volverAlumnos'])
+const emit = defineEmits(['volverAlumnos', 'actualizarHorarios'])
 
 const alumno = computed(() => props.alumnoSeleccionado)
 
+// Datos de horarios del alumno (ejemplo - deberían venir del backend)
+const horariosAlumno = ref([
+  {
+    dia: "Lunes",
+    horario: "10:00-13:00"
+  },
+  {
+    dia: "Miércoles",
+    horario: "13:00-16:00"
+  },
+  {
+    dia: "Viernes",
+    horario: "10:00-13:00"
+  }
+])
+
+// Datos de cuotas (los mismos que tenías en Cuota.vue)
+const cuotas = ref([
+  {
+    mes: "Junio",
+    anio: "2025",
+    trabajo: "Musculación",
+    suscripcion: "3 días a la semana",
+    monto: 20000,
+    pagada: false
+  },
+  {
+    mes: "Mayo",
+    anio: "2025",
+    trabajo: "Musculación",
+    suscripcion: "3 días a la semana",
+    monto: 20000,
+    pagada: false
+  },
+  {
+    mes: "Abril",
+    anio: "2025",
+    trabajo: "Musculación",
+    suscripcion: "3 días a la semana",
+    monto: 20000,
+    pagada: true
+  },
+  {
+    mes: "Marzo",
+    anio: "2025",
+    trabajo: "Musculación",
+    suscripcion: "3 días a la semana",
+    monto: 20000,
+    pagada: true
+  },
+  {
+    mes: "Febrero",
+    anio: "2025",
+    trabajo: "Musculación",
+    suscripcion: "3 días a la semana",
+    monto: 20000,
+    pagada: true
+  },
+  {
+    mes: "Enero",
+    anio: "2025",
+    trabajo: "Musculación",
+    suscripcion: "3 días a la semana",
+    monto: 20000,
+    pagada: true
+  }
+])
+
 const volverAlumnos = () => {
   emit('volverAlumnos')
+}
+
+const manejarHorariosActualizados = (nuevosHorarios) => {
+  console.log('Horarios actualizados:', nuevosHorarios)
+  horariosAlumno.value = nuevosHorarios
+  // Aquí puedes enviar los datos al backend o al componente padre
+  emit('actualizarHorarios', nuevosHorarios)
 }
 </script>
 
@@ -266,26 +354,6 @@ const volverAlumnos = () => {
 .cuotas-info.ninguna {
   background-color: #e8f5e9;
   color: #388e3c;
-}
-
-.mensaje-futuro {
-  text-align: center;
-  padding: 3rem 2rem;
-  background: #f8f9fa;
-  border-radius: 10px;
-  border: 2px dashed #dee2e6;
-  color: #6c757d;
-}
-
-.mensaje-futuro i {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #adb5bd;
-}
-
-.mensaje-futuro p {
-  margin: 0;
-  font-size: 1rem;
 }
 
 .sin-alumno {

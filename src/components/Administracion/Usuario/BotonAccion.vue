@@ -1,20 +1,45 @@
 <template>
   <button
     class="boton"
-    :class="pagada ? 'descargar' : 'pagar'"
+    :class="claseBoton"
     @click="manejarClick"
   >
-    {{ pagada ? 'Ver Comprobante' : 'PAGAR' }}
+    {{ textoBoton }}
   </button>
 </template>
 
 <script setup>
-defineProps({
-  pagada: Boolean
+import { computed } from 'vue'
+
+const props = defineProps({
+  pagada: Boolean,
+  modo: {
+    type: String,
+    default: 'cuota' // 'cuota' o 'infoAlumno'
+  }
+})
+
+const emit = defineEmits(['accion-click'])
+
+// 🎯 Texto del botón según modo y estado
+const textoBoton = computed(() => {
+  if (props.modo === 'cuota') {
+    return props.pagada ? 'Ver Comprobante' : 'PAGAR'
+  } else {
+    return props.pagada ? 'Ver Comprobante' : 'Marcar Pagada'
+  }
+})
+
+// 🎯 Clase del botón según modo y estado
+const claseBoton = computed(() => {
+  if (props.pagada) {
+    return 'descargar'
+  }
+  return props.modo === 'cuota' ? 'pagar' : 'marcar-pagada'
 })
 
 function manejarClick() {
-  // Lógica futura para pago/descarga
+  emit('accion-click')
 }
 </script>
 
@@ -32,8 +57,8 @@ function manejarClick() {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  margin: 0 auto; /* ✅ CORRECCIÓN: Añadido para centrar */
-  width: fit-content; /* ✅ CORRECCIÓN: Ajusta al contenido */
+  margin: 0 auto;
+  width: fit-content;
 }
 
 .boton:hover {
@@ -41,6 +66,11 @@ function manejarClick() {
 }
 
 .pagar {
+  background: white;
+  border: 1px solid #000;
+}
+
+.marcar-pagada {
   background: white;
   border: 1px solid #000;
 }
