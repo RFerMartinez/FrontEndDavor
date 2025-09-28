@@ -267,10 +267,6 @@ const horariosAlumno = ref([
     horario: "10:00-13:00"
   },
   {
-    dia: "Miércoles",
-    horario: "13:00-16:00"
-  },
-  {
     dia: "Viernes",
     horario: "10:00-13:00"
   }

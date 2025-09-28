@@ -175,7 +175,7 @@ const props = defineProps({
   },
   suscripcion: {
     type: String,
-    default: '3 Días a la semana'
+    default: ''
   }
 })
 
