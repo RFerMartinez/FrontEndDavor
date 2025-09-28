@@ -289,7 +289,8 @@ const alumnos = [
     apellido: "Ortega",
     activo: false,
     cuotasPendientes: 5,
-    turno: "Tarde"
+    turno: "Tarde",
+    suscripcion: "2 Dias Semana"
   },
   {
     dni: "59284731",

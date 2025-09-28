@@ -22,6 +22,13 @@
         >
           Alumnos
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'suscripciones' }"
+          @click="cambiarVista('suscripciones')"
+        >
+          Suscripciones
+        </button>
       </Sidebar>
 
       <!-- Navbar para móviles -->
@@ -44,6 +51,13 @@
           @click="cambiarVista('alumnos')"
         >
           Alumnos
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'suscripciones' }"
+          @click="cambiarVista('suscripciones')"
+        >
+          Suscripciones
         </button>
       </NavbarMobile>
 
@@ -70,6 +84,7 @@ import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
 import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
 import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
+import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
 
 const usuario = {
   nombre: 'Beto',
@@ -108,6 +123,7 @@ const vistaComponente = computed(() => {
     case 'informacion': return InformacionPersonal
     case 'alumnos': return Alumnos
     case 'infoAlumno': return InfoAlumno
+    case 'suscripciones': return Suscripciones
     default: return InformacionPersonal
   }
 })

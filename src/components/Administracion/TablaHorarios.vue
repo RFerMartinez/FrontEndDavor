@@ -411,7 +411,7 @@ onUnmounted(() => {
 }
 
 .titulo i {
-  color: #2196f3;
+  color: #e91e63;
 }
 
 .controles {
@@ -475,7 +475,7 @@ onUnmounted(() => {
 }
 
 .celda-horario-header {
-  background: linear-gradient(135deg, #2196f3, #1976d2);
+  background: linear-gradient(135deg, #e91e63, #d33838);
   color: white;
   padding: 1rem 0.5rem;
   border-radius: 8px;
@@ -557,7 +557,7 @@ onUnmounted(() => {
 
 .count-number {
   font-size: 1.5rem;
-  color: #2196f3;
+  color: #e91e63;
 }
 
 .count-text {
@@ -574,7 +574,7 @@ onUnmounted(() => {
 }
 
 .dia-mobile-card.expandido {
-  border-color: #2196f3;
+  border-color: #e91e63;
   box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
 }
 
@@ -603,7 +603,7 @@ onUnmounted(() => {
 }
 
 .dia-info i {
-  color: #2196f3;
+  color: #e91e63;
   font-size: 1rem;
 }
 
@@ -767,7 +767,7 @@ onUnmounted(() => {
 .mensaje-info {
   background: #e3f2fd;
   border: 1px solid #bbdefb;
-  color: #1976d2;
+  color: #e91e63;
 }
 
 .mensaje-success {
