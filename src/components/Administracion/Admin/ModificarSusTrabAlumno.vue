@@ -171,11 +171,19 @@ const suscripcionCambiada = computed(() => {
 })
 
 const formularioValido = computed(() => {
+  // Si la suscripción es "Día Libre", no requiere horarios
+  if (datosModificados.value.suscripcion === 'Día Libre') {
+    return datosModificados.value.suscripcion && datosModificados.value.trabajoactual
+  }
+  
+  // Para otras suscripciones, si cambió la suscripción, validar que hay horarios
   if (suscripcionCambiada.value) {
     return datosModificados.value.suscripcion && 
            datosModificados.value.trabajoactual && 
            horariosModificados.value.length > 0
   }
+  
+  // Si no cambió la suscripción, solo validar suscripción y trabajo
   return datosModificados.value.suscripcion && datosModificados.value.trabajoactual
 })
 
@@ -296,14 +304,30 @@ watch(datosCargados, (nuevoValor) => {
   }
 })
 
-// Watcher para mostrar/ocultar horarios con animación
+// Watcher para mostrar/ocultar horarios con animación - CORREGIDO
 watch(suscripcionCambiada, (nuevoValor) => {
-  if (nuevoValor) {
+  if (nuevoValor && datosModificados.value.suscripcion !== 'Día Libre') {
+    // Solo mostrar horarios si cambió la suscripción Y no es "Día Libre"
     setTimeout(() => {
       mostrarHorarios.value = true
     }, 100)
   } else {
+    // Ocultar horarios si no hay cambio O si es "Día Libre"
     mostrarHorarios.value = false
+  }
+})
+
+// Watcher adicional para detectar cambios directos a "Día Libre"
+watch(() => datosModificados.value.suscripcion, (nuevaSuscripcion, suscripcionAnterior) => {
+  // Si la nueva suscripción es "Día Libre", ocultar horarios inmediatamente
+  if (nuevaSuscripcion === 'Día Libre') {
+    mostrarHorarios.value = false
+  }
+  // Si cambió desde otra suscripción y no es "Día Libre", mostrar horarios
+  else if (nuevaSuscripcion !== suscripcionAnterior && nuevaSuscripcion !== 'Día Libre') {
+    setTimeout(() => {
+      mostrarHorarios.value = true
+    }, 100)
   }
 })
 
@@ -327,7 +351,8 @@ const confirmarGuardar = () => {
   }
   
   if (!formularioValido.value) {
-    if (suscripcionCambiada.value && horariosModificados.value.length === 0) {
+    // Si no es "Día Libre" y no hay horarios configurados
+    if (suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre' && horariosModificados.value.length === 0) {
       alert('Debe configurar los horarios para la nueva suscripción')
     } else {
       alert('Por favor complete todos los campos requeridos')
@@ -342,12 +367,15 @@ const guardarCambios = () => {
   mostrarConfirmacion.value = false
   
   try {
+    // Si la suscripción es "Día Libre", enviar horarios vacíos
+    const horariosAEnviar = datosModificados.value.suscripcion === 'Día Libre' ? [] : horariosModificados.value
+    
     const datosEnviar = {
       alumno: {
         suscripcion: datosModificados.value.suscripcion,
         trabajoactual: datosModificados.value.trabajoactual
       },
-      horarios: horariosModificados.value
+      horarios: horariosAEnviar
     }
     
     console.log('Guardando cambios:', datosEnviar)

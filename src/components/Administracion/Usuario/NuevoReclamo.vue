@@ -1,3 +1,4 @@
+
 <template>
   <div class="nuevo-reclamo-container">
     <h2 class="subtitulo">Nuevo Reclamo</h2>

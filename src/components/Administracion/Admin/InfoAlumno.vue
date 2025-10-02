@@ -252,7 +252,7 @@ const alumno = ref({
   activo: false,
   cuotasPendientes: 5,
   turno: "Tarde",
-  suscripcion: "2 Dias Semana",
+  suscripcion: "2 Días a la semana",
   trabajoactual: "Musculacion",
   provincia: "Chaco",
   localidad: "Las Breñas",
