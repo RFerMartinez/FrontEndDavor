@@ -29,6 +29,13 @@
         >
           Suscripciones
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'trabajo' }"
+          @click="cambiarVista('trabajo')"
+        >
+          Trabajos Metodologías
+        </button>
       </Sidebar>
 
       <!-- Navbar para móviles -->
@@ -59,6 +66,13 @@
         >
           Suscripciones
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'trabajo' }"
+          @click="cambiarVista('trabajo')"
+        >
+          Trabajos Metodologías
+        </button>
       </NavbarMobile>
 
       <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
@@ -85,6 +99,7 @@ import InformacionPersonal from '@/components/Administracion/Usuario/Informacion
 import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
 import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
 import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
+import Trabajos_Metodologias from '@/components/Administracion/Admin/Trabajos_Metodologias.vue'
 
 const usuario = {
   nombre: 'Beto',
@@ -124,6 +139,7 @@ const vistaComponente = computed(() => {
     case 'alumnos': return Alumnos
     case 'infoAlumno': return InfoAlumno
     case 'suscripciones': return Suscripciones
+    case 'trabajo': return Trabajos_Metodologias
     default: return InformacionPersonal
   }
 })

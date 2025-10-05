@@ -1,23 +1,22 @@
 <template>
-  <div class="login-layout">
-    <FondoInicio>
+  <div class="auth-layout">
+    <AuthBackground>
       <LoginRegistro :modo="$route.query.modo" />
-    </FondoInicio>
+    </AuthBackground>
     <Footer />
   </div>
 </template>
 
 <script>
-import FondoInicio from '@/components/Inicio/FondoInicio.vue'
+import AuthBackground from '../components/Inicio/AuthBackground.vue'
 import LoginRegistro from '@/components/Inicio/LoginRegistro.vue'
 import Footer from '@/components/Inicio/Footer.vue';
 
 export default {
   components: {
-    FondoInicio,
+    AuthBackground,
     LoginRegistro,
     Footer
   }
 }
-
 </script>

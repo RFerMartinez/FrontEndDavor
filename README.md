@@ -24,7 +24,7 @@ git add .
 git commit -m "Descripción clara de los cambios"
 git push 
 
-
+ ## Traer cambios del git
 git branch
 git fetch
 git pull origin main

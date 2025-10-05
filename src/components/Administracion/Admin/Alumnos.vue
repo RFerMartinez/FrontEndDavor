@@ -462,6 +462,14 @@ const filtroTurno = ref(null)
 
 const emit = defineEmits(['verAlumno'])
 
+// Función para normalizar texto (quitar tildes y convertir a minúsculas)
+const normalizarTexto = (texto) => {
+  return texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+}
+
 // Computed properties para la información de estado
 const alumnosActivos = computed(() => 
   alumnosFiltrados.value.filter(alumno => alumno.activo).length
@@ -475,13 +483,27 @@ const alumnosFiltrados = computed(() => {
   let alumnosFiltrados = alumnos
 
   // Filtrar por término de búsqueda
-  if (terminoBusqueda.value) {
-    const termino = terminoBusqueda.value.toLowerCase()
-    alumnosFiltrados = alumnosFiltrados.filter(alumno => 
-      alumno.dni.includes(termino) ||
-      alumno.nombre.toLowerCase().includes(termino) ||
-      alumno.apellido.toLowerCase().includes(termino)
-    )
+  if (terminoBusqueda.value.trim()) {
+    const termino = terminoBusqueda.value.trim()
+    
+    // Verificar si el término es numérico (posible DNI)
+    const esBusquedaDNI = /^\d+$/.test(termino)
+    
+    alumnosFiltrados = alumnosFiltrados.filter(alumno => {
+      if (esBusquedaDNI) {
+        // Para búsqueda de DNI: buscar coincidencia exacta
+        return alumno.dni === termino
+      } else {
+        // Para búsqueda de texto: normalizar y buscar coincidencias parciales
+        const nombreNormalizado = normalizarTexto(alumno.nombre)
+        const apellidoNormalizado = normalizarTexto(alumno.apellido)
+        const terminoNormalizado = normalizarTexto(termino)
+        
+        return nombreNormalizado.includes(terminoNormalizado) ||
+               apellidoNormalizado.includes(terminoNormalizado) ||
+               `${nombreNormalizado} ${apellidoNormalizado}`.includes(terminoNormalizado)
+      }
+    })
   }
 
   // Filtrar por turno

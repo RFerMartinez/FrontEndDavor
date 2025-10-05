@@ -756,6 +756,14 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
 }
 
 /* Responsive */
+/* Responsive */
+@media (max-width: 1560px) {
+  .botones-accion {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   .contenedor-info-alumno {
     padding: 1.5rem;

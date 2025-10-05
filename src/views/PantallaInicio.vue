@@ -1,9 +1,8 @@
 <template>
   <div>
-    <NavBar />
-    <FondoInicio/>
+    <FondoInicio />
 
-    <section id="metodologias" class="black-section">
+    <section id="metodologias" class="black-section" :class="{ 'section-blur': modalVisible }">
       <div class="container">
         <h2 class="section-title">Metodologías de trabajo</h2>
         <div class="grid">
@@ -18,42 +17,38 @@
     </section>
 
     <transition name="modal-fade">
-      <div v-if="modalVisible" class="modal" @click.self="cerrarModal">
+      <div v-if="modalVisible" class="modal-overlay" @click.self="cerrarModal">
         <div class="modal-content">
-          <img :src="modalData.imagen" :alt="modalData.nombre" />
           <h3>{{ modalData.nombre }}</h3>
           <p>{{ modalData.descripcion }}</p>
           <button @click="cerrarModal">Cerrar</button>
         </div>
       </div>
     </transition>
-   <section id="precios" class="black-section">
-    <div class="container">
-      <h2 class="section-title">Precios</h2>
-      <div class="precios-grid">
-        <Precio
-          v-for="(item, index) in precios"
-          :key="index"
-          :precio="item"
-        />
+
+    <section id="precios" class="black-section" :class="{ 'section-blur': modalVisible }">
+      <div class="container">
+        <h2 class="section-title">Precios</h2>
+        <div class="precios-grid">
+          <Precio
+            v-for="(item, index) in precios"
+            :key="index"
+            :precio="item"
+          />
+        </div>
       </div>
-    </div>
-  </section>
-  <Footer />
-  </div> 
-
-
-  
+    </section>
+    
+    <Footer :class="{ 'section-blur': modalVisible }" />
+  </div>
 </template>
-
 
 <script setup>
 import Footer from '../components/Inicio/Footer.vue'
-import NavBar from '@/components/Inicio/NavBar.vue'
 import FondoInicio from '@/components/Inicio/FondoInicio.vue'
 import Metodologia from '../components/Inicio/Metodologias.vue'
 import Precio from '../components/Inicio/Precio.vue'
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 
 // Metodologías
 const metodologias = ref([])
@@ -70,6 +65,7 @@ function abrirModal(metodo) {
   modalData.value = metodo
   modalVisible.value = true
 }
+
 function cerrarModal() {
   modalVisible.value = false
 }
@@ -88,99 +84,173 @@ fetch('/data/precios.json')
 .black-section {
   background-color: #000;
   color: white;
-  padding: 60px 20px 100px; /* menos padding arriba */
-  min-height: 500px;
+  padding: 80px 20px;
+  min-height: auto;
 }
 
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* TÍTULOS PROFESIONALES Y MINIMALISTAS */
 .section-title {
   text-align: center;
-  padding-top: 10px;
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-family: 'Poppins', sans-serif;
+  margin-bottom: 50px;
+  color: #ffffff;
+  font-weight: 300;
+  letter-spacing: 1px;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    #e50914 50%, 
+    transparent 100%);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
   margin-top: 30px;
-  padding: 0 20px;
-}
-
-@media (max-width: 767px) {
-  .grid {
-    grid-template-columns: 1fr; /* ✅ ahora sí se aplica en móvil */
-    gap: 20px;
-  }
-}
-
-/* Modal */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal-content {
-  background-color: #111;
-  color: white;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 90%;
-  transform-origin: center;
-  overflow: hidden; /* para evitar que haya desbordes que muestren fondo */
-  transform-origin: center center; /* importante para que la escala sea centrada */
-}
-.modal-content img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-.modal-content button {
-  background-color: #e50914;
-  border: none;
-  padding: 10px 15px;
-  color: white;
-  cursor: pointer;
-  border-radius: 5px;
-  margin-top: 10px;
-}
-/* Animación del modal */
-.modal-fade-enter-active,
-.modal-fade-leave-active {
-  transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* easing bounce */
-}
-
-.modal-fade-enter-from,
-.modal-fade-leave-to {
-  opacity: 0;
-  transform: scale(0.9); /* quitamos translateY */
-  transform-origin: center center; /* para que escale desde el centro */
-}
-
-.modal-fade-enter-to,
-.modal-fade-leave-from {
-  opacity: 1;
-  transform: scale(1);
 }
 
 .precios-grid {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 25px;
   margin-top: 30px;
 }
 
+/* BLUR EFFECT */
+.section-blur {
+  filter: blur(8px);
+  pointer-events: none;
+  transition: filter 0.3s ease;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: linear-gradient(135deg, #111 0%, #222 100%);
+  color: white;
+  padding: 3rem;
+  border-radius: 15px;
+  max-width: 500px;
+  width: 90%;
+  border: 1px solid #333;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+}
+
+.modal-content h3 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal-content p {
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: #ccc;
+  text-align: center;
+}
+
+.modal-content button {
+  background: linear-gradient(135deg, #e50914 0%, #ff2a2a 100%);
+  border: none;
+  padding: 12px 30px;
+  color: white;
+  cursor: pointer;
+  border-radius: 25px;
+  font-weight: 500;
+  display: block;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.modal-content button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
+}
+
+/* ANIMACIONES MODAL */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .section-title {
+    font-size: 2.2rem;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 10px;
+  }
+  
+  .modal-content {
+    padding: 2rem;
+    margin: 20px;
+  }
+  
+  .modal-content h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .black-section {
+    padding: 60px 15px;
+  }
+  
+  .section-title {
+    font-size: 1.8rem;
+    padding-bottom: 12px;
+  }
+  
+  .section-title::after {
+    width: 60px;
+  }
+  
+  .modal-content {
+    padding: 1.5rem;
+  }
+}
 </style>

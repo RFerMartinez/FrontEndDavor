@@ -1,75 +1,275 @@
-[⚠️ Suspicious Content] <template>
-  <div class="form-container">
-    <!-- INICIAR SESIÓN -->
-    <div class="form-box" v-if="modo !== 'registro'">
-      <h2 class="form-title">INICIAR SESIÓN</h2>
-      <label>Usuario</label>
-      <input type="text" placeholder="Ingrese su usuario">
-      <label>Contraseña</label>
-      <input type="password" placeholder="Ingrese su contraseña">
-      <button @click="iniciarSesion">INICIAR SESIÓN</button>
-      <div class="form-inline-links">
-        <span class="small-link" @click="cambiarModo('registro')">Registrarse</span>
-        <router-link class="small-link" to="/">Volver al inicio</router-link>
+<template>
+  <div class="auth-container">
+    <!-- Header del formulario -->
+    <div class="auth-header">
+      <div class="brand-logo">
+        <span class="brand-text">GIMNASIO</span>
+        <span class="brand-accent">Abito</span>
       </div>
+      <div class="form-tabs" v-if="modo !== 'registro' || paso === 1">
+        <button 
+          class="tab-btn" 
+          :class="{ active: modo !== 'registro' }"
+          @click="cambiarModo('login')"
+        >
+          Iniciar Sesión
+        </button>
+        <button 
+          class="tab-btn" 
+          :class="{ active: modo === 'registro' }"
+          @click="cambiarModo('registro')"
+        >
+          Registrarse
+        </button>
+      </div>
+    </div>
+
+    <!-- INICIAR SESIÓN -->
+    <div class="form-wrapper" v-if="modo !== 'registro'">
+      <form class="auth-form" @submit.prevent="iniciarSesion">
+        <div class="form-group">
+          <input 
+            type="text" 
+            placeholder=" "
+            class="form-input"
+            required
+            autocomplete="username"
+          >
+          <label class="form-label">Usuario</label>
+          <div class="input-underline"></div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            type="password" 
+            placeholder=" "
+            class="form-input"
+            required
+            autocomplete="current-password"
+          >
+          <label class="form-label">Contraseña</label>
+          <div class="input-underline"></div>
+        </div>
+
+        <button type="submit" class="auth-btn primary">
+          <span>INICIAR SESIÓN</span>
+          <div class="btn-loader" v-if="loading"></div>
+        </button>
+
+        <div class="form-links">
+          <router-link to="/" class="link-text">
+            ← Volver al inicio
+          </router-link>
+        </div>
+      </form>
     </div>
 
     <!-- REGISTRO PASO 1 -->
-    <div class="form-box" v-else-if="paso === 1">
-      <h2 class="form-title">REGISTRO - PASO 1</h2>
-      <label>Correo Electronico</label>
-      <input type="email" placeholder="ejemplo@gmail.com">
-      <label>Usuario</label>
-      <input type="text" placeholder="Nombre de usuario">
-      <label>Contraseña</label>
-      <input type="password" placeholder="Contraseña">
-      <button @click="paso = 2">Siguiente</button>
-      <div class="form-links">
-        <router-link class="small-link" to="/">Volver al inicio</router-link>
-        <span class="small-link" @click="cambiarModo('login')">Ir a Iniciar Sesión</span>
-      </div>
+    <div class="form-wrapper" v-else-if="paso === 1">
+      <form class="auth-form" @submit.prevent="siguientePaso">
+        <div class="step-indicator">
+          <div class="step active">1</div>
+          <div class="step-line"></div>
+          <div class="step">2</div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            type="email" 
+            placeholder=" "
+            class="form-input"
+            required
+            autocomplete="email"
+            @blur="validarEmail"
+            @input="limpiarErrorEmail"
+          >
+          <label class="form-label">Correo Electrónico</label>
+          <div class="input-underline"></div>
+          <div class="error-message" v-if="emailError">{{ emailError }}</div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            type="text" 
+            placeholder=" "
+            class="form-input"
+            required
+            autocomplete="username"
+          >
+          <label class="form-label">Usuario</label>
+          <div class="input-underline"></div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            type="password" 
+            placeholder=" "
+            class="form-input"
+            required
+            autocomplete="new-password"
+          >
+          <label class="form-label">Contraseña</label>
+          <div class="input-underline"></div>
+        </div>
+
+        <button type="submit" class="auth-btn primary">
+          <span>CONTINUAR</span>
+        </button>
+
+        <div class="form-links">
+          <router-link to="/" class="link-text">
+            ← Volver al inicio
+          </router-link>
+        </div>
+      </form>
     </div>
 
     <!-- REGISTRO PASO 2 -->
-    <div class="form-box" v-else-if="paso === 2">
-      <h2 class="form-title">REGISTRO - PASO 2</h2>
-      <input type="text" placeholder="Nombre">
-      <input type="text" placeholder="Apellido">
-      <input type="text" placeholder="DNI">
-      <input type="text" placeholder="Teléfono">
-      <select>
-        <option>Provincia</option>
-        <option>Buenos Aires</option>
-      </select>
-      <select>
-        <option>Localidad</option>
-        <option>La Plata</option>
-      </select>
-      <input type="text" placeholder="Calle">
-      <input type="text" placeholder="Número">
-      <button @click="mostrarExito">Registrarse</button>
-      <div class="form-links">
-        <span class="small-link" @click="paso = 1">Volver al paso anterior</span>
-        <span class="small-link" @click="cambiarModo('login')">Ir a Iniciar Sesión</span>
-        <router-link class="small-link" to="/">Volver al inicio</router-link>
-      </div>
+    <div class="form-wrapper" v-else-if="paso === 2">
+      <form class="auth-form" @submit.prevent="mostrarExito">
+        <div class="step-indicator">
+          <div class="step completed">1</div>
+          <div class="step-line completed"></div>
+          <div class="step active">2</div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <input 
+              type="text" 
+              placeholder=" " 
+              class="form-input" 
+              required
+              autocomplete="given-name"
+            >
+            <label class="form-label">Nombre</label>
+            <div class="input-underline"></div>
+          </div>
+
+          <div class="form-group">
+            <input 
+              type="text" 
+              placeholder=" " 
+              class="form-input" 
+              required
+              autocomplete="family-name"
+            >
+            <label class="form-label">Apellido</label>
+            <div class="input-underline"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            type="text" 
+            placeholder=" " 
+            class="form-input" 
+            required
+            autocomplete="off"
+          >
+          <label class="form-label">DNI</label>
+            <div class="input-underline"></div>
+        </div>
+
+        <div class="form-group">
+          <input 
+            type="tel" 
+            placeholder=" " 
+            class="form-input" 
+            required
+            autocomplete="tel"
+          >
+          <label class="form-label">Teléfono</label>
+            <div class="input-underline"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <select class="form-input select-custom" required autocomplete="address-level1">
+              <option value="" disabled selected>Seleccione provincia</option>
+              <option>Buenos Aires</option>
+              <option>Córdoba</option>
+              <option>Santa Fe</option>
+              <option>Mendoza</option>
+            </select>
+            <label class="form-label">Provincia</label>
+            <div class="input-underline"></div>
+          </div>
+
+          <div class="form-group">
+            <select class="form-input select-custom" required autocomplete="address-level2">
+              <option value="" disabled selected>Seleccione localidad</option>
+              <option>La Plata</option>
+              <option>Capital Federal</option>
+              <option>Mar del Plata</option>
+              <option>Bahía Blanca</option>
+            </select>
+            <label class="form-label">Localidad</label>
+            <div class="input-underline"></div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <input 
+              type="text" 
+              placeholder=" " 
+              class="form-input" 
+              required
+              autocomplete="address-line1"
+            >
+            <label class="form-label">Calle</label>
+            <div class="input-underline"></div>
+          </div>
+
+          <div class="form-group">
+            <input 
+              type="text" 
+              placeholder=" " 
+              class="form-input" 
+              required
+              autocomplete="address-line2"
+            >
+            <label class="form-label">Número</label>
+            <div class="input-underline"></div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="auth-btn secondary" @click="paso = 1">
+            VOLVER
+          </button>
+          <button type="submit" class="auth-btn primary">
+            REGISTRARSE
+          </button>
+        </div>
+      </form>
     </div>
 
     <!-- MENSAJE DE ÉXITO -->
-    <div class="mensaje-exito" id="mensajeExito" v-else >
-     <div class="checkmark">
-        <svg class="check-icon" viewBox="0 0 52 52">
-          <circle class="check-circle" cx="26" cy="26" r="24" fill="none"/>
-          <path class="check-mark" fill="none" d="M14 27l7 7 16-16"/>
-        </svg>
+    <div class="success-wrapper" v-else>
+      <div class="success-content">
+        <div class="checkmark-animation">
+          <svg class="check-icon" viewBox="0 0 52 52">
+            <circle class="check-circle" cx="26" cy="26" r="24" fill="none"/>
+            <path class="check-mark" fill="none" d="M14 27l7 7 16-16"/>
+          </svg>
+        </div>
+        
+        <h3 class="success-title">¡Registro Exitoso!</h3>
+        
+        <div class="success-message">
+          <p>Gracias por registrarte en <strong>GIMNASIO Abito</strong>.</p>
+          <p>Tu cuenta ha sido creada exitosamente.</p>
+          <p>Por favor, acércate al gimnasio para que podamos asignarte una suscripción y un horario.</p>
+          <p class="location">📍 Calle 9 de julio 1355</p>
+          <p>¡Gracias por elegirnos! Nos enorgullece que formes parte de nuestra comunidad.</p>
+        </div>
+
+        <router-link to="/" class="auth-btn primary">
+          VOLVER AL INICIO
+        </router-link>
       </div>
-        <h3 >¡Registro Exitoso!</h3>
-        <p>Gracias por registrarte en <strong>GYM Abito</strong>.<br>
-        Tu cuenta ha sido creada exitosamente.<br>
-        Por favor, acércate al gimnasio para que podamos asignarte una suscripción y un horario.<br>
-        Estamos ubicados en calle 9 de julio 1355.<br>
-        ¡Gracias por elegirnos! Nos enorgullece que formes parte de nuestra comunidad.</p>
-      <router-link class="small-link" to="/">Volver al inicio</router-link>
     </div>
   </div>
 </template>
@@ -79,18 +279,42 @@ export default {
   props: ['modo'],
   data() {
     return {
-      paso: this.modo === 'registro' ? 1 : 0
+      paso: this.modo === 'registro' ? 1 : 0,
+      loading: false,
+      emailError: ''
     }
   },
   methods: {
     cambiarModo(m) {
       this.$router.push({ path: '/login', query: { modo: m } })
     },
-    iniciarSesion() {
+    async iniciarSesion() {
+      this.loading = true
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      this.loading = false
       alert('Simulación de inicio de sesión')
+    },
+    siguientePaso() {
+      this.paso = 2
     },
     mostrarExito() {
       this.paso = 3
+    },
+    validarEmail(event) {
+      const email = event.target.value;
+      if (email && !this.esEmailValido(email)) {
+        this.emailError = 'Por favor ingresa un correo electrónico válido';
+      } else {
+        this.emailError = '';
+      }
+    },
+    limpiarErrorEmail() {
+      this.emailError = '';
+    },
+    esEmailValido(email) {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
     }
   },
   watch: {
@@ -102,110 +326,320 @@ export default {
 </script>
 
 <style scoped>
-.form-container {
-  width: 90%;
-  max-width: 400px;
-  position: relative;
-  z-index: 2;
-  height: 100vh;             /* Altura total de la pantalla */
-  display: flex;
-  justify-content: center;   /* Centra horizontalmente */
-  align-items: center;       /* Centra verticalmente */
-  margin: 0 auto;            /* Centra horizontalmente si no está flex */
-  box-sizing: border-box;    /* Para que padding no afecte ancho */
-}
-.form-box {
-  background-color: rgba(30, 30, 30, 0.95);
-  border-radius: 10px;
-  padding: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  animation: fadeIn 0.4s ease-in-out;
-}
-input, select {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
-  outline: none;
-}
-button {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  background-color: #e50914;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-button:hover {
-  background-color: #ff2a2a;
-}
-label {
-  color: white;
-}
-.form-title {
-  text-align: center;
-  margin-bottom: 10px;
-  color: white;
-}
-.form-links, .form-inline-links {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: 10px;
-  align-items: center;
-}
-.small-link {
-  font-size: 0.85rem;
-  color: #aaa;
-  cursor: pointer;
-  text-decoration: underline;
-}
-.small-link:hover {
-  color: white;
-}
-.mensaje-exito {
-  background-color: rgba(20, 20, 20, 0.95);
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,255,0,0.2);
-  text-align: center;
-}
-.checkmark {
-  font-size: 50px;
-  color: #00ff88;
-  animation: pop 0.4s ease;
-  margin-bottom: 10px;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.mensaje-exito {
-  background-color: rgba(20, 20, 20, 0.95);
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,255,0,0.2);
-  animation: fadeIn 0.5s ease-in-out;
-  text-align: center;
-  color: white;
+.auth-container {
+  width: 100%;
+  max-width: 480px;
+  background: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.checkmark {
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.brand-text {
+  color: #ffffff;
+}
+
+.brand-accent {
+  color: #e50914;
+}
+
+.form-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.tab-btn.active {
+  background: rgba(229, 9, 20, 0.2);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.3);
+}
+
+.tab-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.form-wrapper {
+  animation: fadeIn 0.4s ease;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.step {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.5);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.step.active {
+  background: rgba(229, 9, 20, 0.2);
+  color: #e50914;
+  border-color: #e50914;
+}
+
+.step.completed {
+  background: #00ff88;
+  color: #000;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  max-width: 60px;
+  transition: all 0.3s ease;
+}
+
+.step-line.completed {
+  background: #00ff88;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem 0 0.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s ease;
+  /* Prevenir estilos de autocomplete de navegadores */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Estilos específicos para los campos select */
+.select-custom {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 30px;
+  cursor: pointer;
+}
+
+.select-custom option {
+  background: #1a1a1a;
+  color: white;
+  padding: 8px;
+}
+
+.select-custom:focus {
+  outline: none;
+  border-bottom-color: #e50914;
+}
+
+.select-custom:focus + .form-label,
+.select-custom:valid + .form-label {
+  transform: translateY(-1.5rem) scale(0.85);
+  color: #e50914;
+}
+
+/* Eliminar el fondo amarillo del autocomplete */
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+  transition: background-color 5000s ease-in-out 0s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-input:focus {
+  outline: none;
+  border-bottom-color: #e50914;
+}
+
+.form-input:focus + .form-label,
+.form-input:not(:placeholder-shown) + .form-label {
+  transform: translateY(-1.5rem) scale(0.85);
+  color: #e50914;
+}
+
+.form-label {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #e50914, #ff4757);
+  transition: width 0.3s ease;
+}
+
+.form-input:focus ~ .input-underline {
+  width: 100%;
+}
+
+.error-message {
+  color: #ff4757;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  animation: slideDown 0.3s ease;
+}
+
+.auth-btn {
+  position: relative;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.auth-btn.primary {
+  background: linear-gradient(135deg, #e50914, #ff4757);
+  color: white;
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+}
+
+.auth-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+}
+
+.auth-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.form-links {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.link-text {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.link-text:hover {
+  color: #e50914;
+}
+
+.success-wrapper {
+  animation: fadeIn 0.6s ease;
+}
+
+.success-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkmark-animation {
   width: 80px;
   height: 80px;
-  margin: 0 auto 20px;
+  margin: 0 auto 2rem;
 }
 
 .check-icon {
   width: 100%;
   height: 100%;
-  stroke: #a5dc86;
+  stroke: #00ff88;
   stroke-width: 4;
   stroke-miterlimit: 10;
   stroke-linecap: round;
@@ -225,7 +659,64 @@ label {
   animation: stroke-check 0.4s 0.6s ease-in-out forwards;
 }
 
+.success-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+}
+
+.success-message {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+.success-message p {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.location {
+  color: #00ff88;
+  font-weight: 600;
+  text-align: center;
+}
+
+.btn-loader {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
 /* Animaciones */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @keyframes stroke-circle {
   to {
     stroke-dashoffset: 0;
@@ -238,4 +729,59 @@ label {
   }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-container {
+    margin: 1rem;
+    padding: 2rem 1.5rem;
+    max-width: none;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-logo {
+    font-size: 1.5rem;
+  }
+
+  .auth-btn {
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 1.5rem 1rem;
+    margin: 0.5rem;
+  }
+
+  .form-tabs {
+    flex-direction: column;
+  }
+
+  .tab-btn {
+    padding: 1rem;
+  }
+}
 </style>
