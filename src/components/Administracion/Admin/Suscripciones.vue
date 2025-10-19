@@ -1,12 +1,10 @@
 <template>
   <div class="contenedor-suscripciones">
-    <!-- Encabezado -->
     <div class="encabezado-suscripciones">
       <h1 class="titulo">SUSCRIPCIONES</h1>
       <p class="subtitulo">Gestiona las suscripciones disponibles para los alumnos</p>
     </div>
 
-    <!-- Botón para agregar nueva suscripción -->
     <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBotón">
       <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
         <button class="btn-agregar" @click="iniciarTransicionAFormulario">
@@ -16,93 +14,26 @@
       </div>
     </transition>
 
-    <!-- Formulario para agregar/editar suscripción -->
     <transition name="slide-down" @after-leave="transicionEnProgreso = false">
-      <div v-if="mostrarFormulario" class="formulario-suscripcion">
-        <h3 class="titulo-formulario">
-          {{ suscripcionEditando ? 'Editar Suscripción' : 'Nueva Suscripción' }}
-        </h3>
-        
-        <div class="campos-formulario">
-          <div class="campo">
-            <label for="descripcion">Descripción:</label>
-            <input
-              id="descripcion"
-              v-model="nuevaSuscripcion.descripcion"
-              type="text"
-              placeholder="Ej: 5 Días a la semana"
-              class="input-text"
-            >
-          </div>
-          
-          <div class="campo">
-            <label for="precio">Precio:</label>
-            <input
-              id="precio"
-              v-model="nuevaSuscripcion.precio"
-              type="text"
-              placeholder="Ej: $30.000"
-              class="input-text"
-            >
-          </div>
-        </div>
-
-        <div class="botones-formulario">
-          <button class="btn btn-guardar" @click="guardarSuscripcion">
-            <i class="fas fa-save"></i>
-            {{ suscripcionEditando ? 'Actualizar' : 'Guardar' }}
-          </button>
-          
-          <button class="btn btn-cancelar" @click="iniciarTransicionABoton">
-            <i class="fas fa-times"></i>
-            Cancelar
-          </button>
-        </div>
-      </div>
+      <AgregarModificar
+        v-if="mostrarFormulario"
+        v-model="nuevaSuscripcion"
+        :es-edicion="suscripcionEditando !== null"
+        :config="configFormulario"
+        @guardar="guardarSuscripcion"
+        @cancelar="iniciarTransicionABoton"
+      />
     </transition>
 
-    <!-- Lista de suscripciones -->
-    <div class="lista-suscripciones">
-      <div v-if="suscripciones.length === 0" class="sin-suscripciones">
-        <i class="fas fa-info-circle fa-2x"></i>
-        <p>No hay suscripciones cargadas</p>
-      </div>
+    <Items
+      :items="suscripciones"
+      :config="configLista"
+      empty-message="No hay suscripciones cargadas"
+      empty-icon="fas fa-info-circle"
+      @editar="editarSuscripcion"
+      @eliminar="eliminarSuscripcion"
+    />
 
-      <transition-group name="list" tag="div" class="tarjetas-suscripciones">
-        <div
-          v-for="suscripcion in suscripciones"
-          :key="suscripcion.id"
-          class="tarjeta-suscripcion"
-        >
-          <div class="contenido-tarjeta">
-            <div class="info-suscripcion">
-              <h3 class="descripcion">{{ suscripcion.descripcion }}</h3>
-              <p class="precio">{{ suscripcion.precio }}</p>
-            </div>
-            
-            <div class="acciones-tarjeta">
-              <button
-                class="btn-accion btn-editar"
-                @click="editarSuscripcion(suscripcion)"
-                title="Editar suscripción"
-              >
-                <i class="fas fa-edit"></i>
-              </button>
-              
-              <button
-                class="btn-accion btn-eliminar"
-                @click="eliminarSuscripcion(suscripcion.id)"
-                title="Eliminar suscripción"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </transition-group>
-    </div>
-
-    <!-- Mensaje de confirmación -->
     <transition name="slide-in">
       <div v-if="mensajeConfirmacion" class="mensaje-confirmacion">
         <div class="contenido-mensaje">
@@ -119,15 +50,35 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+// Importamos los nuevos componentes
+import AgregarModificar from './AgregarModificar.vue' // Ajusta la ruta si es necesario
+import Items from './Items.vue' // Ajusta la ruta si es necesario
 
-// Estado de las suscripciones
+// --- Configuración para los componentes hijos ---
+const configFormulario = {
+  tituloSingular: 'Suscripción',
+  layout: 'inline', // 1fr 1fr
+  campo1: { key: 'descripcion', label: 'Descripción:', placeholder: 'Ej: 5 Días a la semana', esTextarea: false },
+  campo2: { key: 'precio', label: 'Precio:', placeholder: 'Ej: $30.000', esTextarea: false }
+}
+
+const configLista = {
+  key1: 'descripcion', // Propiedad para el título
+  showKey2: true,      // Sí mostramos el segundo campo
+  key2: 'precio',      // Propiedad para el detalle
+  styleKey2: 'precio'  // Clase CSS para el detalle
+}
+// ----------------------------------------------
+
+
+// Estado de las suscripciones (TODA LA LÓGICA SE MANTIENE EN EL PADRE)
 const suscripciones = ref([])
 const mostrarFormulario = ref(false)
-const suscripcionEditando = ref(null)
+const suscripcionEditando = ref(null) // Ahora guarda el ID
 const mensajeConfirmacion = ref('')
 const transicionEnProgreso = ref(false)
 
-// Nueva suscripción temporal
+// Nueva suscripción temporal (usada por v-model en AgregarModificar)
 const nuevaSuscripcion = ref({
   descripcion: '',
   precio: ''
@@ -155,9 +106,9 @@ const cargarSuscripciones = async () => {
   }
 }
 
-// Iniciar transición hacia el formulario
+// Iniciar transición hacia el formulario (para "Agregar")
 const iniciarTransicionAFormulario = () => {
-  nuevaSuscripcion.value = { descripcion: '', precio: '' }
+  nuevaSuscripcion.value = { descripcion: '', precio: '' } // Limpiamos el v-model
   suscripcionEditando.value = null
   transicionEnProgreso.value = true
   // mostrarFormulario se activará después de que el botón desaparezca
@@ -168,7 +119,7 @@ const mostrarFormularioDespuesDeBotón = () => {
   mostrarFormulario.value = true
 }
 
-// Iniciar transición hacia el botón
+// Iniciar transición hacia el botón (para "Cancelar")
 const iniciarTransicionABoton = () => {
   mostrarFormulario.value = false
   suscripcionEditando.value = null
@@ -176,16 +127,23 @@ const iniciarTransicionABoton = () => {
   // transicionEnProgreso se desactivará después de que el formulario desaparezca
 }
 
-// EVENTO: Editar suscripción existente
+// EVENTO: Editar suscripción existente (lo llama el @editar de Items)
 const editarSuscripcion = (suscripcion) => {
-  nuevaSuscripcion.value = { ...suscripcion }
+  // Copiamos los datos del item al v-model del formulario
+  nuevaSuscripcion.value = { ...suscripcion } 
   suscripcionEditando.value = suscripcion.id
-  transicionEnProgreso.value = true
-  // mostrarFormulario se activará después de que el botón desaparezca
+  
+  if (!mostrarFormulario.value) {
+    transicionEnProgreso.value = true // Oculta el botón
+    // El @after-leave se encargará de mostrar el formulario
+  }
+  // Si el formulario ya estaba visible, simplemente se actualizan los datos
+  mostrarFormulario.value = true; // Forzamos la muestra por si acaso
 }
 
-// EVENTO: Guardar suscripción (crear o actualizar)
+// EVENTO: Guardar suscripción (lo llama el @guardar de AgregarModificar)
 const guardarSuscripcion = () => {
+  // Leemos los datos directamente desde el v-model (nuevaSuscripcion)
   if (!nuevaSuscripcion.value.descripcion || !nuevaSuscripcion.value.precio) {
     mensajeConfirmacion.value = 'Por favor completa todos los campos'
     setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
@@ -209,13 +167,13 @@ const guardarSuscripcion = () => {
     mensajeConfirmacion.value = 'Suscripción creada correctamente'
   }
 
-  mostrarFormulario.value = false
-  suscripcionEditando.value = null
+  // Usamos la misma función de "Cancelar" para cerrar el formulario
+  iniciarTransicionABoton()
   
   setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
 }
 
-// EVENTO: Eliminar suscripción
+// EVENTO: Eliminar suscripción (lo llama el @eliminar de Items)
 const eliminarSuscripcion = (id) => {
   if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
     // EVENTO: Eliminar suscripción
@@ -232,6 +190,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Estilos del Contenedor, Encabezado, Botón Agregar y Mensaje */
+/* Todos los estilos del formulario y la lista se fueron a los hijos */
+/* CSS limpiado de caracteres inválidos */
+
 .contenedor-suscripciones {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
@@ -326,225 +288,6 @@ onMounted(() => {
   transform: translateY(-10px);
 }
 
-/* Formulario */
-.formulario-suscripcion {
-  background: #f8f9fa;
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.titulo-formulario {
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.campos-formulario {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-}
-
-.campo label {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #495057;
-  font-size: 0.95rem;
-}
-
-.input-text {
-  padding: 0.8rem 1rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: white;
-}
-
-.input-text:focus {
-  outline: none;
-  border-color: #e91e63;
-  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
-}
-
-.botones-formulario {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-}
-
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-guardar {
-  background: #C2185B;
-  color: white;
-  box-shadow: 0 2px 8px rgba(194, 24, 91, 0.3);
-}
-
-.btn-guardar:hover {
-  background: #AD1457;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.4);
-}
-
-.btn-cancelar {
-  background: #9E9E9E;
-  color: white;
-  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.3);
-}
-
-.btn-cancelar:hover {
-  background: #757575;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(158, 158, 158, 0.4);
-}
-
-/* Lista de suscripciones */
-.lista-suscripciones {
-  margin-top: 2rem;
-}
-
-.sin-suscripciones {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
-}
-
-.sin-suscripciones i {
-  margin-bottom: 1rem;
-  color: #adb5bd;
-  font-size: 3rem;
-  opacity: 0.7;
-}
-
-/* Animaciones para las tarjetas */
-.list-enter-active {
-  transition: all 0.4s ease;
-}
-.list-leave-active {
-  transition: all 0.3s ease;
-}
-.list-enter-from {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
-}
-.list-move {
-  transition: transform 0.4s ease;
-}
-
-.tarjetas-suscripciones {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
-}
-
-.tarjeta-suscripcion {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.tarjeta-suscripcion:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-.contenido-tarjeta {
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.info-suscripcion {
-  flex: 1;
-}
-
-.descripcion {
-  font-size: 1.1rem;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.precio {
-  font-size: 1.4rem;
-  color: #e91e63;
-  font-weight: 700;
-  margin: 0;
-}
-
-.acciones-tarjeta {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.btn-accion {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-editar {
-  background: #FF9800;
-  color: white;
-  box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3);
-}
-
-.btn-editar:hover {
-  background: #F57C00;
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
-}
-
-.btn-eliminar {
-  background: #D32F2F;
-  color: white;
-  box-shadow: 0 2px 6px rgba(211, 47, 47, 0.3);
-}
-
-.btn-eliminar:hover {
-  background: #C62828;
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(211, 47, 47, 0.4);
-}
-
 /* Mensaje de confirmación */
 .slide-in-enter-active {
   transition: all 0.3s ease-out;
@@ -608,29 +351,6 @@ onMounted(() => {
     font-size: 1.8rem;
   }
   
-  .campos-formulario {
-    grid-template-columns: 1fr;
-  }
-  
-  .tarjetas-suscripciones {
-    grid-template-columns: 1fr;
-  }
-  
-  .contenido-tarjeta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .acciones-tarjeta {
-    align-self: stretch;
-    justify-content: center;
-  }
-  
-  .botones-formulario {
-    flex-direction: column;
-  }
-  
   .mensaje-confirmacion {
     top: 10px;
     right: 10px;
@@ -647,17 +367,8 @@ onMounted(() => {
   .titulo {
     font-size: 1.6rem;
   }
-  
-  .formulario-suscripcion {
-    padding: 1.5rem;
-  }
-  
+    
   .btn-agregar {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .btn {
     width: 100%;
     justify-content: center;
   }
