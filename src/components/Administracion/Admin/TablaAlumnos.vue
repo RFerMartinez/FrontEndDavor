@@ -2,64 +2,59 @@
   <div class="tabla-container" :class="{ 'mobile': isMobile }">
     <table v-if="!isMobile" class="tabla-alumnos">
       <thead>
-        <tr>
+        <tr v-if="modo === 'alumnos'">
           <th class="col-dni">DNI</th>
           <th class="col-nombre">NOMBRE COMPLETO</th>
           <th class="col-cuotas">CUOTAS PENDIENTES</th>
           <th class="col-estado-alumno">ESTADO</th>
           <th class="col-acciones">ACCIONES</th>
         </tr>
+        <tr v-else-if="modo === 'personas'">
+          <th class="col-dni">DNI</th>
+          <th class="col-nombre-personas">NOMBRE COMPLETO</th> <th class="col-acciones-personas">ACCIONES</th> </tr>
       </thead>
       <tbody>
         <FilaAlumno
-          v-for="(alumno, index) in alumnos"
-          :key="index"
-          :alumno="alumno"
-          :is-mobile="isMobile"
-          @ver-detalles="$emit('verDetalles', alumno)"
-        />
+          v-for="(item, index) in alumnos" :key="index"
+          :alumno="item" :is-mobile="isMobile"
+          :modo="modo" @verDetalles="$emit('verDetalles', item)"
+          @realizarIngreso="$emit('realizarIngreso', item)" />
       </tbody>
     </table>
-    
-    <!-- Vista móvil manejada por FilaAlumno -->
+
     <div v-else class="mobile-view">
       <FilaAlumno
-        v-for="(alumno, index) in alumnos"
+        v-for="(item, index) in alumnos"
         :key="index"
-        :alumno="alumno"
+        :alumno="item"
         :is-mobile="isMobile"
-        @ver-detalles="$emit('verDetalles', alumno)"
-      />
+        :modo="modo" @verDetalles="$emit('verDetalles', item)"
+        @realizarIngreso="$emit('realizarIngreso', item)" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import FilaAlumno from './FilaAlumno.vue'
+import FilaAlumno from './FilaAlumno.vue' // Ajusta la ruta
 
 defineProps({
-  alumnos: Array
+  alumnos: Array, // Mantenemos el nombre de la prop por consistencia
+  modo: {          // Nueva prop para diferenciar
+    type: String,
+    default: 'alumnos', // 'alumnos' o 'personas'
+    validator: (value) => ['alumnos', 'personas'].includes(value)
+  }
 })
 
-defineEmits(['verDetalles'])
+// Emitimos los dos posibles eventos
+defineEmits(['verDetalles', 'realizarIngreso'])
 
 const isMobile = ref(false)
-
-const checkIsMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-}
-
-onMounted(() => {
-  checkIsMobile()
-  window.addEventListener('resize', checkIsMobile)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkIsMobile)
-})
+const checkIsMobile = () => { isMobile.value = window.innerWidth <= 768 }
+onMounted(() => { checkIsMobile(); window.addEventListener('resize', checkIsMobile) })
+onUnmounted(() => { window.removeEventListener('resize', checkIsMobile) })
 </script>
-
 
 <style scoped>
 .tabla-container {
@@ -81,10 +76,10 @@ onUnmounted(() => {
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.95rem;
-  min-width: 800px;
+  min-width: 600px; /* Reducido un poco para modo personas */
 }
 
-/* ENCABEZADOS CON PADDING CONSISTENTE */
+/* ENCABEZADOS */
 .tabla-alumnos th {
   text-align: center;
   padding: 0.75rem 0.5rem;
@@ -97,40 +92,29 @@ onUnmounted(() => {
   top: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  height: 70px;
+  height: 60px; /* Reducido */
   box-sizing: border-box;
   vertical-align: middle;
 }
 
-/* PADDING ESPECÍFICO PARA CADA COLUMNA */
-.tabla-alumnos .col-dni {
-  width: 15%;
-  padding: 0.75rem 0.5rem !important;
-}
+/* --- ANCHOS MODO ALUMNOS --- */
+.tabla-alumnos th.col-dni { width: 15%; }
+.tabla-alumnos th.col-nombre { width: 35%; text-align: left; padding-left: 1.5rem !important; }
+.tabla-alumnos th.col-cuotas { width: 15%; padding-right: 1.5rem !important; text-align: right;}
+.tabla-alumnos th.col-estado-alumno { width: 15%; }
+.tabla-alumnos th.col-acciones { width: 20%; }
 
-.tabla-alumnos .col-nombre {
-  width: 35%;
-  padding: 0.75rem 0.5rem !important;
-  padding-left: 1.5rem !important;
+/* --- ANCHOS MODO PERSONAS --- */
+/* DNI usa la misma clase col-dni */
+.tabla-alumnos th.col-nombre-personas {
+  width: 55%; /* Más ancho */
   text-align: left;
+  padding-left: 1.5rem !important;
+}
+.tabla-alumnos th.col-acciones-personas {
+  width: 30%; /* Más ancho */
 }
 
-.tabla-alumnos .col-estado-alumno {
-  width: 15%;
-  padding: 0.75rem 0.5rem !important;
-}
-
-.tabla-alumnos .col-cuotas {
-  width: 15%;
-  padding: 0.75rem 0.5rem !important;
-  padding-right: 1.5rem !important;
-  text-align: right;
-}
-
-.tabla-alumnos .col-acciones {
-  width: 20%;
-  padding: 0.75rem 0.5rem !important;
-}
 
 .mobile-view {
   width: 100%;
@@ -139,22 +123,13 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-/* Media queries para móvil */
+/* Media queries */
 @media (max-width: 768px) {
-  .tabla-container {
-    padding: 1.5rem;
-    border-radius: 16px;
-  }
-  
-  .mobile-view {
-    gap: 0.8rem;
-  }
+  .tabla-container { padding: 1rem; border-radius: 12px; } /* Más chico en móvil */
+  .mobile-view { gap: 0.8rem; }
 }
 
-@media (max-width: 380px) {
-  .tabla-container {
-    padding: 1rem;
-    border-radius: 12px;
-  }
+@media (max-width: 480px) {
+  .tabla-container { padding: 0.8rem; }
 }
 </style>
