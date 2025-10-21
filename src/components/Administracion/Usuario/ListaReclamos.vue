@@ -1,6 +1,5 @@
 <template>
   <div class="lista-reclamos-container" :class="{ 'mobile': isMobile }">
-    <!-- Vista para PC -->
     <table v-if="!isMobile" class="tabla-reclamos">
       <thead>
         <tr>
@@ -10,44 +9,51 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="reclamo in reclamos" :key="reclamo.id" class="fila-reclamo">
-          <td class="numero">#{{ reclamo.id }}</td>
-          <td class="fecha-hora">
-            {{ reclamo.fecha }}<br>
-            <span class="hora">{{ reclamo.hora }}</span>
+        <tr v-if="reclamos.length === 0">
+          <td colspan="3" class="no-reclamos">
+            Aún no has realizado ningún reclamo.
           </td>
-          <td class="descripcion">{{ reclamo.descripcion || 'Sin descripción' }}</td>
+        </tr>
+        <tr v-for="reclamo in reclamos" :key="reclamo.idReclamo" class="fila-reclamo">
+          <td class="numero">#{{ reclamo.idReclamo }}</td>
+          <td class="fecha-hora">
+            {{ formatReclamoDateTime(reclamo.fecha, reclamo.hora).fecha }}<br>
+            <span class="hora">{{ formatReclamoDateTime(reclamo.fecha, reclamo.hora).hora }}</span>
+          </td>
+          <td class="descripcion">{{ reclamo.comentario || 'Sin descripción' }}</td>
         </tr>
       </tbody>
     </table>
     
-    <!-- Vista para móviles -->
     <div v-else class="mobile-view">
+      <div v-if="reclamos.length === 0" class="no-reclamos-mobile">
+        Aún no has realizado ningún reclamo.
+      </div>
       <div 
         v-for="reclamo in reclamos" 
-        :key="reclamo.id" 
+        :key="reclamo.idReclamo" 
         class="reclamo-card"
-        :class="{ 'expandida': reclamoExpandido === reclamo.id }"
+        :class="{ 'expandida': reclamoExpandido === reclamo.idReclamo }"
       >
-        <div class="card-header" @click="toggleExpandido(reclamo.id)">
+        <div class="card-header" @click="toggleExpandido(reclamo.idReclamo)">
           <div class="info-principal">
-            <span class="numero">#{{ reclamo.id }}</span>
+            <span class="numero">#{{ reclamo.idReclamo }}</span>
             <div class="fecha-hora">
-              <span class="fecha">{{ reclamo.fecha }}</span>
-              <span class="hora">{{ reclamo.hora }}</span>
+              <span class="fecha">{{ formatReclamoDateTime(reclamo.fecha, reclamo.hora).fecha }}</span>
+              <span class="hora">{{ formatReclamoDateTime(reclamo.fecha, reclamo.hora).hora }}</span>
             </div>
           </div>
           
           <div class="expand-icon">
-            <i :class="reclamoExpandido === reclamo.id ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
+            <i :class="reclamoExpandido === reclamo.idReclamo ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
           </div>
         </div>
         
         <transition name="slide">
-          <div v-if="reclamoExpandido === reclamo.id" class="card-details">
+          <div v-if="reclamoExpandido === reclamo.idReclamo" class="card-details">
             <div class="detalle-descripcion">
               <h4>Descripción:</h4>
-              <p>{{ reclamo.descripcion || 'Sin descripción' }}</p>
+              <p>{{ reclamo.comentario || 'Sin descripción' }}</p>
             </div>
           </div>
         </transition>
@@ -57,11 +63,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
 
+
+// Ferchu
+import { defineProps } from 'vue';
+// import { formatDateTimeNative } from '@/utils/formatters';
+import { formatReclamoDateTime } from '@/utils/formatters';
 const props = defineProps({
-  reclamos: Array
-})
+  reclamos: {
+    type: Array,
+    required: true,
+  },
+});
+
+
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const isMobile = ref(false)
 const reclamoExpandido = ref(null)
@@ -132,6 +148,7 @@ td {
 
 .fecha-hora {
   font-weight: 500;
+  min-width: 170px;
 }
 
 .hora {

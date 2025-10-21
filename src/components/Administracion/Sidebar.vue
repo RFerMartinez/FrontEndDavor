@@ -22,15 +22,28 @@
 </template>
 
 <script setup>
-const props = defineProps({
-  nombre: String,
-  apellido: String
-})
 
-const emit = defineEmits(['logout'])
+import { ref, onMounted } from 'vue';
+// 1. Importa la función para obtener los datos del usuario
+import { getUser } from '@/api/storage/userStorage';
+
+const emit = defineEmits(['logout']);
+
+// 2. Crea variables reactivas para el nombre y el apellido
+const nombre = ref('');
+const apellido = ref('');
+
+// 3. Cuando el componente se monta, carga los datos del usuario
+onMounted(() => {
+  const usuario = getUser();
+  if (usuario) {
+    nombre.value = usuario.nombre;
+    apellido.value = usuario.apellido;
+  }
+});
 
 function cerrarSesion() {
-  emit('logout')
+  emit('logout');
 }
 </script>
 

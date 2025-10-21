@@ -38,13 +38,18 @@ const descripcion = ref('')
 const guardar = () => {
   if (!descripcion.value.trim()) return
   
-  const nuevoReclamo = {
-    id: Math.floor(Math.random() * 900) + 100,
-    fecha: new Date().toLocaleDateString('es-AR'),
-    hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
-    descripcion: descripcion.value
-  }
-  emit('guardar', nuevoReclamo)
+  // const nuevoReclamo = {
+  //   id: Math.floor(Math.random() * 900) + 100,
+  //   fecha: new Date().toLocaleDateString('es-AR'),
+  //   hora: new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+  //   descripcion: descripcion.value
+  // }
+  // emit('guardar', nuevoReclamo)
+
+  // Ahora solo emitimos el texto de la descripción
+  emit('guardar', descripcion.value);
+
+  // Limpiamos el campo después de emitir
   descripcion.value = ''
 }
 

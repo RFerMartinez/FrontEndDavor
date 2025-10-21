@@ -74,16 +74,11 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ListaReclamos from './ListaReclamos.vue'
 import NuevoReclamo from './NuevoReclamo.vue'
 
-const reclamos = ref([
-  { id: 234, fecha: '16/04/2025', hora: '21:32:00', descripcion: 'Aca iría todo el texto del reclamo para que se muestre en la tabla' },
-  { id: 244, fecha: '02/06/2025', hora: '14:45:00', descripcion: 'Ejemplo de reclamo con texto más largo para probar el desplegable en dispositivos móviles' },
-  { id: 245, fecha: '03/06/2025', hora: '10:15:00', descripcion: 'Problema con el servicio de agua caliente en los vestuarios' },
-  { id: 246, fecha: '04/06/2025', hora: '16:30:00', descripcion: 'Ruidos molestos en el gimnasio durante la noche' },
-  { id: 247, fecha: '05/06/2025', hora: '09:00:00', descripcion: 'Máquina de cardio fuera de servicio' },
-  { id: 248, fecha: '06/06/2025', hora: '18:45:00', descripcion: 'Falta de limpieza en los vestuarios' },
-  { id: 249, fecha: '07/06/2025', hora: '12:00:00', descripcion: 'Aire acondicionado no funciona correctamente' },
-  { id: 250, fecha: '08/06/2025', hora: '19:30:00', descripcion: 'Problema con la reserva de clases particulares' }
-])
+// servicios (ferchu)
+import { obtenerReclamos, crearReclamo } from '@/api/services/reclamosService';
+
+const reclamos = ref([])
+const cargando = ref(true); // <-- estado de carga
 
 const mostrarFormulario = ref(false)
 const paginaActual = ref(1)
@@ -131,14 +126,22 @@ const checkIsMobile = () => {
   elementosPorPagina.value = isMobile.value ? 5 : 10
 }
 
-const agregarReclamo = (nuevoReclamo) => {
-  reclamos.value.unshift({
-    id: Math.max(...reclamos.value.map(r => r.id), 0) + 1,
-    ...nuevoReclamo
-  })
-  mostrarFormulario.value = false
-  paginaActual.value = 1 // Volver a la primera página
-}
+// --- Método para agregar el reclamo usando la API ---
+const agregarReclamo = async (descripcionReclamo) => {
+  try {
+    // Llama al servicio para crear el reclamo en el backend
+    const nuevoReclamo = await crearReclamo(descripcionReclamo);
+    
+    // Agrega el nuevo reclamo (devuelto por la API) al inicio de la lista
+    reclamos.value.unshift(nuevoReclamo);
+    
+    mostrarFormulario.value = false;
+    paginaActual.value = 1; // Volver a la primera página
+  } catch (error) {
+    // Aquí podrías mostrar un mensaje de error al usuario
+    alert('No se pudo guardar el reclamo. Inténtalo de nuevo.');
+  }
+};
 
 const cambiarPagina = (nuevaPagina) => {
   if (nuevaPagina !== '...' && nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
@@ -150,10 +153,15 @@ const cambiarPagina = (nuevaPagina) => {
   }
 }
 
-onMounted(() => {
-  checkIsMobile()
-  window.addEventListener('resize', checkIsMobile)
-})
+// Cargar reclamos desde la API al montar el componente ---
+onMounted(async () => {
+  checkIsMobile();
+  window.addEventListener('resize', checkIsMobile);
+  
+  cargando.value = true;
+  reclamos.value = await obtenerReclamos();
+  cargando.value = false;
+});
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkIsMobile)
