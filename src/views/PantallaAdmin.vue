@@ -107,6 +107,10 @@
 </template>
 
 <script setup>
+// Imports ferchu :)
+import { useRouter } from 'vue-router'; // Importa useRouter
+import { logout } from '@/api/services/authService'; // Importa la función de logout
+
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 // Tus imports originales (SIN CAMBIOS)
 import Background from '@/components/Administracion/Background.vue'
@@ -123,6 +127,20 @@ import Personas from '@/components/Administracion/Admin/Personas.vue'
 import IngresoPersona from '@/components/Administracion/Admin/IngresoPersona.vue'
 // *****************************************************************************************
 
+
+
+
+// FER ------------------------------
+const router = useRouter(); // Obtén la instancia del router
+const cerrarSesion = () => {
+  logout(); // Llama a la función de logout que limpia el localStorage
+  router.push('/'); // Redirige al login
+};
+// Fin Fer ---------------------------
+
+
+
+
 // Tus refs originales (SIN CAMBIOS)
 const usuario = { nombre: 'Beto', apellido: 'Cristoff' };
 const vistaActiva = ref('informacion'); // O la que prefieras como inicial
@@ -137,7 +155,6 @@ const datosSecundarios = ref(null); // Guarda el alumno o la persona
 
 // Tus funciones originales (SIN CAMBIOS)
 const checkIsMobile = () => { isMobile.value = window.innerWidth <= 768; };
-const cerrarSesion = () => { console.log('Cerrando sesión...'); };
 
 const cambiarVista = (vista) => {
   vistaActiva.value = vista

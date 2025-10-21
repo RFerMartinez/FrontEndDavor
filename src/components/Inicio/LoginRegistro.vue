@@ -29,6 +29,7 @@
       <form class="auth-form" @submit.prevent="iniciarSesion">
         <div class="form-group">
           <input 
+            v-model="loginData.username"
             type="text" 
             placeholder=" "
             class="form-input"
@@ -41,6 +42,7 @@
 
         <div class="form-group">
           <input 
+            v-model="loginData.password"
             type="password" 
             placeholder=" "
             class="form-input"
@@ -51,7 +53,9 @@
           <div class="input-underline"></div>
         </div>
 
-        <button type="submit" class="auth-btn primary">
+        <div v-if="loginError" class="error-message">{{ loginError }}</div>
+
+        <button type="submit" class="auth-btn primary" :disabled="loading">
           <span>INICIAR SESIÓN</span>
           <div class="btn-loader" v-if="loading"></div>
         </button>
@@ -275,12 +279,20 @@
 </template>
 
 <script>
+// servicio de login
+import { login } from '@/api/services/authService';
+
 export default {
   props: ['modo'],
   data() {
     return {
       paso: this.modo === 'registro' ? 1 : 0,
       loading: false,
+      loginData: { // Objeto para v-model
+        username: '',
+        password: ''
+      },
+      loginError: '', // Para mostrar mensajes de error
       emailError: ''
     }
   },
@@ -289,11 +301,23 @@ export default {
       this.$router.push({ path: '/login', query: { modo: m } })
     },
     async iniciarSesion() {
-      this.loading = true
-      // Simular llamada a API
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      this.loading = false
-      alert('Simulación de inicio de sesión')
+      this.loading = true;
+      this.loginError = ''; // Limpia errores previos
+      try {
+        const userData = await login(this.loginData.username, this.loginData.password);
+        
+        // Redirigir según el rol
+        if (userData.esAdmin) {
+          this.$router.push('/admin');
+        } else {
+          this.$router.push('/usuario');
+        }
+      } catch (error) {
+        // Manejar errores de la API (ej: contraseña incorrecta)
+        this.loginError = 'Usuario o contraseña incorrectos. Inténtalo de nuevo.';
+      } finally {
+        this.loading = false;
+      }
     },
     siguientePaso() {
       this.paso = 2
@@ -319,13 +343,22 @@ export default {
   },
   watch: {
     modo(nuevo) {
-      this.paso = nuevo === 'registro' ? 1 : 0
+      this.paso = nuevo === 'registro' ? 1 : 0;
+      this.loginError = ''; // Limpia errores al cambiar de modo
     }
   }
 }
 </script>
 
 <style scoped>
+.error-message {
+  color: #ff4757;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: -0.5rem;
+  margin-bottom: 0.5rem;
+}
+
 .auth-container {
   width: 100%;
   max-width: 480px;

@@ -71,6 +71,10 @@
 </template>
 
 <script setup>
+// Imports ferchu :)
+import { useRouter } from 'vue-router'; // Importa useRouter
+import { logout } from '@/api/services/authService'; // Importa la función de logout
+
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Background from '@/components/Administracion/Background.vue'
 import Sidebar from '@/components/Administracion/Sidebar.vue'
@@ -78,6 +82,19 @@ import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
 import Cuotas from '@/components/Administracion/Usuario/Cuotas.vue'
 import Reclamos from '@/components/Administracion/Usuario/Reclamos.vue'
+
+
+
+
+// FER ------------------------------
+const router = useRouter(); // Obtén la instancia del router
+const cerrarSesion = () => {
+  logout(); // Llama a la función de logout que limpia el localStorage
+  router.push('/'); // Redirige al login
+};
+// Fin Fer ---------------------------
+
+
 
 const usuario = {
   nombre: 'Juan',
@@ -93,10 +110,6 @@ const checkIsMobile = () => {
 
 const cambiarVista = (vista) => {
   vistaActiva.value = vista
-}
-
-const cerrarSesion = () => {
-  console.log('Cerrando sesión...')
 }
 
 const vistaComponente = computed(() => {
