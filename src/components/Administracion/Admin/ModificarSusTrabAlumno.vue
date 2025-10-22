@@ -81,14 +81,13 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import TablaHorarios from '../TablaHorarios.vue';
-// *** Importar los componentes hijos ***
-import ListadoSuscripciones from './ListadoSuscripciones.vue'; // Ajusta la ruta si es necesario
-import ListadoTrabajos from './ListadoTrabajos.vue';       // Ajusta la ruta si es necesario
-import ListadoNiveles from './ListadoNiveles.vue';     // <-- NUEVO: Importar ListadoNiveles
+import ListadoSuscripciones from './ListadoSuscripciones.vue';
+import ListadoTrabajos from './ListadoTrabajos.vue';
+import ListadoNiveles from './ListadoNiveles.vue';
 
 const props = defineProps({
-  alumno: Object, // Sigue siendo requerido para este modo
-  horarioAlumno: Array // Sigue siendo requerido para este modo
+  alumno: Object,
+  horarioAlumno: Array
 });
 
 const emit = defineEmits(['guardar-cambios', 'cancelar']);
@@ -97,15 +96,19 @@ const emit = defineEmits(['guardar-cambios', 'cancelar']);
 const datosModificados = ref({
   suscripcion: '',
   trabajoactual: '',
-  nivel: '' // <-- NUEVO: Añadir nivel
+  nivel: ''
 });
-const horariosModificados = ref([]);
+const horariosModificados = ref([]); // Horarios que se enviarán al guardar
 const suscripcionOriginal = ref('');
 const trabajoOriginal = ref('');
-const nivelOriginal = ref(null); // <-- NUEVO: Guardar nivel original
+const nivelOriginal = ref('');
 const mostrarConfirmacion = ref(false);
 const mostrarExito = ref(false);
 const mostrarSinCambios = ref(false);
+
+// Bandera para saber si los horarios se confirmaron DESPUÉS de cambiar la suscripción
+const horariosConfirmadosDespuesDeCambio = ref(true); // Empieza como true (válido)
+
 
 const suscripcionCambiada = computed(() => {
   return datosModificados.value.suscripcion !== suscripcionOriginal.value;
@@ -113,35 +116,56 @@ const suscripcionCambiada = computed(() => {
 
 // Computed para decidir si mostrar TablaHorarios
 const debeMostrarHorarios = computed(() => {
+  // Mostrar si cambió la suscripción Y la nueva NO es Día Libre
   return suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre';
 });
 
+// --- VALIDACIÓN FORMULARIO PADRE REVISADA ---
 const formularioValido = computed(() => {
-  // <-- MODIFICADO: Añadir chequeo de nivel -->
   const baseValido = datosModificados.value.suscripcion &&
                      datosModificados.value.trabajoactual &&
                      datosModificados.value.nivel;
 
+  if (!baseValido) return false;
+
+  // Si la nueva suscripción es Día Libre, no requiere horarios.
   if (datosModificados.value.suscripcion === 'Día Libre') {
-    return baseValido; // Nivel sigue siendo requerido
+    return true;
   }
+
+  // Si la suscripción CAMBIÓ (y no es Día Libre)...
   if (suscripcionCambiada.value) {
-    return baseValido && horariosModificados.value.length > 0;
+    // ...requiere que los horarios hayan sido confirmados DESPUÉS del cambio.
+    return horariosConfirmadosDespuesDeCambio.value;
   }
-  return baseValido; // Si no cambió suscripción, nivel sigue siendo requerido
+
+  // Si la suscripción NO cambió, el formulario base es suficiente
+  // (asumimos que los horarios originales ya eran válidos).
+  return true;
 });
+// --- FIN VALIDACIÓN ---
 
 
 const hayCambios = () => {
-  // <-- MODIFICADO: Añadir comparación de nivel -->
+  // Comparamos también si los horarios modificados son diferentes a los originales
+  // Usamos JSON.stringify para comparar arrays de objetos (simple pero efectivo aquí)
+  // Ordenamos para que el orden no afecte la comparación
+  const sortFn = (a, b) => a.dia.localeCompare(b.dia) || a.horario.localeCompare(b.horario);
+  const horariosModificadosSorted = JSON.stringify([...horariosModificados.value].sort(sortFn));
+  const horariosOriginalesSorted = JSON.stringify([...props.horarioAlumno].sort(sortFn));
+
   return datosModificados.value.suscripcion !== suscripcionOriginal.value ||
          datosModificados.value.trabajoactual !== trabajoOriginal.value ||
-         datosModificados.value.nivel !== nivelOriginal.value;
+         datosModificados.value.nivel !== nivelOriginal.value ||
+         // Considera cambio si los horarios son diferentes solo si la suscripción NO cambió
+         // Si la suscripción SÍ cambió, el cambio principal es la suscripción, y los horarios deben revalidarse.
+         (!suscripcionCambiada.value && horariosModificadosSorted !== horariosOriginalesSorted);
 };
 
-const normalizarNombreTrabajo = (nombre) => {
+
+const normalizarNombreTrabajo = (nombre) => { /* ... sin cambios ... */
   if (!nombre) return nombre;
-  const mapeoNombres = { /* ... tu mapeo ... */
+  const mapeoNombres = {
     'Musculacion': 'Musculación', 'Musculación': 'Musculación', 'Funcional': 'Funcional',
     'Mantenimiento': 'Mantenimiento', 'Rehabilitacion': 'Rehabilitación',
     'Rehabilitación': 'Rehabilitación', 'Aerobico': 'Aeróbico', 'Aeróbico': 'Aeróbico',
@@ -150,50 +174,79 @@ const normalizarNombreTrabajo = (nombre) => {
   return mapeoNombres[nombre] || nombre;
 };
 
-// Inicializar datos al montar
+
 onMounted(() => {
   if (props.alumno) {
       const trabajoNormalizado = normalizarNombreTrabajo(props.alumno.trabajoactual);
       datosModificados.value.suscripcion = props.alumno.suscripcion;
       datosModificados.value.trabajoactual = trabajoNormalizado;
-      datosModificados.value.nivel = props.alumno.nivel; // <-- NUEVO: Inicializar nivel
+      datosModificados.value.nivel = props.alumno.nivel || '';
       suscripcionOriginal.value = props.alumno.suscripcion;
       trabajoOriginal.value = trabajoNormalizado;
-      nivelOriginal.value = props.alumno.nivel; // <-- NUEVO: Guardar nivel original
+      nivelOriginal.value = props.alumno.nivel || '';
   }
   if (props.horarioAlumno) {
-      horariosModificados.value = [...props.horarioAlumno];
+      // Inicializar horariosModificados con los originales
+      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
   }
+  // Estado inicial es válido
+  horariosConfirmadosDespuesDeCambio.value = true;
 });
 
-// Actualizar horarios recibidos del hijo
+// --- WATCH MODIFICADO: AHORA RESETEA LOS HORARIOS ---
+watch(() => datosModificados.value.suscripcion, (nuevaSuscripcion, viejaSuscripcion) => {
+  // Si cambia respecto al original Y no es la carga inicial
+  if (viejaSuscripcion !== undefined && nuevaSuscripcion !== suscripcionOriginal.value) {
+    console.log('Suscripción cambiada -> Reseteando horarios y requiriendo confirmación.');
+    horariosConfirmadosDespuesDeCambio.value = false;
+    // VACIAR los horarios para forzar nueva selección en TablaHorarios
+    horariosModificados.value = [];
+  } else if (nuevaSuscripcion === suscripcionOriginal.value && viejaSuscripcion !== undefined) {
+      // Si vuelve a la original, también requiere confirmar (podría haber tocado horarios antes)
+      // y reseteamos a los horarios originales de la prop para empezar desde ahí.
+      console.log('Suscripción volvió a la original -> Reseteando a horarios originales y requiriendo confirmación.')
+      horariosConfirmadosDespuesDeCambio.value = false;
+      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno)); // Volver a los originales
+  }
+});
+// --- FIN WATCH ---
+
+
 const actualizarHorarios = (nuevosHorarios) => {
-  console.log('Horarios actualizados desde TablaHorarios:', nuevosHorarios);
-  horariosModificados.value = nuevosHorarios;
+  console.log('Horarios actualizados y confirmados desde TablaHorarios:', nuevosHorarios);
+  horariosModificados.value = JSON.parse(JSON.stringify(nuevosHorarios));
+  // Marcar como confirmados porque se presionó "Guardar" en TablaHorarios
+  // Esto habilitará el botón "Guardar Cambios" del padre si el resto es válido
+  horariosConfirmadosDespuesDeCambio.value = true;
 };
 
-// Lógica de Modales y Guardado
+
+// --- CONFIRMAR GUARDAR REVISADO ---
 const confirmarGuardar = () => {
+  // 1. ¿Hubo cambios?
   if (!hayCambios()) {
     mostrarSinCambios.value = true;
     return;
   }
-  // <-- MODIFICADO: Añadir chequeo específico de nivel -->
+  // 2. ¿El formulario es válido AHORA?
   if (!formularioValido.value) {
-    if (!datosModificados.value.nivel) {
-        alert('Por favor seleccione un nivel');
-    } else if (suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre' && horariosModificados.value.length === 0) {
-      alert('Debe configurar los horarios para la nueva suscripción');
+    // Dar mensaje específico si el problema son los horarios no confirmados
+    if (suscripcionCambiada.value && !horariosConfirmadosDespuesDeCambio.value && datosModificados.value.suscripcion !== 'Día Libre') {
+         alert('La suscripción cambió. Debes seleccionar y guardar los nuevos horarios usando el botón "Guardar Cambios" dentro de la tabla de horarios.');
+    } else if (!datosModificados.value.suscripcion || !datosModificados.value.trabajoactual || !datosModificados.value.nivel) {
+         alert('Por favor, completa los campos de Suscripción, Trabajo Actual y Nivel.');
     } else {
-      // Mensaje genérico si falta suscripción o trabajo
-      alert('Por favor complete todos los campos requeridos (Suscripción, Trabajo y Nivel)');
+         // Otro caso (poco probable si la lógica es correcta)
+         alert('El formulario no es válido. Revisa los campos requeridos.');
     }
-    return;
+    return; // Detener si no es válido
   }
+  // 3. Si hubo cambios y es válido -> Mostrar confirmación
   mostrarConfirmacion.value = true;
 };
+// --- FIN CONFIRMAR GUARDAR ---
 
-const guardarCambios = () => {
+const guardarCambios = () => { /* ... sin cambios ... */
   mostrarConfirmacion.value = false;
   try {
     const horariosAEnviar = datosModificados.value.suscripcion === 'Día Libre' ? [] : horariosModificados.value;
@@ -201,7 +254,7 @@ const guardarCambios = () => {
       alumno: {
         suscripcion: datosModificados.value.suscripcion,
         trabajoactual: datosModificados.value.trabajoactual,
-        nivel: datosModificados.value.nivel // <-- NUEVO: Enviar nivel
+        nivel: datosModificados.value.nivel
       },
       horarios: horariosAEnviar
     };
@@ -214,6 +267,7 @@ const guardarCambios = () => {
   }
 };
 
+// Funciones modales (sin cambios)
 const cancelarGuardar = () => { mostrarConfirmacion.value = false; };
 const cerrarExito = () => { mostrarExito.value = false; };
 const volverAEditar = () => { mostrarSinCambios.value = false; };
