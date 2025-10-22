@@ -82,10 +82,10 @@ const emit = defineEmits(['verIngreso'])
 
 // --- Lógica de datos, filtros y paginación ---
 const personas = ref([
-  { id: 1, dni: "11223344", nombre: "Laura", apellido: "Martinez", email: "laura@email.com", telefono: "333-444", provincia: "Chaco", localidad: "Resistencia", Calle: "Av Italia", nro: "100" },
-  { id: 2, dni: "55667788", nombre: "Roberto", apellido: "Sanchez", email: "roberto@email.com", telefono: "555-666", provincia: "Chaco", localidad: "Barranqueras", Calle: "Av España", nro: "200" },
-  { id: 3, dni: "99887766", nombre: "Sofia", apellido: "Gomez", email: "sofia@email.com", telefono: "999-888", provincia: "Chaco", localidad: "Fontana", Calle: "Av San Martin", nro: "300" },
-  { id: 4, dni: "12121212", nombre: "Esteban", apellido: "Quito", email: "esteban@email.com", telefono: "121-212", provincia: "Chaco", localidad: "Vilelas", Calle: "Av Paraguay", nro: "400" },
+  { dni: "11223344", nombre: "Laura", apellido: "Martinez" },
+  { dni: "55667788", nombre: "Roberto", apellido: "Sanchez" },
+  { dni: "99887766", nombre: "Sofia", apellido: "Gomez"},
+  { dni: "12121212", nombre: "Esteban", apellido: "Quito"},
 ].sort((a, b) => (a.apellido || '').localeCompare(b.apellido || '')));
 
 const paginaActual = ref(1);
