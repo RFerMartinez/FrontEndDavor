@@ -11,10 +11,9 @@
 
       <div class="contenido-modificacion">
         <form @submit.prevent="confirmarGuardar" class="formulario-modificacion">
-          <!-- Información Personal -->
           <div class="seccion-formulario">
             <h3 class="titulo-seccion-formulario">Información Personal</h3>
-            <div class="campos-grid">
+            <div class="campos-grid grid-personal">
               <div class="campo">
                 <label for="nombre" class="etiqueta-campo">Nombre:</label>
                 <input type="text" id="nombre" v-model="datosModificados.nombre" class="input-campo" required>
@@ -35,21 +34,47 @@
                 <label for="telefono" class="etiqueta-campo">Teléfono:</label>
                 <input type="tel" id="telefono" v-model="datosModificados.telefono" class="input-campo" required>
               </div>
+              
+              <div class="campo">
+                <label for="sexo" class="etiqueta-campo">Sexo:</label>
+                <select id="sexo" v-model="datosModificados.sexo" class="input-campo select-custom" required>
+                  <option value="" disabled>Seleccione sexo</option>
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                </select>
+              </div>
+              
             </div>
           </div>
 
-          <!-- Dirección -->
           <div class="seccion-formulario">
             <h3 class="titulo-seccion-formulario">Dirección</h3>
-            <div class="campos-grid">
+            <div class="campos-grid grid-direccion">
+              
               <div class="campo">
                 <label for="provincia" class="etiqueta-campo">Provincia:</label>
-                <input type="text" id="provincia" v-model="datosModificados.provincia" class="input-campo" required>
+                <select id="provincia" v-model="datosModificados.provincia" class="input-campo select-custom" required>
+                  <option value="" disabled>Seleccione provincia</option>
+                  <option>Buenos Aires</option>
+                  <option>Córdoba</option>
+                  <option>Santa Fe</option>
+                  <option>Mendoza</option>
+                  <option>Chaco</option> 
+                </select>
               </div>
+              
               <div class="campo">
                 <label for="localidad" class="etiqueta-campo">Localidad:</label>
-                <input type="text" id="localidad" v-model="datosModificados.localidad" class="input-campo" required>
+                <select id="localidad" v-model="datosModificados.localidad" class="input-campo select-custom" required>
+                  <option value="" disabled>Seleccione localidad</option>
+                  <option>La Plata</option>
+                  <option>Capital Federal</option>
+                  <option>Mar del Plata</option>
+                  <option>Bahía Blanca</option>
+                  <option>Las Breñas</option> 
+                </select>
               </div>
+              
               <div class="campo">
                 <label for="calle" class="etiqueta-campo">Calle:</label>
                 <input type="text" id="calle" v-model="datosModificados.Calle" class="input-campo" required>
@@ -61,7 +86,6 @@
             </div>
           </div>
 
-          <!-- Botones de acción -->
           <div class="botones-formulario">
             <button type="button" class="btn-cancelar" @click="cancelar">
               <i class="fas fa-times"></i>
@@ -76,7 +100,6 @@
       </div>
     </div>
 
-    <!-- Modal de confirmación -->
     <div v-if="mostrarConfirmacion" class="modal-overlay">
       <div class="modal-confirmacion">
         <div class="modal-header">
@@ -97,7 +120,6 @@
       </div>
     </div>
 
-    <!-- Modal de éxito -->
     <div v-if="mostrarExito" class="modal-overlay">
       <div class="modal-exito">
         <div class="modal-header">
@@ -115,7 +137,6 @@
       </div>
     </div>
 
-    <!-- Modal de sin cambios -->
     <div v-if="mostrarSinCambios" class="modal-overlay">
       <div class="modal-sin-cambios">
         <div class="modal-header">
@@ -154,18 +175,21 @@ const mostrarExito = ref(false)
 const mostrarSinCambios = ref(false)
 
 onMounted(() => {
-  // Guardar los datos originales para comparar
   datosOriginales.value = { ...props.alumno }
-  // Copiar los datos del alumno para modificarlos
   datosModificados.value = { ...props.alumno }
 })
 
-// Función para verificar si hay cambios
 const hayCambios = () => {
-  const campos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'provincia', 'localidad', 'Calle', 'nro']
+  const campos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'sexo', 'provincia', 'localidad', 'Calle', 'nro']
   
   for (const campo of campos) {
-    if (datosModificados.value[campo] !== datosOriginales.value[campo]) {
+    const originalExists = Object.prototype.hasOwnProperty.call(datosOriginales.value, campo);
+    const modificadoExists = Object.prototype.hasOwnProperty.call(datosModificados.value, campo);
+
+    if (originalExists !== modificadoExists) {
+      return true;
+    }
+    if (originalExists && modificadoExists && datosModificados.value[campo] !== datosOriginales.value[campo]) {
       return true
     }
   }
@@ -173,12 +197,10 @@ const hayCambios = () => {
 }
 
 const confirmarGuardar = () => {
-  // Validar que el formulario esté completo
   if (!validarFormulario()) {
     return
   }
   
-  // Verificar si hay cambios
   if (!hayCambios()) {
     mostrarSinCambios.value = true
     return
@@ -188,16 +210,18 @@ const confirmarGuardar = () => {
 }
 
 const validarFormulario = () => {
-  const camposRequeridos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'provincia', 'localidad', 'Calle', 'nro']
+  const camposRequeridos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'sexo', 'provincia', 'localidad', 'Calle', 'nro']
   
   for (const campo of camposRequeridos) {
-    if (!datosModificados.value[campo] || datosModificados.value[campo].toString().trim() === '') {
+    if (!Object.prototype.hasOwnProperty.call(datosModificados.value, campo) || 
+        datosModificados.value[campo] === null || 
+        datosModificados.value[campo] === undefined || 
+        datosModificados.value[campo].toString().trim() === '') {
       alert(`El campo ${campo} es requerido`)
       return false
     }
   }
   
-  // Validar formato de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!emailRegex.test(datosModificados.value.email)) {
     alert('Por favor ingresa un email válido')
@@ -208,17 +232,11 @@ const validarFormulario = () => {
 }
 
 const guardarCambios = () => {
-  // Cerrar modal de confirmación
   mostrarConfirmacion.value = false
   
   try {
-    // Simular guardado (aquí iría la llamada a la API)
     console.log('Guardando cambios:', datosModificados.value)
-    
-    // Emitir los datos modificados al componente padre
     emit('guardar-cambios', datosModificados.value)
-    
-    // Mostrar mensaje de éxito
     mostrarExito.value = true
     
   } catch (error) {
@@ -233,18 +251,14 @@ const cancelarGuardar = () => {
 
 const cerrarExito = () => {
   mostrarExito.value = false
-  // El componente se cerrará automáticamente porque el padre maneja el estado
 }
 
-// Funciones para el modal de sin cambios
 const volverAEditar = () => {
   mostrarSinCambios.value = false
-  // El usuario sigue en el formulario para editar
 }
 
 const cancelarSinCambios = () => {
   mostrarSinCambios.value = false
-  // Cerrar el componente y volver a InfoAlumno
   emit('cancelar')
 }
 
@@ -309,8 +323,15 @@ const cancelar = () => {
 
 .campos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1.5rem;
+}
+
+.campos-grid.grid-personal {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.campos-grid.grid-direccion {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .campo {
@@ -331,11 +352,32 @@ const cancelar = () => {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
+  background-color: white; 
+  color: #2c3e50;
 }
 
 .input-campo:focus {
   outline: none;
   border-color: #2196F3;
+}
+
+.input-campo.select-custom {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 16px;
+  
+  padding-right: 3rem; 
+  cursor: pointer;
+}
+
+.input-campo.select-custom option {
+  background: #ffffff;
+  color: #1a1a1a;
 }
 
 .botones-formulario {
@@ -381,7 +423,6 @@ const cancelar = () => {
   transform: translateY(-1px);
 }
 
-/* Estilos para los modales */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -395,6 +436,7 @@ const cancelar = () => {
   z-index: 1000;
 }
 
+/* V V V ESTILOS MODAL MODIFICADOS V V V */
 .modal-confirmacion, .modal-exito, .modal-sin-cambios {
   background: white;
   border-radius: 15px;
@@ -403,6 +445,10 @@ const cancelar = () => {
   width: 90%;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   animation: modalAppear 0.3s ease;
+  /* Nuevos estilos para centrar */
+  display: flex;
+  flex-direction: column;
+  text-align: center; 
 }
 
 .modal-header {
@@ -410,7 +456,9 @@ const cancelar = () => {
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  justify-content: center; /* Centra icono y título */
 }
+/* ^ ^ ^ ESTILOS MODAL MODIFICADOS ^ ^ ^ */
 
 .modal-header i {
   font-size: 2rem;
@@ -443,11 +491,14 @@ const cancelar = () => {
   color: #495057;
 }
 
+/* V V V ESTILOS MODAL MODIFICADOS V V V */
 .modal-footer {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end;
+  justify-content: center; /* Centra los botones */
+  flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si no caben */
 }
+/* ^ ^ ^ ESTILOS MODAL MODIFICADOS ^ ^ ^ */
 
 .btn-modal {
   padding: 0.8rem 1.5rem;
@@ -511,8 +562,10 @@ const cancelar = () => {
     padding: 1rem;
   }
   
-  .campos-grid {
-    grid-template-columns: 1fr;
+  .campos-grid, 
+  .campos-grid.grid-personal, 
+  .campos-grid.grid-direccion {
+    grid-template-columns: 1fr; 
   }
   
   .botones-formulario {
@@ -520,7 +573,7 @@ const cancelar = () => {
   }
   
   .modal-footer {
-    flex-direction: column;
+    flex-direction: column; /* Apila botones en pantallas chicas */
   }
   
   .modal-confirmacion, .modal-exito, .modal-sin-cambios {

@@ -30,3 +30,17 @@ git fetch
 git pull origin main
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+## Utilizacion del git ahora que fer se puso homosexual 
+## Antes de trabajar o atraer los cambios
+git fetch origin main
+git pull origin main
+
+## levantar api con visual
+D:\UNIVERSIDAD\Proyecto Diseño\gym_Abito_API\venv\Scripts>activate
+ D:\UNIVERSIDAD\Proyecto Diseño\gym_Abito_API\src
+ en esta carpeta hacer:
+ py main.py
+
+ ## Para subir cambios al git
+ como siempre

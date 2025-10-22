@@ -1,6 +1,5 @@
 <template>
   <div class="auth-container">
-    <!-- Header del formulario -->
     <div class="auth-header">
       <div class="brand-logo">
         <span class="brand-text">GIMNASIO</span>
@@ -24,7 +23,6 @@
       </div>
     </div>
 
-    <!-- INICIAR SESIÓN -->
     <div class="form-wrapper" v-if="modo !== 'registro'">
       <form class="auth-form" @submit.prevent="iniciarSesion">
         <div class="form-group">
@@ -43,7 +41,7 @@
         <div class="form-group">
           <input 
             v-model="loginData.password"
-            type="password" 
+            :type="passwordFieldType" 
             placeholder=" "
             class="form-input"
             required
@@ -51,8 +49,18 @@
           >
           <label class="form-label">Contraseña</label>
           <div class="input-underline"></div>
+          
+          <button 
+            type="button" 
+            @click="togglePasswordVisibility" 
+            class="password-toggle-btn"
+            aria-label="Mostrar u ocultar contraseña"
+          >
+            <svg v-if="passwordFieldType === 'password'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
         </div>
-
+        
         <div v-if="loginError" class="error-message">{{ loginError }}</div>
 
         <button type="submit" class="auth-btn primary" :disabled="loading">
@@ -68,7 +76,6 @@
       </form>
     </div>
 
-    <!-- REGISTRO PASO 1 -->
     <div class="form-wrapper" v-else-if="paso === 1">
       <form class="auth-form" @submit.prevent="siguientePaso">
         <div class="step-indicator">
@@ -79,6 +86,7 @@
 
         <div class="form-group">
           <input 
+            v-model="registerData.email"
             type="email" 
             placeholder=" "
             class="form-input"
@@ -94,6 +102,7 @@
 
         <div class="form-group">
           <input 
+            v-model="registerData.username"
             type="text" 
             placeholder=" "
             class="form-input"
@@ -106,15 +115,52 @@
 
         <div class="form-group">
           <input 
-            type="password" 
+            v-model="registerData.password"
+            :type="registerPasswordFieldType" 
             placeholder=" "
             class="form-input"
             required
             autocomplete="new-password"
+            @input="limpiarErrorPassword"
           >
           <label class="form-label">Contraseña</label>
           <div class="input-underline"></div>
+          <button 
+            type="button" 
+            @click="toggleRegisterPasswordVisibility" 
+            class="password-toggle-btn"
+            aria-label="Mostrar u ocultar contraseña"
+          >
+            <svg v-if="registerPasswordFieldType === 'password'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
         </div>
+        
+        <div class="form-group">
+          <input 
+            v-model="registerData.confirmPassword"
+            :type="registerConfirmPasswordFieldType" 
+            placeholder=" "
+            class="form-input"
+            required
+            autocomplete="new-password"
+            @blur="validarContraseñas"
+            @input="limpiarErrorPassword"
+          >
+          <label class="form-label">Confirmar Contraseña</label>
+          <div class="input-underline"></div>
+          <button 
+            type="button" 
+            @click="toggleRegisterConfirmPasswordVisibility" 
+            class="password-toggle-btn"
+            aria-label="Mostrar u ocultar contraseña"
+          >
+            <svg v-if="registerConfirmPasswordFieldType === 'password'" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+          </button>
+        </div>
+        
+        <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
 
         <button type="submit" class="auth-btn primary">
           <span>CONTINUAR</span>
@@ -128,7 +174,6 @@
       </form>
     </div>
 
-    <!-- REGISTRO PASO 2 -->
     <div class="form-wrapper" v-else-if="paso === 2">
       <form class="auth-form" @submit.prevent="mostrarExito">
         <div class="step-indicator">
@@ -184,6 +229,16 @@
             autocomplete="tel"
           >
           <label class="form-label">Teléfono</label>
+            <div class="input-underline"></div>
+        </div>
+
+        <div class="form-group">
+            <select class="form-input select-custom" required>
+              <option value="" disabled selected>Seleccione sexo</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+            </select>
+            <label class="form-label">Sexo</label>
             <div class="input-underline"></div>
         </div>
 
@@ -250,7 +305,6 @@
       </form>
     </div>
 
-    <!-- MENSAJE DE ÉXITO -->
     <div class="success-wrapper" v-else>
       <div class="success-content">
         <div class="checkmark-animation">
@@ -293,7 +347,20 @@ export default {
         password: ''
       },
       loginError: '', // Para mostrar mensajes de error
-      emailError: ''
+      emailError: '',
+      passwordFieldType: 'password', // Para login
+      
+      // --- DATOS DE REGISTRO MODIFICADOS ---
+      registerData: {
+        email: '', // <-- NUEVO
+        username: '', // <-- NUEVO
+        password: '',
+        confirmPassword: ''
+      },
+      registerPasswordFieldType: 'password',
+      registerConfirmPasswordFieldType: 'password',
+      passwordError: '' // Error de contraseñas no coinciden
+      // --- FIN MODIFICACIÓN ---
     }
   },
   methods: {
@@ -319,14 +386,20 @@ export default {
         this.loading = false;
       }
     },
+    
     siguientePaso() {
-      this.paso = 2
+      // Validar email aquí también si es necesario, o en el blur es suficiente
+      this.validarContraseñas(); // Validar antes de continuar
+      if (!this.passwordError && !this.emailError) { // Asegurarse de no avanzar con errores
+        this.paso = 2;
+      }
     },
     mostrarExito() {
       this.paso = 3
     },
     validarEmail(event) {
-      const email = event.target.value;
+      // Usar el v-model en lugar de event.target.value
+      const email = this.registerData.email;
       if (email && !this.esEmailValido(email)) {
         this.emailError = 'Por favor ingresa un correo electrónico válido';
       } else {
@@ -339,12 +412,36 @@ export default {
     esEmailValido(email) {
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return regex.test(email);
+    },
+    
+    togglePasswordVisibility() {
+      this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+    },
+
+    toggleRegisterPasswordVisibility() {
+      this.registerPasswordFieldType = this.registerPasswordFieldType === 'password' ? 'text' : 'password';
+    },
+    toggleRegisterConfirmPasswordVisibility() {
+      this.registerConfirmPasswordFieldType = this.registerConfirmPasswordFieldType === 'password' ? 'text' : 'password';
+    },
+    validarContraseñas() {
+      if (this.registerData.password && this.registerData.confirmPassword && this.registerData.password !== this.registerData.confirmPassword) {
+        this.passwordError = 'Las contraseñas no coinciden';
+      } else {
+        this.passwordError = '';
+      }
+    },
+    limpiarErrorPassword() {
+       this.passwordError = '';
     }
   },
   watch: {
     modo(nuevo) {
       this.paso = nuevo === 'registro' ? 1 : 0;
       this.loginError = ''; // Limpia errores al cambiar de modo
+      this.passwordError = ''; // Limpia error de contraseña también
+      this.emailError = '';
+      // No limpiar registerData para que persista
     }
   }
 }
@@ -435,6 +532,14 @@ export default {
   gap: 1.5rem;
 }
 
+.auth-form[gap="1.5rem"] .form-group {
+    margin-bottom: 0; 
+}
+.auth-form .error-message {
+    margin-top: -0.5rem; 
+    margin-bottom: 0;
+}
+
 .step-indicator {
   display: flex;
   align-items: center;
@@ -502,13 +607,12 @@ export default {
   font-size: 1rem;
   font-family: 'Inter', sans-serif;
   transition: all 0.3s ease;
-  /* Prevenir estilos de autocomplete de navegadores */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 }
 
-/* Estilos específicos para los campos select */
+/* V--- ESTILOS DE SELECT MODIFICADOS ---V */
 .select-custom {
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -516,13 +620,23 @@ export default {
   background-size: 16px;
   padding-right: 30px;
   cursor: pointer;
+  
+  /* NUEVO: Oculta el texto inicial (ej: "Seleccione...") */
+  color: transparent; 
+}
+
+/* NUEVO: Muestra el texto en blanco SÓLO cuando se selecciona una opción válida */
+.select-custom:valid {
+  color: #ffffff;
 }
 
 .select-custom option {
   background: #1a1a1a;
   color: white;
-  padding: 8px;
+  /* padding: 8px; (eliminado, no funciona bien) */
 }
+/* ^--- FIN ESTILOS DE SELECT ---^ */
+
 
 .select-custom:focus {
   outline: none;
@@ -535,7 +649,6 @@ export default {
   color: #e50914;
 }
 
-/* Eliminar el fondo amarillo del autocomplete */
 .form-input:-webkit-autofill,
 .form-input:-webkit-autofill:hover,
 .form-input:-webkit-autofill:focus {
@@ -554,6 +667,11 @@ export default {
 .form-input:not(:placeholder-shown) + .form-label {
   transform: translateY(-1.5rem) scale(0.85);
   color: #e50914;
+}
+
+.form-input.select-custom:required:valid + .form-label {
+    transform: translateY(-1.5rem) scale(0.85);
+    color: #e50914;
 }
 
 .form-label {
@@ -581,13 +699,47 @@ export default {
   width: 100%;
 }
 
-.error-message {
+.password-toggle-btn {
+  position: absolute;
+  top: 1rem; 
+  right: 0;
+  transform: translateY(0);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s ease;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+}
+
+.password-toggle-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.password-toggle-btn:hover {
+  color: #e50914; 
+}
+
+.form-group + .error-message {
+    margin-top: -1rem; 
+    margin-bottom: 0.5rem;
+}
+.form-group .error-message { 
   color: #ff4757;
   font-size: 0.8rem;
   margin-top: 0.5rem;
   font-family: 'Inter', sans-serif;
   animation: slideDown 0.3s ease;
 }
+
 
 .auth-btn {
   position: relative;

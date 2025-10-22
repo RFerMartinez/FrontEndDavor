@@ -4,10 +4,9 @@
       <div class="header-modificacion">
         <h2 class="titulo-modificacion">
           <i class="fas fa-sync-alt"></i>
-          Modificar Suscripción y Trabajo
-        </h2>
-        <p class="subtitulo-modificacion">Editando suscripción de {{ alumno.nombre }} {{ alumno.apellido }}</p>
-      </div>
+          Modificar Suscripción, Trabajo y Nivel
+          </h2>
+        <p class="subtitulo-modificacion">Editando información de {{ alumno.nombre }} {{ alumno.apellido }}</p> </div>
 
       <div class="contenido-modificacion">
         <div class="formulario-modificacion">
@@ -21,6 +20,10 @@
             <ListadoTrabajos v-model="datosModificados.trabajoactual" />
           </div>
 
+          <div class="seccion-formulario">
+            <h3 class="titulo-seccion-formulario">Nivel</h3>
+            <ListadoNiveles v-model="datosModificados.nivel" />
+          </div>
           <div class="seccion-formulario" v-show="debeMostrarHorarios">
             <h3 class="titulo-seccion-formulario">Horarios</h3>
             <p v-if="suscripcionCambiada" class="advertencia-horarios">
@@ -54,22 +57,22 @@
     <div v-if="mostrarConfirmacion" class="modal-overlay">
       <div class="modal-confirmacion">
          <div class="modal-header"> <i class="fas fa-exclamation-triangle"></i> <h3>Confirmar Cambios</h3> </div>
-         <div class="modal-body"> <p>¿Estás seguro que deseas actualizar la suscripción y trabajo del alumno?</p> </div>
+         <div class="modal-body"> <p>¿Estás seguro que deseas actualizar la suscripción, trabajo y nivel del alumno?</p> </div>
          <div class="modal-footer"> <button class="btn-modal btn-cancelar-modal" @click="cancelarGuardar"> No, Cancelar </button> <button class="btn-modal btn-confirmar-modal" @click="guardarCambios"> Sí, Guardar Cambios </button> </div>
       </div>
     </div>
     <div v-if="mostrarExito" class="modal-overlay">
       <div class="modal-exito">
          <div class="modal-header"> <i class="fas fa-check-circle"></i> <h3>¡Éxito!</h3> </div>
-         <div class="modal-body"> <p>Suscripción y trabajo actualizados correctamente</p> </div>
+         <div class="modal-body"> <p>Suscripción, trabajo y nivel actualizados correctamente</p> </div>
          <div class="modal-footer"> <button class="btn-modal btn-aceptar-modal" @click="cerrarExito"> Aceptar </button> </div>
       </div>
     </div>
     <div v-if="mostrarSinCambios" class="modal-overlay">
       <div class="modal-sin-cambios">
          <div class="modal-header"> <i class="fas fa-info-circle"></i> <h3>Sin Cambios</h3> </div>
-          <div class="modal-body"> <p>No modificó ningún campo. ¿Qué desea hacer?</p> </div>
-          <div class="modal-footer"> <button class="btn-modal btn-volver-modal" @click="volverAEditar"> Volver a Editar </button> <button class="btn-modal btn-cancelar-modal" @click="cancelarSinCambios"> Cancelar y Volver </button> </div>
+         <div class="modal-body"> <p>No modificó ningún campo. ¿Qué desea hacer?</p> </div>
+         <div class="modal-footer"> <button class="btn-modal btn-volver-modal" @click="volverAEditar"> Volver a Editar </button> <button class="btn-modal btn-cancelar-modal" @click="cancelarSinCambios"> Cancelar y Volver </button> </div>
       </div>
     </div>
   </div>
@@ -78,9 +81,10 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import TablaHorarios from '../TablaHorarios.vue';
-// *** NUEVO: Importar los componentes hijos ***
+// *** Importar los componentes hijos ***
 import ListadoSuscripciones from './ListadoSuscripciones.vue'; // Ajusta la ruta si es necesario
 import ListadoTrabajos from './ListadoTrabajos.vue';       // Ajusta la ruta si es necesario
+import ListadoNiveles from './ListadoNiveles.vue';     // <-- NUEVO: Importar ListadoNiveles
 
 const props = defineProps({
   alumno: Object, // Sigue siendo requerido para este modo
@@ -92,17 +96,16 @@ const emit = defineEmits(['guardar-cambios', 'cancelar']);
 // Estado local
 const datosModificados = ref({
   suscripcion: '',
-  trabajoactual: ''
+  trabajoactual: '',
+  nivel: '' // <-- NUEVO: Añadir nivel
 });
 const horariosModificados = ref([]);
 const suscripcionOriginal = ref('');
 const trabajoOriginal = ref('');
+const nivelOriginal = ref(null); // <-- NUEVO: Guardar nivel original
 const mostrarConfirmacion = ref(false);
 const mostrarExito = ref(false);
 const mostrarSinCambios = ref(false);
-// const datosCargados = ref(false); // Ya no se necesita, los hijos cargan sus datos
-
-// --- Lógica sin cambios (excepto la inicialización que depende de props) ---
 
 const suscripcionCambiada = computed(() => {
   return datosModificados.value.suscripcion !== suscripcionOriginal.value;
@@ -110,28 +113,30 @@ const suscripcionCambiada = computed(() => {
 
 // Computed para decidir si mostrar TablaHorarios
 const debeMostrarHorarios = computed(() => {
-    // Modo "modificar": Mostrar si cambió la suscripción y no es "Día Libre"
-    // Modo "ingreso" (futuro): Mostrar si hay suscripción y no es "Día Libre"
-    // Por ahora, solo implementamos la lógica de "modificar"
-    return suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre';
+  return suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre';
 });
-
 
 const formularioValido = computed(() => {
+  // <-- MODIFICADO: Añadir chequeo de nivel -->
+  const baseValido = datosModificados.value.suscripcion &&
+                     datosModificados.value.trabajoactual &&
+                     datosModificados.value.nivel;
+
   if (datosModificados.value.suscripcion === 'Día Libre') {
-    return datosModificados.value.suscripcion && datosModificados.value.trabajoactual;
+    return baseValido; // Nivel sigue siendo requerido
   }
   if (suscripcionCambiada.value) {
-    return datosModificados.value.suscripcion &&
-           datosModificados.value.trabajoactual &&
-           horariosModificados.value.length > 0;
+    return baseValido && horariosModificados.value.length > 0;
   }
-  return datosModificados.value.suscripcion && datosModificados.value.trabajoactual;
+  return baseValido; // Si no cambió suscripción, nivel sigue siendo requerido
 });
 
+
 const hayCambios = () => {
+  // <-- MODIFICADO: Añadir comparación de nivel -->
   return datosModificados.value.suscripcion !== suscripcionOriginal.value ||
-         datosModificados.value.trabajoactual !== trabajoOriginal.value;
+         datosModificados.value.trabajoactual !== trabajoOriginal.value ||
+         datosModificados.value.nivel !== nivelOriginal.value;
 };
 
 const normalizarNombreTrabajo = (nombre) => {
@@ -151,13 +156,14 @@ onMounted(() => {
       const trabajoNormalizado = normalizarNombreTrabajo(props.alumno.trabajoactual);
       datosModificados.value.suscripcion = props.alumno.suscripcion;
       datosModificados.value.trabajoactual = trabajoNormalizado;
+      datosModificados.value.nivel = props.alumno.nivel; // <-- NUEVO: Inicializar nivel
       suscripcionOriginal.value = props.alumno.suscripcion;
       trabajoOriginal.value = trabajoNormalizado;
+      nivelOriginal.value = props.alumno.nivel; // <-- NUEVO: Guardar nivel original
   }
   if (props.horarioAlumno) {
       horariosModificados.value = [...props.horarioAlumno];
   }
-  // Ya no cargamos precios ni metodologías aquí
 });
 
 // Actualizar horarios recibidos del hijo
@@ -166,17 +172,21 @@ const actualizarHorarios = (nuevosHorarios) => {
   horariosModificados.value = nuevosHorarios;
 };
 
-// Lógica de Modales y Guardado (sin cambios)
+// Lógica de Modales y Guardado
 const confirmarGuardar = () => {
   if (!hayCambios()) {
     mostrarSinCambios.value = true;
     return;
   }
+  // <-- MODIFICADO: Añadir chequeo específico de nivel -->
   if (!formularioValido.value) {
-    if (suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre' && horariosModificados.value.length === 0) {
+    if (!datosModificados.value.nivel) {
+        alert('Por favor seleccione un nivel');
+    } else if (suscripcionCambiada.value && datosModificados.value.suscripcion !== 'Día Libre' && horariosModificados.value.length === 0) {
       alert('Debe configurar los horarios para la nueva suscripción');
     } else {
-      alert('Por favor complete todos los campos requeridos');
+      // Mensaje genérico si falta suscripción o trabajo
+      alert('Por favor complete todos los campos requeridos (Suscripción, Trabajo y Nivel)');
     }
     return;
   }
@@ -190,7 +200,8 @@ const guardarCambios = () => {
     const datosEnviar = {
       alumno: {
         suscripcion: datosModificados.value.suscripcion,
-        trabajoactual: datosModificados.value.trabajoactual
+        trabajoactual: datosModificados.value.trabajoactual,
+        nivel: datosModificados.value.nivel // <-- NUEVO: Enviar nivel
       },
       horarios: horariosAEnviar
     };

@@ -139,7 +139,7 @@ const agregarReclamo = async (descripcionReclamo) => {
     paginaActual.value = 1; // Volver a la primera página
   } catch (error) {
     // Aquí podrías mostrar un mensaje de error al usuario
-    alert('No se pudo guardar el reclamo. Inténtalo de nuevo.');
+    alert('No se pudo guardar el reclamo porque es muy corto o hubo un problema. Inténtalo de nuevo.');
   }
 };
 

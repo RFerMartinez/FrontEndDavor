@@ -1,6 +1,5 @@
 <template>
   <div class="contenedor-info-alumno">
-    <!-- Encabezado con botón volver -->
     <div class="encabezado-info" v-if="!mostrandoModificacion">
       <button class="btn-volver" @click="volverAlumnos">
         <i class="fas fa-arrow-left"></i>
@@ -9,7 +8,6 @@
       <h1 class="titulo">INFORMACIÓN DEL ALUMNO</h1>
     </div>
 
-    <!-- Mostrar componente de modificación de datos -->
     <div v-if="mostrandoModificacion === 'datos'">
       <ModificarDatosAlumno 
         :alumno="alumno"
@@ -18,7 +16,6 @@
       />
     </div>
 
-    <!-- Mostrar componente de modificación de suscripción y trabajo -->
     <div v-if="mostrandoModificacion === 'suscripcion-trabajo'">
       <ModificarSusTrabAlumno 
         :alumno="alumno"
@@ -28,7 +25,6 @@
       />
     </div>
 
-    <!-- Tarjeta de información del alumno (solo se muestra cuando no estamos modificando) -->
     <div class="tarjeta-alumno" v-if="alumno && !mostrandoModificacion">
       <div class="tarjeta-header">
         <div class="info-principal">
@@ -41,7 +37,6 @@
       </div>
 
       <div class="tarjeta-contenido">
-        <!-- Información Personal -->
         <div class="seccion-tabla">
           <h3 class="titulo-seccion">
             <i class="fas fa-user"></i>
@@ -60,19 +55,18 @@
               <div class="celda etiqueta">Email:</div>
               <div class="celda valor">{{ alumno.email }}</div>
             </div>
+            
             <div class="fila-tabla">
               <div class="celda etiqueta">Teléfono:</div>
               <div class="celda valor">{{ alumno.telefono }}</div>
-              <div class="celda etiqueta"></div>
-              <div class="celda valor"></div>
+              <div class="celda etiqueta">Sexo:</div>
+              <div class="celda valor">{{ alumno.sexo === 'F' ? 'Femenino' : (alumno.sexo === 'M' ? 'Masculino' : 'No especificado') }}</div>
             </div>
-          </div>
+            </div>
         </div>
 
-        <!-- Separador visual -->
         <div class="separador-seccion"></div>
 
-        <!-- Dirección -->
         <div class="seccion-tabla">
           <h3 class="titulo-seccion">
             <i class="fas fa-map-marker-alt"></i>
@@ -94,10 +88,8 @@
           </div>
         </div>
 
-        <!-- Separador visual -->
         <div class="separador-seccion"></div>
 
-        <!-- Información del Gimnasio -->
         <div class="seccion-tabla">
           <h3 class="titulo-seccion">
             <i class="fas fa-dumbbell"></i>
@@ -113,16 +105,14 @@
             <div class="fila-tabla">
               <div class="celda etiqueta">Trabajo Actual:</div>
               <div class="celda valor">{{ alumno.trabajoactual }}</div>
-              <div class="celda etiqueta"></div>
-              <div class="celda valor"></div>
+              <div class="celda etiqueta">Nivel:</div> 
+              <div class="celda valor">{{ alumno.nivel }}</div>
             </div>
           </div>
         </div>
 
-        <!-- Separador visual -->
         <div class="separador-seccion"></div>
 
-        <!-- Estado y Cuotas -->
         <div class="seccion-tabla">
           <h3 class="titulo-seccion">
             <i class="fas fa-chart-bar"></i>
@@ -144,10 +134,8 @@
           </div>
         </div>
 
-        <!-- Separador visual -->
         <div class="separador-seccion"></div>
 
-        <!-- Sección de Horarios -->
         <div class="seccion-info">
           <TablaHorarios 
             :horarios-alumno="horariosAlumno"
@@ -156,10 +144,8 @@
           />
         </div>
 
-        <!-- Separador visual -->
         <div class="separador-seccion"></div>
 
-        <!-- Sección de Historial de Cuotas -->
         <div class="seccion-info">
           <h3 class="titulo-seccion">
             <i class="fas fa-history"></i>
@@ -168,7 +154,6 @@
           <TablaCuota :modo="'infoAlumno'" :cuotas="cuotas" />
         </div>
 
-        <!-- Botones de acciones -->
         <div class="seccion-botones">
           <div class="botones-accion">
             <button class="btn-accion btn-modificar" @click="modificarDatos">
@@ -195,7 +180,6 @@
       </div>
     </div>
 
-    <!-- Mensaje si no hay alumno seleccionado -->
     <div v-else-if="!mostrandoModificacion" class="sin-alumno">
       <i class="fas fa-exclamation-triangle fa-3x"></i>
       <h3>No se encontró información del alumno</h3>
@@ -206,7 +190,6 @@
       </button>
     </div>
 
-    <!-- Mensaje de confirmación -->
     <div v-if="mensajeConfirmacion" class="mensaje-confirmacion" :class="{'mostrar': mensajeConfirmacion}">
       <div class="contenido-mensaje">
         <i class="fas fa-check-circle"></i>
@@ -248,12 +231,14 @@ const alumno = ref({
   nombre: "Lucía",
   apellido: "Ortega",
   email: "lucia_ortega@gmail.com",
+  sexo: "F", // <-- LÍNEA AGREGADA
   telefono: "+543731457384",
   activo: false,
   cuotasPendientes: 5,
   turno: "Tarde",
   suscripcion: "2 Días a la semana",
   trabajoactual: "Musculacion",
+  nivel: "3",
   provincia: "Chaco",
   localidad: "Las Breñas",
   Calle: "Republica Chaca",
