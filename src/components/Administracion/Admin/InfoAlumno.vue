@@ -133,12 +133,12 @@ const horariosAlumno = ref([
 ])
 
 const cuotas = ref([
-    { mes: "Junio", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: false },
-    { mes: "Mayo", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: false },
-    { mes: "Abril", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true },
-    { mes: "Marzo", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true },
-    { mes: "Febrero", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true },
-    { mes: "Enero", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true }
+    { mes: "Junio", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: false,"vencimiento": "2025-10-23" },
+    { mes: "Mayo", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: false,"vencimiento": "2025-10-23" },
+    { mes: "Abril", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" },
+    { mes: "Marzo", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" },
+    { mes: "Febrero", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" },
+    { mes: "Enero", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" }
 ])
 
 const volverAlumnos = () => { emit('volverAlumnos') }

@@ -37,6 +37,12 @@
             <ListadoTrabajos v-model="nuevoTrabajo" />
           </div>
 
+          <div class="seccion-formulario">
+            <h3 class="titulo-seccion-formulario">
+              <i class="fas fa-layer-group"></i> Seleccionar Nivel
+            </h3>
+            <ListadoNiveles v-model="nuevoNivel" />
+          </div>
           <div
             class="seccion-formulario seccion-horarios"
             :class="{ 'deshabilitado': !nuevaSuscripcion || nuevaSuscripcion === 'Día Libre' }"
@@ -49,7 +55,7 @@
               <i class="fas fa-info-circle"></i>
               Selecciona una suscripción para habilitar los horarios.
             </p>
-             <p v-else-if="nuevaSuscripcion === 'Día Libre'" class="info-horarios">
+            <p v-else-if="nuevaSuscripcion === 'Día Libre'" class="info-horarios">
               <i class="fas fa-info-circle"></i>
               La suscripción "Día Libre" no requiere horarios fijos.
             </p>
@@ -63,6 +69,7 @@
             </div>
           </div>
         </div>
+
         <div class="seccion-botones">
           <div class="botones-accion">
             <button class="btn-accion btn-cancelar-ingreso" @click="volverPersonas">
@@ -79,20 +86,20 @@
             </button>
           </div>
           <p v-if="mostrarMensajeValidacion" class="mensaje-validacion">
-             <i class="fas fa-exclamation-triangle"></i> Por favor, completa la suscripción, el trabajo y los horarios (si aplica).
-           </p>
-        </div>
-         </div>
+             <i class="fas fa-exclamation-triangle"></i> Por favor, completa Suscripción, Trabajo, Nivel y Horarios (si aplica).
+          </p>
+          </div>
+      </div>
     </div>
 
     <div v-else class="sin-persona">
-         <i class="fas fa-exclamation-triangle fa-3x"></i>
-         <h3>No se encontró información de la persona</h3>
-         <p>Por favor, vuelve a la lista de personas</p>
-         <button class="btn-volver-centrado" @click="volverPersonas">
-            <i class="fas fa-arrow-left"></i>
-            Volver a Personas
-         </button>
+       <i class="fas fa-exclamation-triangle fa-3x"></i>
+       <h3>No se encontró información de la persona</h3>
+       <p>Por favor, vuelve a la lista de personas</p>
+       <button class="btn-volver-centrado" @click="volverPersonas">
+          <i class="fas fa-arrow-left"></i>
+          Volver a Personas
+       </button>
     </div>
   </div>
 </template>
@@ -101,8 +108,9 @@
 import { ref, computed, defineProps, defineEmits, onMounted } from 'vue';
 import ListadoSuscripciones from './ListadoSuscripciones.vue';
 import ListadoTrabajos from './ListadoTrabajos.vue';
+import ListadoNiveles from './ListadoNiveles.vue'; // <-- NUEVO: Importar
 import TablaHorarios from '../TablaHorarios.vue';
-import DetallePersona from './DetallePersona.vue'; // <-- Importado
+import DetallePersona from './DetallePersona.vue';
 
 const props = defineProps({
   personaSeleccionada: Object
@@ -112,9 +120,10 @@ const persona = ref({ dni: "11223344", nombre: "Laura", apellido: "Martinez",ema
 
 const emit = defineEmits(['volverPersonas', 'ingresoConfirmado']);
 
+// Refs para los datos NUEVOS de ingreso
 const nuevaSuscripcion = ref('');
 const nuevoTrabajo = ref('');
-// const nuevoNivel = ref(''); // Descomenta si lo necesitas
+const nuevoNivel = ref(''); // <-- NUEVO: Ref para el nivel
 const nuevosHorarios = ref([]);
 const mostrarMensajeValidacion = ref(false);
 
@@ -127,52 +136,61 @@ onMounted(() => {
   }
 });
 
+// --- VALIDACIÓN MODIFICADA ---
 const formularioIngresoValido = computed(() => {
   const tieneSuscripcion = !!nuevaSuscripcion.value;
   const tieneTrabajo = !!nuevoTrabajo.value;
-  // const tieneNivel = !!nuevoNivel.value; // Descomenta si lo necesitas
+  const tieneNivel = !!nuevoNivel.value; // <-- NUEVO: Chequeo de nivel
   let tieneHorariosValidos = true;
 
+  // Validar horarios solo si la suscripción no es 'Día Libre'
   if (tieneSuscripcion && nuevaSuscripcion.value !== 'Día Libre') {
     tieneHorariosValidos = nuevosHorarios.value && nuevosHorarios.value.length > 0;
   }
-  // return tieneSuscripcion && tieneTrabajo && tieneNivel && tieneHorariosValidos; // Ajusta si añades nivel
-  return tieneSuscripcion && tieneTrabajo && tieneHorariosValidos;
+
+  // Ahora requiere los tres + horarios si aplica
+  return tieneSuscripcion && tieneTrabajo && tieneNivel && tieneHorariosValidos;
 });
+// --- FIN VALIDACIÓN ---
+
 
 const volverPersonas = () => { emit('volverPersonas'); };
 
 const actualizarHorarios = (horarios) => {
   nuevosHorarios.value = horarios || [];
+  // Ocultar mensaje de validación si el formulario ahora es válido
   if (formularioIngresoValido.value) {
-      mostrarMensajeValidacion.value = false;
+    mostrarMensajeValidacion.value = false;
   }
 };
 
+// --- CONFIRMAR INGRESO MODIFICADO ---
 const confirmarIngreso = () => {
   if (!formularioIngresoValido.value) {
     console.error("Formulario de ingreso inválido. Datos actuales:", {
       suscripcion: nuevaSuscripcion.value,
       trabajo: nuevoTrabajo.value,
-      // nivel: nuevoNivel.value, // Descomenta si lo necesitas
+      nivel: nuevoNivel.value, // <-- NUEVO: Incluir nivel en log
       horarios: nuevosHorarios.value
     });
-    mostrarMensajeValidacion.value = true;
-    return;
+    mostrarMensajeValidacion.value = true; // Mostrar mensaje de error
+    return; // Detener ejecución
   }
-  mostrarMensajeValidacion.value = false;
+  mostrarMensajeValidacion.value = false; // Ocultar mensaje si es válido
 
+  // Construir objeto final
   const datosCompletosIngreso = {
-    ...persona.value,
+    ...persona.value, // Datos base de la persona
     suscripcion: nuevaSuscripcion.value,
-    trabajoactual: nuevoTrabajo.value,
-    // nivel: nuevoNivel.value || '1', // Descomenta y ajusta si lo necesitas (ej. valor por defecto '1')
+    trabajoactual: nuevoTrabajo.value, // Usamos 'trabajoactual' para consistencia con InfoAlumno
+    nivel: nuevoNivel.value, // <-- NUEVO: Añadir nivel seleccionado
     horarios: nuevosHorarios.value || [],
     activo: true,
     cuotasPendientes: 0,
-    turno: '',
+    turno: '', // Se calcula después
   };
 
+  // Determinar turno (sin cambios)
   if (datosCompletosIngreso.horarios && datosCompletosIngreso.horarios.length > 0) {
       const primerHorario = datosCompletosIngreso.horarios[0]?.horario;
       if (primerHorario && typeof primerHorario === 'string') {
@@ -189,6 +207,7 @@ const confirmarIngreso = () => {
   console.log("Confirmando ingreso con datos completos:", datosCompletosIngreso);
   emit('ingresoConfirmado', datosCompletosIngreso);
 };
+// --- FIN CONFIRMAR INGRESO ---
 </script>
 
 <style scoped>

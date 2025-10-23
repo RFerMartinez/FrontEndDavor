@@ -1,162 +1,183 @@
 <template>
   <div class="tabla-completa">
     <div class="tabla-container" :class="{ 'mobile': isMobile }">
+
+      <div v-if="cargando" class="loading-container">
+        <div class="spinner"></div>
+        <span>Cargando cuotas...</span>
+      </div>
+      <div v-else-if="!cargando && (!cuotas || cuotas.length === 0)" class="no-cuotas-mensaje">
+      <i class="fas fa-info-circle"></i>
+        <span>No se encontraron cuotas</span>
+      </div>
+
+      <template v-else-if="!cargando && cuotas && cuotas.length > 0">
       <table v-if="!isMobile" class="tabla-cuotas">
-        <thead>
-          <tr>
-            <th class="col-mes">MES / AÑO</th>
-            <th class="col-trabajo">TRABAJO / SUSCRIPCIÓN</th>
-            <th class="col-monto">MONTO</th>
-            <th class="col-acciones">ACCIONES</th>
-            <th class="col-estado">ESTADO</th>
-            <!-- Nueva columna vacía solo para modo infoAlumno -->
-            <th v-if="modo === 'infoAlumno'" class="col-adicional"></th>
-          </tr>
-        </thead>
-        <tbody>
+          <thead>
+            <tr>
+              <th class="col-mes">MES / AÑO</th>
+              <th class="col-trabajo">TRABAJO / SUSCRIPCIÓN</th>
+              <th class="col-monto">MONTO</th>
+              <th class="col-acciones">ACCIONES</th>
+              <th class="col-estado">ESTADO</th>
+              <th v-if="modo === 'infoAlumno'" class="col-adicional"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <FilaCuota
+              v-for="(cuota, index) in cuotasPaginadas"
+              :key="cuota.mes + '-' + cuota.anio + '-' + index"
+              :cuota="cuota"
+              :is-mobile="isMobile"
+              :modo="modo"
+            />
+          </tbody>
+        </table>
+
+        <div v-else class="mobile-view">
           <FilaCuota
             v-for="(cuota, index) in cuotasPaginadas"
-            :key="index"
+            :key="cuota.mes + '-' + cuota.anio + '-' + index"
             :cuota="cuota"
             :is-mobile="isMobile"
             :modo="modo"
           />
-        </tbody>
-      </table>
-      
-      <!-- Vista móvil manejada por FilaCuota -->
-      <div v-else class="mobile-view">
-        <FilaCuota
-          v-for="(cuota, index) in cuotasPaginadas"
-          :key="index"
-          :cuota="cuota"
-          :is-mobile="isMobile"
-          :modo="modo"
-        />
-      </div>
+        </div>
+      </template>
+
     </div>
 
-    <!-- Controles de paginación inferiores - Solo navegación -->
-    <div class="paginacion-inferior" v-if="totalPaginas > 1">
-      <div class="paginacion-controles">
-        <button 
-          class="btn-paginacion" 
-          :disabled="paginaActual === 1"
-          @click="cambiarPagina(paginaActual - 1)"
-          aria-label="Página anterior"
-        >
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        
-        <div class="numeros-pagina">
-          <span 
-            v-for="numero in numerosPaginas" 
-            :key="numero"
-            class="numero-pagina"
-            :class="{ 'activa': numero === paginaActual }"
-            @click="cambiarPagina(numero)"
-          >
-            {{ numero }}
-          </span>
-        </div>
-        
-        <button 
-          class="btn-paginacion" 
-          :disabled="paginaActual === totalPaginas"
-          @click="cambiarPagina(paginaActual + 1)"
-          aria-label="Página siguiente"
-        >
-          <i class="fas fa-chevron-right"></i>
-        </button>
-      </div>
+    <div class="paginacion-inferior" v-if="!cargando && totalPaginas > 1">
+        <div class="paginacion-controles">
+           <button
+             class="btn-paginacion"
+             :disabled="paginaActual === 1"
+             @click="cambiarPagina(paginaActual - 1)"
+             aria-label="Página anterior"
+           >
+             <i class="fas fa-chevron-left"></i>
+           </button>
+
+           <div class="numeros-pagina">
+             <span
+               v-for="numero in numerosPaginas"
+               :key="numero"
+               class="numero-pagina"
+               :class="{ 'activa': numero === paginaActual, 'puntos': numero === '...' }"
+               @click="cambiarPagina(numero)"
+             >
+               {{ numero === '...' ? '…' : numero }}
+             </span>
+           </div>
+
+           <button
+             class="btn-paginacion"
+             :disabled="paginaActual === totalPaginas"
+             @click="cambiarPagina(paginaActual + 1)"
+             aria-label="Página siguiente"
+           >
+             <i class="fas fa-chevron-right"></i>
+           </button>
+         </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import FilaCuota from './FilaCuota.vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import FilaCuota from './FilaCuota.vue';
 
 const props = defineProps({
-  cuotas: Array,
+  cuotas: {
+      type: Array,
+      default: () => []
+  },
   elementosPorPagina: {
     type: Number,
     default: 6
   },
   modo: {
     type: String,
-    default: 'cuota' // 'cuota' o 'infoAlumno'
+    default: 'cuota'
+  },
+  // --- NUEVA PROP ---
+  cargando: {
+    type: Boolean,
+    default: false // Por defecto no está cargando
   }
-})
+  // --- FIN NUEVA PROP ---
+});
 
-const isMobile = ref(false)
-const paginaActual = ref(1)
+const isMobile = ref(false);
+const paginaActual = ref(1);
 
-// Computed properties para la paginación
-const totalPaginas = computed(() => 
-  Math.ceil(props.cuotas.length / props.elementosPorPagina)
-)
+// --- WATCH (sin cambios) ---
+watch(() => props.cuotas, (newCuotas, oldCuotas) => {
+    if (newCuotas && oldCuotas && newCuotas.length !== oldCuotas.length) {
+        paginaActual.value = 1;
+    }
+}, { deep: true });
+// --- FIN WATCH ---
 
-const cuotasPaginadas = computed(() => {
-  const inicio = (paginaActual.value - 1) * props.elementosPorPagina
-  const fin = inicio + props.elementosPorPagina
-  return props.cuotas.slice(inicio, fin)
-})
+// Computed properties (sin cambios)
+const totalPaginas = computed(() => Math.ceil((props.cuotas?.length || 0) / props.elementosPorPagina));
+const cuotasPaginadas = computed(() => { /* ... sin cambios ... */
+    const inicio = (paginaActual.value - 1) * props.elementosPorPagina;
+    const fin = inicio + props.elementosPorPagina;
+    return props.cuotas?.slice(inicio, fin) || [];
+});
+const numerosPaginas = computed(() => { /* ... sin cambios ... */
+    const total = totalPaginas.value;
+    if (total <= 1) return [];
+    const current = paginaActual.value;
+    const delta = 1;
+    const range = [];
+    for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) { range.push(i); }
+    if (current - delta > 2) { range.unshift('...'); }
+    if (current + delta < total - 1) { range.push('...'); }
+    range.unshift(1);
+    if (total > 1) range.push(total);
+    return range.filter((item, index, arr) => {
+        if (item === '...') {
+            if (index === 1 && arr[0] === 1) return false;
+            if (index === arr.length - 2 && arr[arr.length - 1] === total) return false;
+            if (index > 0 && arr[index - 1] === '...') return false;
+        }
+        return true;
+    });
+});
 
-const numerosPaginas = computed(() => {
-  const total = totalPaginas.value
-  const current = paginaActual.value
-  const delta = 1 // Número de páginas a mostrar alrededor de la actual
-  
-  let range = []
-  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
-    range.push(i)
-  }
-  
-  if (current - delta > 2) {
-    range.unshift('...')
-  }
-  if (current + delta < total - 1) {
-    range.push('...')
-  }
-  
-  range.unshift(1)
-  if (total > 1) range.push(total)
-  
-  return range
-})
+// Métodos (sin cambios)
+const cambiarPagina = (nuevaPagina) => { /* ... sin cambios ... */
+    if (nuevaPagina !== '...' && nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
+        paginaActual.value = nuevaPagina;
+        const tablaElement = document.querySelector('.tabla-completa');
+        if (tablaElement) {
+            tablaElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+};
+const checkIsMobile = () => { isMobile.value = window.innerWidth <= 768; };
 
-// Métodos
-const cambiarPagina = (nuevaPagina) => {
-  if (nuevaPagina !== '...' && nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
-    paginaActual.value = nuevaPagina
-    // Scroll suave al principio del contenedor
-    document.querySelector('.tabla-completa').scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'start' 
-    })
-  }
-}
+onMounted(() => { /* ... sin cambios ... */
+  checkIsMobile();
+  window.addEventListener('resize', checkIsMobile);
+});
 
-const checkIsMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-}
-
-onMounted(() => {
-  checkIsMobile()
-  window.addEventListener('resize', checkIsMobile)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkIsMobile)
-})
+onUnmounted(() => { /* ... sin cambios ... */
+  window.removeEventListener('resize', checkIsMobile);
+});
 </script>
 
 <style scoped>
+/* --- ESTILOS RE-INDENTADOS Y CON NUEVOS ESTILOS PARA CARGA --- */
+
+/* Contenedor principal */
 .tabla-completa {
   width: 100%;
 }
 
+/* Contenedor de la tabla/vista móvil */
 .tabla-container {
   background-color: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
@@ -169,8 +190,58 @@ onUnmounted(() => {
   box-sizing: border-box;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.5);
+  position: relative; /* Para posicionar el spinner */
+  min-height: 150px; /* Altura mínima para mostrar spinner */
 }
 
+/* V V V NUEVOS ESTILOS: Indicador de Carga V V V */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px; /* Coincide con min-height de tabla-container */
+  color: #6c757d;
+  font-style: italic;
+  gap: 1rem;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3; /* Gris claro */
+  border-top: 4px solid #e91e63; /* Color principal */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+/* ^ ^ ^ FIN NUEVOS ESTILOS ^ ^ ^ */
+
+
+/* Mensaje "Sin Cuotas" (Estilos existentes) */
+.no-cuotas-mensaje {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  min-height: 150px; /* Altura mínima */
+  justify-content: center;
+}
+.no-cuotas-mensaje i {
+  font-size: 2rem;
+  color: #adb5bd;
+}
+
+/* Tabla Desktop */
 .tabla-cuotas {
   width: 100%;
   border-collapse: separate;
@@ -178,8 +249,6 @@ onUnmounted(() => {
   font-size: 0.95rem;
   min-width: 800px;
 }
-
-/* ✅ CORRECCIÓN: ENCABEZADOS CON PADDING CONSISTENTE */
 .tabla-cuotas th {
   text-align: center;
   padding: 0.75rem 0.5rem;
@@ -196,42 +265,14 @@ onUnmounted(() => {
   box-sizing: border-box;
   vertical-align: middle;
 }
+.tabla-cuotas .col-mes { width: 15%; padding: 0.75rem 0.5rem !important; }
+.tabla-cuotas .col-trabajo { width: 35%; padding: 0.75rem 0.5rem !important; padding-left: 1.5rem !important; text-align: left; }
+.tabla-cuotas .col-monto { width: 15%; padding: 0.75rem 0.5rem !important; padding-right: 1.5rem !important; text-align: right; }
+.tabla-cuotas .col-acciones { width: 20%; padding: 0.75rem 0.5rem !important; }
+.tabla-cuotas .col-estado { width: 15%; padding: 0.75rem 0.5rem !important; }
+.tabla-cuotas .col-adicional { width: 10%; padding: 0.75rem 0.5rem !important; }
 
-/* ✅ CORRECCIÓN: PADDING ESPECÍFICO PARA CADA COLUMNA */
-.tabla-cuotas .col-mes {
-  width: 15%;
-  padding: 0.75rem 0.5rem !important;
-}
-
-.tabla-cuotas .col-trabajo {
-  width: 35%;
-  padding: 0.75rem 0.5rem !important;
-  padding-left: 1.5rem !important;
-  text-align: left;
-}
-
-.tabla-cuotas .col-monto {
-  width: 15%;
-  padding: 0.75rem 0.5rem !important;
-  padding-right: 1.5rem !important;
-  text-align: right;
-}
-
-.tabla-cuotas .col-acciones {
-  width: 20%;
-  padding: 0.75rem 0.5rem !important;
-}
-
-.tabla-cuotas .col-estado {
-  width: 15%;
-  padding: 0.75rem 0.5rem !important;
-}
-
-.tabla-cuotas .col-adicional {
-  width: 10%;
-  padding: 0.75rem 0.5rem !important;
-}
-
+/* Vista Móvil */
 .mobile-view {
   width: 100%;
   display: flex;
@@ -239,7 +280,7 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-/* Paginación inferior - Solo navegación */
+/* Paginación */
 .paginacion-inferior {
   margin-top: 2.5rem;
   padding: 1.2rem;
@@ -250,13 +291,11 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
 }
-
 .paginacion-controles {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
-
 .btn-paginacion {
   width: 40px;
   height: 40px;
@@ -271,27 +310,23 @@ onUnmounted(() => {
   color: #e91e63;
   font-size: 0.9rem;
 }
-
 .btn-paginacion:hover:not(:disabled) {
   background: #e91e63;
   color: white;
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
 }
-
 .btn-paginacion:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   border-color: #ccc;
   color: #ccc;
 }
-
 .numeros-pagina {
   display: flex;
   gap: 0.4rem;
   align-items: center;
 }
-
 .numero-pagina {
   width: 35px;
   height: 35px;
@@ -307,85 +342,47 @@ onUnmounted(() => {
   color: #6c757d;
   font-size: 0.85rem;
 }
-
-.numero-pagina:hover {
+.numero-pagina:hover:not(.puntos) {
   border-color: #e91e63;
   color: #e91e63;
   transform: scale(1.05);
 }
-
 .numero-pagina.activa {
   background: #e91e63;
   border-color: #e91e63;
   color: white;
   transform: scale(1.1);
 }
+.numero-pagina.puntos {
+  cursor: default;
+  border: none;
+  font-weight: bold;
+}
 
-/* Media queries para móvil */
+/* Media Queries (Responsive) */
 @media (max-width: 768px) {
-  .tabla-container {
-    padding: 1.5rem;
-    border-radius: 16px;
-  }
-  
-  .mobile-view {
-    gap: 0.8rem;
-  }
-  
-  .paginacion-inferior {
-    margin-top: 2rem;
-    padding: 1rem;
-  }
-  
-  .btn-paginacion {
-    width: 35px;
-    height: 35px;
-    font-size: 0.8rem;
-  }
-  
-  .numero-pagina {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-  }
+  .tabla-container { padding: 1.5rem; border-radius: 16px; }
+  .mobile-view { gap: 0.8rem; }
+  .paginacion-inferior { margin-top: 2rem; padding: 1rem; }
+  .btn-paginacion { width: 35px; height: 35px; font-size: 0.8rem; }
+  .numero-pagina { width: 30px; height: 30px; font-size: 0.8rem; }
+  .no-cuotas-mensaje { padding: 2rem 1rem; font-size: 1rem;}
+  .loading-container { min-height: 120px; } /* Menos altura en móvil */
 }
 
 @media (max-width: 480px) {
-  .tabla-container {
-    padding: 1rem;
-    border-radius: 12px;
-  }
-  
-  .paginacion-inferior {
-    margin-top: 1.5rem;
-    padding: 0.8rem;
-  }
-  
-  .paginacion-controles {
-    gap: 0.6rem;
-  }
-  
-  .btn-paginacion {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
-  }
-  
-  .numero-pagina {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-  
-  .numeros-pagina {
-    gap: 0.3rem;
-  }
+  .tabla-container { padding: 1rem; border-radius: 12px; }
+  .paginacion-inferior { margin-top: 1.5rem; padding: 0.8rem; }
+  .paginacion-controles { gap: 0.6rem; }
+  .btn-paginacion { width: 32px; height: 32px; font-size: 0.75rem; }
+  .numero-pagina { width: 28px; height: 28px; font-size: 0.75rem; }
+  .numeros-pagina { gap: 0.3rem; }
+  .no-cuotas-mensaje { font-size: 0.9rem;}
+  .spinner { width: 30px; height: 30px; border-width: 3px; }
+  .loading-container { min-height: 100px; }
 }
 
 @media (max-width: 380px) {
-  .tabla-container {
-    padding: 1rem;
-    border-radius: 12px;
-  }
+  .tabla-container { padding: 1rem; border-radius: 12px; }
 }
 </style>
