@@ -116,7 +116,18 @@ const props = defineProps({
   personaSeleccionada: Object
 });
 
-const persona = ref({ dni: "11223344", nombre: "Laura", apellido: "Martinez",email: "laura@email.com", telefono: "333-444", provincia: "Chaco", localidad: "Resistencia", Calle: "Av Italia", nro: "100" });
+const persona = ref({
+  dni: "11223344",
+  nombre: "Laura",
+  apellido: "Martinez",
+  email: "laura@email.com",
+  sexo: "F",
+  telefono: "333-444",
+  provincia: "Chaco",
+  localidad: "Resistencia",
+  Calle: "Av Italia",
+  nro: "100"
+});
 
 const emit = defineEmits(['volverPersonas', 'ingresoConfirmado']);
 

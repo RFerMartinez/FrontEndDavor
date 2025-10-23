@@ -26,3 +26,22 @@ export const obtenerMisCuotas = async () => {
         return [];
     }
 };
+
+/**
+ * Obtiene las cuotas de un alumno específico por su DNI (para Staff).
+ */
+export const obtenerCuotasDeAlumno = async (dni) => {
+    try {
+        const token = getToken();
+        if (!token) throw new Error('No hay token de autenticación.');
+
+        // Usamos el nuevo endpoint que creaste
+        const response = await axios.get(`${API_URL}/alumno/${dni}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        });
+        return response.data;
+    } catch (error) {
+        console.error(`Error al obtener las cuotas del alumno ${dni}:`, error);
+        return [];
+    }
+};

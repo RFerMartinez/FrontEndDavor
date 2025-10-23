@@ -132,10 +132,14 @@ import IngresoPersona from '@/components/Administracion/Admin/IngresoPersona.vue
 
 // FER ------------------------------
 const router = useRouter(); // Obtén la instancia del router
+
 const cerrarSesion = () => {
   logout(); // Llama a la función de logout que limpia el localStorage
   router.push('/'); // Redirige al login
 };
+
+const alumnoSeleccionado = ref(null); // Para guardar el alumno al que se le hizo clic
+
 // Fin Fer ---------------------------
 
 
@@ -145,7 +149,6 @@ const cerrarSesion = () => {
 const usuario = { nombre: 'Beto', apellido: 'Cristoff' };
 const vistaActiva = ref('informacion'); // O la que prefieras como inicial
 const isMobile = ref(false);
-const alumnoSeleccionado = ref(null); // Lo mantenemos por InfoAlumno
 
 // *** ===================== NUEVO: Refs para vista secundaria general ===================== ***
 // Usaremos estos en lugar de 'alumnoSeleccionado' directamente para más flexibilidad
