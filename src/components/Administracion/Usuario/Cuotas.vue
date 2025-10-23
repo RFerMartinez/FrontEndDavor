@@ -44,171 +44,38 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import TablaCuotas from './TablaCuotas.vue'
 
-const cuotas = [
-  {
-    mes: "Junio",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Mayo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Abril",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Marzo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Febrero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Enero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Junio",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Mayo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Abril",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Marzo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Febrero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Enero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Junio",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Mayo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: false
-  },
-  {
-    mes: "Abril",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Marzo",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Febrero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  },
-  {
-    mes: "Enero",
-    anio: "2025",
-    trabajo: "Musculación",
-    suscripcion: "3 días a la semana",
-    monto: 20000,
-    pagada: true
-  }
-]
+// Función del servidor para obtener las cuotas (ferchu)
+import { obtenerMisCuotas } from '@/api/services/cuotasService.js'
+
+const cuotas = ref([])
+const cargando = ref(true) //para mostrar un estado de carga
 
 const mostrarSoloPendientes = ref(false)
 
+// Llama a la API cuando el componente se monta
+onMounted(async () => {
+  cargando.value = true;
+  // Llama a la función del servicio y guarda los datos en nuestro ref
+  cuotas.value = await obtenerMisCuotas();
+  cargando.value = false;
+});
+
 // Computed properties para la información de estado
 const cuotasPendientes = computed(() => 
-  cuotas.filter(cuota => !cuota.pagada).length
+  cuotas.value.filter(cuota => !cuota.pagada).length
 )
 
 const cuotasPagadas = computed(() => 
-  cuotas.filter(cuota => cuota.pagada).length
+  cuotas.value.filter(cuota => cuota.pagada).length
 )
 
 const cuotasMostradas = computed(() => 
   mostrarSoloPendientes.value 
-    ? cuotas.filter(cuota => !cuota.pagada)
-    : cuotas
+    ? cuotas.value.filter(cuota => !cuota.pagada)
+    : cuotas.value
 )
 
 // Métodos
