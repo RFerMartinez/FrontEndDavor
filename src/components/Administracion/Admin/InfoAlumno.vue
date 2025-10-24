@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Estado from '../Estado.vue'
 import TablaCuota from '../Usuario/TablaCuotas.vue'
 import TablaHorarios from '../TablaHorarios.vue'
@@ -121,25 +121,36 @@ const mostrandoModificacion = ref(null)
 const mensajeConfirmacion = ref('')
 const alumnoID = computed(() => props.alumnoSeleccionado)
 
-const alumno = ref({
-  dni: "48573921", nombre: "Lucía", apellido: "Ortega", email: "lucia_ortega@gmail.com",
-  sexo: "F", telefono: "+543731457384", activo: false, cuotasPendientes: 5,
-  turno: "Tarde", suscripcion: "2 Días a la semana", trabajoactual: "Musculacion",
-  nivel: "3", provincia: "Chaco", localidad: "Las Breñas", Calle: "Republica Chaca", nro: "235",
+
+
+import { obtenerAlumnoPorDni, obtenerHorariosPorDni } from '@/api/services/alumnoService'
+import { obtenerCuotasDeAlumno } from '@/api/services/cuotasService'
+const loading = ref(false)
+const alumno = ref(null)
+const horariosAlumno = ref([])
+const cuotas = ref([])
+onMounted(async () => {
+  loading.value = true
+  try {
+    if (alumnoID.value && alumnoID.value["dni"]) {
+      const respuestaAlumno = await obtenerAlumnoPorDni(alumnoID.value["dni"])
+      alumno.value = respuestaAlumno
+
+      const respuestaHorarios = await obtenerHorariosPorDni(alumnoID.value["dni"])
+      horariosAlumno.value = respuestaHorarios
+
+      const respuestaCuotas = await obtenerCuotasDeAlumno(alumnoID.value["dni"])
+      cuotas.value = respuestaCuotas
+    }
+  } catch (error) {
+    console.error('Error al cargar la información del alumno:', error)
+  } finally {
+    loading.value = false
+  }
 })
 
-const horariosAlumno = ref([
-  { dia: "Lunes", horario: "10:00-13:00" }, { dia: "Viernes", horario: "10:00-13:00" }
-])
 
-const cuotas = ref([
-    { mes: "Junio", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: false,"vencimiento": "2025-10-23" },
-    { mes: "Mayo", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: false,"vencimiento": "2025-10-23" },
-    { mes: "Abril", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" },
-    { mes: "Marzo", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" },
-    { mes: "Febrero", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" },
-    { mes: "Enero", anio: "2025", trabajo: "Musculación", suscripcion: "3 días a la semana", monto: 20000, pagada: true,"vencimiento": "2025-10-23" }
-])
+
 
 const volverAlumnos = () => { emit('volverAlumnos') }
 

@@ -127,332 +127,27 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import TablaAlumnos from './TablaAlumnos.vue'
 
-const alumnos = [
-  {
-    dni: "12345678",
-    nombre: "Juan",
-    apellido: "Pérez",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "87654321", 
-    nombre: "María",
-    apellido: "Gómez",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "45678912",
-    nombre: "Carlos",
-    apellido: "Rodríguez",
-    activo: false,
-    cuotasPendientes: 5,
-    turno: "Mañana"
-  },
-  {
-    dni: "78912345",
-    nombre: "Ana",
-    apellido: "López",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Tarde"
-  },
-  {
-    dni: "32165497",
-    nombre: "Pedro",
-    apellido: "Martínez",
-    activo: false,
-    cuotasPendientes: 3,
-    turno: "Mañana"
-  },
-  {
-    dni: "65498732",
-    nombre: "Laura",
-    apellido: "García",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "98732165",
-    nombre: "Miguel",
-    apellido: "Fernández",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "14725836",
-    nombre: "Sofía",
-    apellido: "Díaz",
-    activo: false,
-    cuotasPendientes: 4,
-    turno: "Tarde"
-  },
-  {
-    dni: "25836914",
-    nombre: "Diego",
-    apellido: "Romero",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Mañana"
-  },
-  {
-    dni: "36925814",
-    nombre: "Elena",
-    apellido: "Sánchez",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "48263917",
-    nombre: "Javier",
-    apellido: "Torres",
-    activo: false,
-    cuotasPendientes: 6,
-    turno: "Mañana"
-  },
-  {
-    dni: "59283746",
-    nombre: "Carmen",
-    apellido: "Navarro",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Tarde"
-  },
-  {
-    dni: "68472915",
-    nombre: "Ricardo",
-    apellido: "Alvarez",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Mañana"
-  },
-  {
-    dni: "75938462",
-    nombre: "Isabel",
-    apellido: "Castillo",
-    activo: false,
-    cuotasPendientes: 3,
-    turno: "Tarde"
-  },
-  {
-    dni: "83572946",
-    nombre: "Fernando",
-    apellido: "Mendoza",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "92485736",
-    nombre: "Patricia",
-    apellido: "Rojas",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "15739284",
-    nombre: "Roberto",
-    apellido: "Silva",
-    activo: false,
-    cuotasPendientes: 4,
-    turno: "Mañana"
-  },
-  {
-    dni: "26847391",
-    nombre: "Gabriela",
-    apellido: "Vargas",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Tarde"
-  },
-  {
-    dni: "37958412",
-    nombre: "Héctor",
-    apellido: "Castro",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Mañana"
-  },
-  {
-    dni: "48573921",
-    nombre: "Lucía",
-    apellido: "Ortega",
-    activo: false,
-    cuotasPendientes: 5,
-    turno: "Tarde",
-    suscripcion: "2 Dias Semana"
-  },
-  {
-    dni: "59284731",
-    nombre: "Óscar",
-    apellido: "Paredes",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "68493725",
-    nombre: "Natalia",
-    apellido: "Jiménez",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "75938472",
-    nombre: "Raúl",
-    apellido: "Herrera",
-    activo: false,
-    cuotasPendientes: 3,
-    turno: "Mañana"
-  },
-  {
-    dni: "83572947",
-    nombre: "Verónica",
-    apellido: "Luna",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Tarde"
-  },
-  {
-    dni: "92485737",
-    nombre: "Andrés",
-    apellido: "Miranda",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Mañana"
-  },
-  {
-    dni: "15739285",
-    nombre: "Daniela",
-    apellido: "Ríos",
-    activo: false,
-    cuotasPendientes: 4,
-    turno: "Tarde"
-  },
-  {
-    dni: "26847392",
-    nombre: "José",
-    apellido: "Fuentes",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "37958413",
-    nombre: "Adriana",
-    apellido: "Soto",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "48573922",
-    nombre: "Mario",
-    apellido: "Contreras",
-    activo: false,
-    cuotasPendientes: 6,
-    turno: "Mañana"
-  },
-  {
-    dni: "59284732",
-    nombre: "Carolina",
-    apellido: "Sepúlveda",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Tarde"
-  },
-  {
-    dni: "68493726",
-    nombre: "Francisco",
-    apellido: "Araya",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Mañana"
-  },
-  {
-    dni: "75938473",
-    nombre: "Paula",
-    apellido: "Espinoza",
-    activo: false,
-    cuotasPendientes: 3,
-    turno: "Tarde"
-  },
-  {
-    dni: "83572948",
-    nombre: "Gustavo",
-    apellido: "Tapia",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "92485738",
-    nombre: "Marcela",
-    apellido: "Leiva",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
-  },
-  {
-    dni: "15739286",
-    nombre: "Rodrigo",
-    apellido: "Vera",
-    activo: false,
-    cuotasPendientes: 4,
-    turno: "Mañana"
-  },
-  {
-    dni: "26847393",
-    nombre: "Camila",
-    apellido: "Molina",
-    activo: true,
-    cuotasPendientes: 1,
-    turno: "Tarde"
-  },
-  {
-    dni: "37958414",
-    nombre: "Sergio",
-    apellido: "Salazar",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Mañana"
-  },
-  {
-    dni: "48573923",
-    nombre: "Valentina",
-    apellido: "Córdova",
-    activo: false,
-    cuotasPendientes: 5,
-    turno: "Tarde"
-  },
-  {
-    dni: "59284733",
-    nombre: "Felipe",
-    apellido: "Peña",
-    activo: true,
-    cuotasPendientes: 2,
-    turno: "Mañana"
-  },
-  {
-    dni: "68493727",
-    nombre: "Antonia",
-    apellido: "Figueroa",
-    activo: true,
-    cuotasPendientes: 0,
-    turno: "Tarde"
+import { obtenerTodosLosAlumnos } from '@/api/services/alumnoService' 
+const alumnos = ref([]);    // Lista completa de alumnos
+const loading = ref(false);  // Estado de carga
+const console = ref(null);   // Referencia a la consola del navegador
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    const respuesta = await obtenerTodosLosAlumnos();
+    alumnos.value = respuesta; // Asume que la respuesta tiene una propiedad 'data' con la lista de alumnos
+  } catch (error) {
+    console.error('Error al obtener los alumnos:', error);
+  } finally {
+    loading.value = false;
   }
-].sort((a, b) => a.apellido.localeCompare(b.apellido))
+})
+
+
 
 const paginaActual = ref(1)
 const elementosPorPagina = 10
@@ -480,7 +175,7 @@ const alumnosInactivos = computed(() =>
 )
 
 const alumnosFiltrados = computed(() => {
-  let alumnosFiltrados = alumnos
+  let alumnosFiltrados = alumnos.value
 
   // Filtrar por término de búsqueda
   if (terminoBusqueda.value.trim()) {

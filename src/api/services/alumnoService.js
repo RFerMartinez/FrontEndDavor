@@ -70,3 +70,4 @@ export const obtenerHorariosPorDni = async (dni) => {
         return []; // Devuelve un array vacío en caso de error.
     }
 };
+

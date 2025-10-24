@@ -128,9 +128,6 @@ import IngresoPersona from '@/components/Administracion/Admin/IngresoPersona.vue
 // *****************************************************************************************
 
 
-
-
-// FER ------------------------------
 const router = useRouter(); // Obtén la instancia del router
 
 const cerrarSesion = () => {
@@ -140,13 +137,48 @@ const cerrarSesion = () => {
 
 const alumnoSeleccionado = ref(null); // Para guardar el alumno al que se le hizo clic
 
-// Fin Fer ---------------------------
 
 
 
 
+
+
+
+
+
+
+
+
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
 // Tus refs originales (SIN CAMBIOS)
 const usuario = { nombre: 'Beto', apellido: 'Cristoff' };
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
+
+
+
+
+
+
+
+
+
+
+
+
+
 const vistaActiva = ref('informacion'); // O la que prefieras como inicial
 const isMobile = ref(false);
 
