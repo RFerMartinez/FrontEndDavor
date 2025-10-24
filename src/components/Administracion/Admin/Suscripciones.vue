@@ -17,10 +17,8 @@
     <transition name="slide-down" @after-leave="transicionEnProgreso = false">
       <AgregarModificar
         v-if="mostrarFormulario"
-        v-model="nuevaSuscripcion"
-        :es-edicion="suscripcionEditando !== null"
-        :config="configFormulario"
-        @guardar="guardarSuscripcion"
+        v-model="datosFormulario" :es-edicion="suscripcionEditando !== null"
+        :config="configFormularioComputada" @guardar="guardarSuscripcion"
         @cancelar="iniciarTransicionABoton"
       />
     </transition>
@@ -45,149 +43,204 @@
         </div>
       </div>
     </transition>
+
+    <div v-if="suscripcionNuevaGuardada" style="margin-top: 2rem; padding: 1rem; border: 1px dashed blue; background: #eef;">
+        <strong>Suscripción Nueva Guardada (Temporal):</strong>
+        <pre>{{ suscripcionNuevaGuardada }}</pre>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-// Importamos los nuevos componentes
-import AgregarModificar from './AgregarModificar.vue' // Ajusta la ruta si es necesario
-import Items from './Items.vue' // Ajusta la ruta si es necesario
+import { ref, computed, onMounted } from 'vue'; // Añadir computed
+import AgregarModificar from './AgregarModificar.vue';
+import Items from './Items.vue';
 
-// --- Configuración para los componentes hijos ---
-const configFormulario = {
+// --- CONFIGURACIÓN ---
+// Configuración base para el formulario (será ajustada por la computada)
+const configFormBase = {
   tituloSingular: 'Suscripción',
-  layout: 'inline', // 1fr 1fr
-  campo1: { key: 'descripcion', label: 'Descripción:', placeholder: 'Ej: 5 Días a la semana', esTextarea: false },
-  campo2: { key: 'precio', label: 'Precio:', placeholder: 'Ej: $30.000', esTextarea: false }
-}
+  layout: 'inline',
+  contexto: 'suscripciones', // <-- CONTEXTO
+  // Los campos se definen en la computada
+};
 
-const configLista = {
-  key1: 'descripcion', // Propiedad para el título
-  showKey2: true,      // Sí mostramos el segundo campo
-  key2: 'precio',      // Propiedad para el detalle
-  styleKey2: 'precio'  // Clase CSS para el detalle
-}
-// ----------------------------------------------
+// Configuración para la lista (ahora con formatoPrecio)
+const configLista = ref({
+  contexto: 'suscripciones', // <-- CONTEXTO
+  key1: 'descripcion',
+  showKey2: true,
+  key2: 'precio',
+  styleKey2: 'precio',
+  formatoPrecio: true // <-- Indica a Items que formatee el precio
+});
+// --------------------
 
 
-// Estado de las suscripciones (TODA LA LÓGICA SE MANTIENE EN EL PADRE)
-const suscripciones = ref([])
-const mostrarFormulario = ref(false)
-const suscripcionEditando = ref(null) // Ahora guarda el ID
-const mensajeConfirmacion = ref('')
-const transicionEnProgreso = ref(false)
+// --- ESTADO ---
+const suscripciones = ref([]); // Lista principal
+const mostrarFormulario = ref(false);
+const suscripcionEditando = ref(null); // Guarda el ID del item en edición
+const mensajeConfirmacion = ref('');
+const transicionEnProgreso = ref(false);
+const datosFormulario = ref({ descripcion: '', precio: '' }); // v-model para AgregarModificar
+const suscripcionNuevaGuardada = ref(null); // <-- NUEVO: Para guardar temporalmente
+// --------------
 
-// Nueva suscripción temporal (usada por v-model en AgregarModificar)
-const nuevaSuscripcion = ref({
-  descripcion: '',
-  precio: ''
-})
 
-// EVENTO: Cargar suscripciones al montar el componente
+// --- CONFIGURACIÓN COMPUTADA DEL FORMULARIO ---
+const configFormularioComputada = computed(() => {
+  const esEdicion = suscripcionEditando.value !== null;
+  return {
+    ...configFormBase, // Copia la base
+    campo1: esEdicion
+      ? { key: 'descripcion', label: 'Descripción:', placeholder: 'Descripción (No editable)', esTextarea: false, tipoInput: 'text', readonly: true } // Edición: readonly
+      : { key: 'descripcion', label: 'Días por semana:', placeholder: 'Ej: 3', esTextarea: false, tipoInput: 'number', min: '1', readonly: false }, // Agregado: number
+    campo2: { key: 'precio', label: 'Precio (número):', placeholder: 'Ej: 20000', esTextarea: false, tipoInput: 'number', min: '0', readonly: false } // Siempre number
+  };
+});
+// ------------------------------------------
+
+// --- FUNCIONES ---
+const parsePriceString = (priceString) => {
+    if (typeof priceString !== 'string') return NaN;
+    // Quitar puntos de miles (si los hubiera) y reemplazar coma decimal por punto
+    const cleanedString = priceString.replace(/\./g, '').replace(',', '.');
+    const number = parseFloat(cleanedString);
+    return isNaN(number) ? NaN : number; // Devolver NaN si falla
+};
+
 const cargarSuscripciones = async () => {
   try {
-    // TODO: Reemplazar con llamada a API real
-    const preciosData = await import('../../../../public/data/precios.json')
-    suscripciones.value = preciosData.default.map((item, index) => ({
-      id: index + 1,
-      ...item
-    }))
-    console.log('Suscripciones cargadas:', suscripciones.value)
+    const preciosData = await import('../../../../public/data/precios.json');
+    suscripciones.value = preciosData.default.map((item, index) => {
+        const precioNum = parsePriceString(item.precio); // Parsea el string del JSON
+        if (isNaN(precioNum)) {
+             console.warn(`Precio inválido en JSON para "${item.descripcion}": ${item.precio}`);
+        }
+        return {
+            id: index + 1,
+            descripcion: item.descripcion,
+            precio: isNaN(precioNum) ? 0 : precioNum // Guarda como número, 0 si falla
+        };
+    });
+    console.log('Suscripciones cargadas (precio como número):', suscripciones.value);
   } catch (error) {
-    console.error('Error cargando suscripciones:', error)
-    // Datos de ejemplo en caso de error
-    suscripciones.value = [
-      { id: 1, descripcion: "5 Días a la semana", precio: "$30.000" },
-      { id: 2, descripcion: "3 Días a la semana", precio: "$20.000" },
-      { id: 3, descripcion: "2 Días a la semana", precio: "$15.000" },
-      { id: 4, descripcion: "Día Libre", precio: "$3.000" }
-    ]
+    console.error('Error cargando suscripciones:', error);
+    suscripciones.value = [ // Datos de ejemplo con precio numérico
+        { id: 1, descripcion: '1 Día a la semana', precio: 10000 },
+        { id: 2, descripcion: '2 Días a la semana', precio: 15000 },
+        { id: 3, descripcion: '3 Días a la semana', precio: 20000 },
+        { id: 4, descripcion: 'Día Libre', precio: 3000 }
+     ];
   }
-}
+};
 
-// Iniciar transición hacia el formulario (para "Agregar")
 const iniciarTransicionAFormulario = () => {
-  nuevaSuscripcion.value = { descripcion: '', precio: '' } // Limpiamos el v-model
-  suscripcionEditando.value = null
-  transicionEnProgreso.value = true
-  // mostrarFormulario se activará después de que el botón desaparezca
-}
+  datosFormulario.value = { descripcion: '', precio: '' };
+  suscripcionEditando.value = null;
+  suscripcionNuevaGuardada.value = null; // Limpiar temp al abrir para agregar
+  transicionEnProgreso.value = true;
+};
 
-// Mostrar formulario después de que el botón desaparezca
-const mostrarFormularioDespuesDeBotón = () => {
-  mostrarFormulario.value = true
-}
+const mostrarFormularioDespuesDeBotón = () => { mostrarFormulario.value = true; };
 
-// Iniciar transición hacia el botón (para "Cancelar")
 const iniciarTransicionABoton = () => {
-  mostrarFormulario.value = false
-  suscripcionEditando.value = null
-  nuevaSuscripcion.value = { descripcion: '', precio: '' }
-  // transicionEnProgreso se desactivará después de que el formulario desaparezca
-}
+  mostrarFormulario.value = false;
+  suscripcionEditando.value = null;
+  datosFormulario.value = { descripcion: '', precio: '' };
+  // No limpiar suscripcionNuevaGuardada aquí para poder verla
+};
 
-// EVENTO: Editar suscripción existente (lo llama el @editar de Items)
 const editarSuscripcion = (suscripcion) => {
-  // Copiamos los datos del item al v-model del formulario
-  nuevaSuscripcion.value = { ...suscripcion } 
-  suscripcionEditando.value = suscripcion.id
-  
-  if (!mostrarFormulario.value) {
-    transicionEnProgreso.value = true // Oculta el botón
-    // El @after-leave se encargará de mostrar el formulario
-  }
-  // Si el formulario ya estaba visible, simplemente se actualizan los datos
-  mostrarFormulario.value = true; // Forzamos la muestra por si acaso
-}
+  // Al editar, pasamos la descripción textual y el precio numérico LIMPIO
+  datosFormulario.value = {
+      descripcion: suscripcion.descripcion,
+      precio: suscripcion.precio // Ya debería ser número por cargarSuscripciones
+  };
+  suscripcionEditando.value = suscripcion.id;
+  suscripcionNuevaGuardada.value = null; // Limpiar temp al abrir para editar
+  if (!mostrarFormulario.value) { transicionEnProgreso.value = true; }
+  mostrarFormulario.value = true;
+};
 
-// EVENTO: Guardar suscripción (lo llama el @guardar de AgregarModificar)
-const guardarSuscripcion = () => {
-  // Leemos los datos directamente desde el v-model (nuevaSuscripcion)
-  if (!nuevaSuscripcion.value.descripcion || !nuevaSuscripcion.value.precio) {
-    mensajeConfirmacion.value = 'Por favor completa todos los campos'
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
-    return
+const guardarSuscripcion = (datosRecibidos) => {
+  const claveCampo1 = configFormularioComputada.value.campo1.key; // 'descripcion'
+  const claveCampo2 = configFormularioComputada.value.campo2.key; // 'precio'
+
+  const valorCampo1 = datosRecibidos[claveCampo1]; // Puede ser número (días) o string (descripción en edición)
+  const valorCampo2 = datosRecibidos[claveCampo2]; // Debería ser un string numérico del input
+
+  // Validaciones
+  if (valorCampo1 === '' || valorCampo1 === null || valorCampo1 === undefined ||
+      valorCampo2 === '' || valorCampo2 === null || valorCampo2 === undefined) {
+    mensajeConfirmacion.value = 'Por favor completa todos los campos';
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    return;
   }
 
-  if (suscripcionEditando.value) {
-    // EVENTO: Actualizar suscripción existente
-    const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value)
+  const precioNum = parseFloat(valorCampo2);
+  if (isNaN(precioNum) || precioNum < 0) {
+      mensajeConfirmacion.value = 'El precio debe ser un número válido mayor o igual a 0.';
+      setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+      return;
+  }
+
+  if (suscripcionEditando.value !== null) { // Editando
+    const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value);
     if (index !== -1) {
-      suscripciones.value[index] = { ...nuevaSuscripcion.value, id: suscripcionEditando.value }
-      mensajeConfirmacion.value = 'Suscripción actualizada correctamente'
+      // --- Lógica API Actualización (SOLO PRECIO) ---
+      suscripciones.value[index].precio = precioNum; // Actualiza solo el precio
+      console.log("Llamando a API para ACTUALIZAR suscripción:", suscripciones.value[index]);
+      mensajeConfirmacion.value = 'Precio de suscripción actualizado';
+      // --- Fin Lógica API ---
     }
-  } else {
-    // EVENTO: Crear nueva suscripción
-    const nuevoId = Math.max(...suscripciones.value.map(s => s.id), 0) + 1
-    suscripciones.value.push({
+  } else { // Agregando
+    const diasNum = parseInt(valorCampo1); // valorCampo1 son los días
+     if (isNaN(diasNum) || diasNum <= 0) {
+        mensajeConfirmacion.value = 'La cantidad de días debe ser un número entero mayor a 0.';
+        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+        return;
+    }
+    const descripcionFormateada = `${diasNum} ${diasNum === 1 ? 'Día' : 'Días'} a la semana`;
+    if (suscripciones.value.some(s => s.descripcion === descripcionFormateada)) {
+        mensajeConfirmacion.value = `La suscripción "${descripcionFormateada}" ya existe.`;
+        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+        return;
+    }
+
+    const nuevoId = Math.max(...suscripciones.value.map(s => s.id), 0) + 1;
+    const nuevaSub = {
       id: nuevoId,
-      ...nuevaSuscripcion.value
-    })
-    mensajeConfirmacion.value = 'Suscripción creada correctamente'
+      descripcion: descripcionFormateada,
+      precio: precioNum
+    };
+    // --- Lógica API Creación ---
+    suscripcionNuevaGuardada.value = { ...nuevaSub }; // <-- Guarda en variable temporal
+    suscripciones.value.push(nuevaSub); // Añade a la lista principal
+    console.log("Llamando a API para CREAR suscripción:", nuevaSub);
+    mensajeConfirmacion.value = 'Suscripción creada correctamente';
+    // --- Fin Lógica API ---
   }
 
-  // Usamos la misma función de "Cancelar" para cerrar el formulario
-  iniciarTransicionABoton()
-  
-  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
-}
+  iniciarTransicionABoton(); // Cierra el formulario
+  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+};
 
-// EVENTO: Eliminar suscripción (lo llama el @eliminar de Items)
-const eliminarSuscripcion = (id) => {
-  if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
-    // EVENTO: Eliminar suscripción
-    suscripciones.value = suscripciones.value.filter(s => s.id !== id)
-    mensajeConfirmacion.value = 'Suscripción eliminada correctamente'
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
-  }
-}
+const eliminarSuscripcion = (id) => { /* ... sin cambios ... */
+    if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
+        console.log("Llamando a API para ELIMINAR suscripción con ID:", id);
+        suscripciones.value = suscripciones.value.filter(s => s.id !== id);
+        mensajeConfirmacion.value = 'Suscripción eliminada correctamente';
+        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    }
+};
+// --------------
 
-// Cargar suscripciones al montar el componente
-onMounted(() => {
-  cargarSuscripciones()
-})
+onMounted(cargarSuscripciones);
 </script>
+
 
 <style scoped>
 /* Estilos del Contenedor, Encabezado, Botón Agregar y Mensaje */

@@ -14,25 +14,26 @@
         <div class="contenido-tarjeta">
           <div class="info-item">
             <h3 class="item-titulo">{{ item[config.key1] }}</h3>
-            
-            <p 
-              v-if="config.showKey2" 
-              class="item-detalle" 
+
+            <p
+              v-if="config.showKey2"
+              class="item-detalle"
               :class="config.styleKey2"
             >
-              {{ item[config.key2] }}
+              {{ getCampo2Valor(item) }}
             </p>
+
           </div>
-          
+
           <div class="acciones-tarjeta">
             <button
               class="btn-accion btn-editar"
               title="Editar"
-              @click="$emit('editar', item)" 
+              @click="$emit('editar', item)"
             >
               <i class="fas fa-edit"></i>
             </button>
-            
+
             <button
               class="btn-accion btn-eliminar"
               title="Eliminar"
@@ -48,34 +49,33 @@
 </template>
 
 <script setup>
-defineProps({
-  items: {
-    type: Array,
-    required: true
-  },
-  config: {
-    type: Object,
-    required: true
-  },
-  emptyMessage: {
-    type: String,
-    default: 'No hay items cargados'
-  },
-  emptyIcon: {
-    type: String,
-    default: 'fas fa-info-circle'
-  }
-  // Ejemplo de config:
-  // config = {
-  //   key1: 'descripcion',  // Propiedad para el título
-  //   showKey2: true,         // Mostrar el segundo campo?
-  //   key2: 'precio',         // Propiedad para el detalle
-  //   styleKey2: 'precio'     // Clase CSS para el detalle
-  // }
-})
 
-// Define los eventos que este componente puede "avisar" al padre
-defineEmits(['editar', 'eliminar'])
+import { computed } from 'vue';
+import { formatCurrency } from '@/utils/formatters'; // <-- IMPORTA LA FUNCIÓN (Ajusta la ruta si es necesario)
+
+const props = defineProps({
+  items: { type: Array, required: true },
+  config: { type: Object, required: true },
+  emptyMessage: { type: String, default: 'No hay items cargados' },
+  emptyIcon: { type: String, default: 'fas fa-info-circle' }
+});
+
+defineEmits(['editar', 'eliminar']);
+
+// --- formatPrice ELIMINADO ---
+// const formatPrice = (value) => { ... }; // Ya no es necesario aquí
+
+// Computed para obtener y formatear (si aplica) el valor del campo 2
+const getCampo2Valor = (item) => {
+    const valor = item[props.config.key2];
+    // Formatea solo si es contexto suscripciones Y la config lo pide Y el valor existe
+    if (props.config.contexto === 'suscripciones' && props.config.formatoPrecio && valor !== undefined && valor !== null) {
+        // --- USA LA FUNCIÓN IMPORTADA ---
+        return formatCurrency(valor);
+        // ---------------------------------
+    }
+    return valor;
+};
 </script>
 
 <style scoped>

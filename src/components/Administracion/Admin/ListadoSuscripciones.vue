@@ -9,7 +9,7 @@
          @click="seleccionar(precio.descripcion)">
       <div class="opcion-contenido">
         <h4 class="opcion-titulo">{{ precio.descripcion }}</h4>
-        <p class="opcion-precio">{{ precio.precio }}</p>
+        <p class="opcion-precio">{{ formatCurrency(precio.precio) }}</p>
       </div>
       <i class="fas fa-check opcion-check" v-if="modelValue === precio.descripcion"></i>
     </div>
@@ -18,6 +18,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { formatCurrency } from '@/utils/formatters';
 
 const props = defineProps({
   modelValue: String // Para usar con v-model (recibe la descripción seleccionada)

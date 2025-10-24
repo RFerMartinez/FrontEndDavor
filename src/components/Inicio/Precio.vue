@@ -1,14 +1,23 @@
 <template>
   <div class="precio-item">
     <span class="descripcion">{{ precio.descripcion }}</span>
-    <span class="valor">{{ precio.precio }}</span>
+    <span class="valor">{{ formatCurrency(precio.precio) }}</span>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  precio: Object
-})
+
+import { computed } from 'vue';
+import { formatCurrency } from '@/utils/formatters'; // <-- IMPORTA LA FUNCIÓN (Ajusta la ruta si es necesario)
+
+const props = defineProps({
+  precio: { // Se espera { descripcion: String, precio: String (ej: "30000") }
+    type: Object,
+    required: true
+  }
+});
+
+
 </script>
 
 <style scoped>

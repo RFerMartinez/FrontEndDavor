@@ -49,3 +49,52 @@ export function formatReclamoDateTime(fechaStr, horaStr) {
         hora: horaFormateada 
     };
 }
+
+
+/**
+ * Formatea un valor numérico o string numérico como moneda argentina (ARS) sin decimales.
+ * @param {string|number|null|undefined} value - El valor a formatear (ej: "30000" o 30000).
+ * @returns {string} - El valor formateado (ej: "$30.000") o un string vacío si la entrada no es válida.
+ */
+export function formatCurrency(value) {
+  // 1. Validar entrada básica
+  if (value === null || value === undefined || value === '') {
+    return ''; // O podrías devolver '$0' o un placeholder
+  }
+
+  // 2. Convertir a número (quitando puntos si los hubiera en string)
+  let numberValue;
+  if (typeof value === 'string') {
+    const cleanedString = value.replace(/\./g, ''); // Quita puntos de miles
+    numberValue = parseFloat(cleanedString);
+  } else if (typeof value === 'number') {
+    numberValue = value;
+  } else {
+    // Si no es string ni número, no se puede formatear
+    console.warn(`formatCurrency: Valor no válido '${value}'`);
+    return ''; // O devolver el valor original? Mejor vacío.
+  }
+
+  // 3. Verificar si la conversión fue exitosa
+  if (isNaN(numberValue)) {
+    console.warn(`formatCurrency: No se pudo convertir '${value}' a número.`);
+    return ''; // O devolver el valor original? Mejor vacío.
+  }
+
+  // 4. Formatear como moneda ARS sin decimales
+  try {
+    return numberValue.toLocaleString('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  } catch (error) {
+    console.error("Error formateando moneda:", error);
+    // En caso de error inesperado, devolver el número sin formato
+    return String(numberValue);
+  }
+}
+
+// Puedes agregar otras funciones de formato aquí si las necesitas
+// export function formatDate(date) { ... }

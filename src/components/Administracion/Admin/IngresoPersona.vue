@@ -105,10 +105,10 @@
 </template>
 
 <script setup>
-import { ref, computed, defineProps, defineEmits, onMounted } from 'vue';
+import { ref, computed, defineProps, defineEmits, onMounted, watch } from 'vue'; // <--- Añadido watch
 import ListadoSuscripciones from './ListadoSuscripciones.vue';
 import ListadoTrabajos from './ListadoTrabajos.vue';
-import ListadoNiveles from './ListadoNiveles.vue'; // <-- NUEVO: Importar
+import ListadoNiveles from './ListadoNiveles.vue';
 import TablaHorarios from '../TablaHorarios.vue';
 import DetallePersona from './DetallePersona.vue';
 
@@ -127,81 +127,100 @@ const persona = ref({
   localidad: "Resistencia",
   Calle: "Av Italia",
   nro: "100"
-});
+}); // Inicializar vacío o con estructura base
 
 const emit = defineEmits(['volverPersonas', 'ingresoConfirmado']);
 
 // Refs para los datos NUEVOS de ingreso
 const nuevaSuscripcion = ref('');
 const nuevoTrabajo = ref('');
-const nuevoNivel = ref(''); // <-- NUEVO: Ref para el nivel
+const nuevoNivel = ref('');
 const nuevosHorarios = ref([]);
 const mostrarMensajeValidacion = ref(false);
 
 onMounted(() => {
   if (props.personaSeleccionada) {
-    persona.value = { ...props.personaSeleccionada };
+    // Copia los datos, asegurándose de que todos los campos base existan
+    persona.value = { ...persona.value, ...props.personaSeleccionada };
     console.log("Datos de personaSeleccionada copiados a ref local:", persona.value);
   } else {
     console.warn("IngresoPersona: No se recibieron datos en personaSeleccionada.");
   }
 });
 
-// --- VALIDACIÓN MODIFICADA ---
+// --- VALIDACIÓN (sin cambios) ---
 const formularioIngresoValido = computed(() => {
   const tieneSuscripcion = !!nuevaSuscripcion.value;
   const tieneTrabajo = !!nuevoTrabajo.value;
-  const tieneNivel = !!nuevoNivel.value; // <-- NUEVO: Chequeo de nivel
+  const tieneNivel = !!nuevoNivel.value;
   let tieneHorariosValidos = true;
 
-  // Validar horarios solo si la suscripción no es 'Día Libre'
   if (tieneSuscripcion && nuevaSuscripcion.value !== 'Día Libre') {
+    // La validación ahora depende de que nuevosHorarios tenga elementos *después*
+    // de que se selecciona la suscripción (gracias al watch que limpia)
     tieneHorariosValidos = nuevosHorarios.value && nuevosHorarios.value.length > 0;
   }
-
-  // Ahora requiere los tres + horarios si aplica
   return tieneSuscripcion && tieneTrabajo && tieneNivel && tieneHorariosValidos;
 });
 // --- FIN VALIDACIÓN ---
+
+// --- NUEVO WATCH PARA RESETEAR HORARIOS ---
+watch(nuevaSuscripcion, (newValue, oldValue) => {
+  // Si la suscripción cambia (y no es la carga inicial donde oldValue es undefined)
+  // y la nueva suscripción NO es 'Día Libre' (para la cual no necesitamos horarios)
+  if (oldValue !== undefined && newValue !== oldValue) {
+    console.log(`Suscripción cambiada de "${oldValue}" a "${newValue}". Reseteando horarios seleccionados.`);
+    nuevosHorarios.value = []; // Limpiar horarios previos
+    mostrarMensajeValidacion.value = false; // Ocultar mensaje de validación previo
+    // El usuario deberá volver a seleccionar horarios en TablaHorarios
+  } else if (newValue === 'Día Libre') {
+      // Si cambia a Día Libre, también limpiamos y ocultamos mensaje
+      nuevosHorarios.value = [];
+      mostrarMensajeValidacion.value = false;
+  }
+});
+// --- FIN NUEVO WATCH ---
 
 
 const volverPersonas = () => { emit('volverPersonas'); };
 
 const actualizarHorarios = (horarios) => {
   nuevosHorarios.value = horarios || [];
+  console.log("IngresoPersona: Horarios actualizados desde TablaHorarios:", nuevosHorarios.value);
   // Ocultar mensaje de validación si el formulario ahora es válido
+  // (esto se recalcula automáticamente por la computed 'formularioIngresoValido')
   if (formularioIngresoValido.value) {
     mostrarMensajeValidacion.value = false;
   }
 };
 
-// --- CONFIRMAR INGRESO MODIFICADO ---
 const confirmarIngreso = () => {
   if (!formularioIngresoValido.value) {
     console.error("Formulario de ingreso inválido. Datos actuales:", {
       suscripcion: nuevaSuscripcion.value,
       trabajo: nuevoTrabajo.value,
-      nivel: nuevoNivel.value, // <-- NUEVO: Incluir nivel en log
+      nivel: nuevoNivel.value,
       horarios: nuevosHorarios.value
     });
-    mostrarMensajeValidacion.value = true; // Mostrar mensaje de error
-    return; // Detener ejecución
+    // Asegurarse de que el mensaje se muestre si falla la validación al hacer clic
+    mostrarMensajeValidacion.value = true;
+    return;
   }
-  mostrarMensajeValidacion.value = false; // Ocultar mensaje si es válido
+  mostrarMensajeValidacion.value = false;
 
-  // Construir objeto final
   const datosCompletosIngreso = {
-    ...persona.value, // Datos base de la persona
+    ...persona.value,
     suscripcion: nuevaSuscripcion.value,
-    trabajoactual: nuevoTrabajo.value, // Usamos 'trabajoactual' para consistencia con InfoAlumno
-    nivel: nuevoNivel.value, // <-- NUEVO: Añadir nivel seleccionado
-    horarios: nuevosHorarios.value || [],
+    trabajoactual: nuevoTrabajo.value,
+    nivel: nuevoNivel.value,
+    // Asegurar que si es Día Libre, los horarios van vacíos
+    horarios: nuevaSuscripcion.value === 'Día Libre' ? [] : (nuevosHorarios.value || []),
     activo: true,
     cuotasPendientes: 0,
-    turno: '', // Se calcula después
+    turno: '',
   };
 
-  // Determinar turno (sin cambios)
+  // Determinar turno
   if (datosCompletosIngreso.horarios && datosCompletosIngreso.horarios.length > 0) {
       const primerHorario = datosCompletosIngreso.horarios[0]?.horario;
       if (primerHorario && typeof primerHorario === 'string') {
@@ -218,7 +237,6 @@ const confirmarIngreso = () => {
   console.log("Confirmando ingreso con datos completos:", datosCompletosIngreso);
   emit('ingresoConfirmado', datosCompletosIngreso);
 };
-// --- FIN CONFIRMAR INGRESO ---
 </script>
 
 <style scoped>
