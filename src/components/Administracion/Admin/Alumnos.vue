@@ -1,10 +1,8 @@
 <template>
   <div class="contenedor-alumnos">
-    <!-- Encabezado con información de alumnos -->
     <div class="encabezado-alumnos">
       <h1 class="titulo">ALUMNOS</h1>
-      
-      <!-- Filtros de búsqueda -->
+
       <div class="filtros-busqueda">
         <div class="busqueda-input-container">
           <i class="fas fa-search icono-busqueda"></i>
@@ -15,8 +13,8 @@
             placeholder="Buscar por DNI, nombre o apellido..."
             @input="aplicarFiltros"
           >
-          <button 
-            v-if="terminoBusqueda" 
+          <button
+            v-if="terminoBusqueda"
             class="btn-limpiar-busqueda"
             @click="limpiarBusqueda"
             aria-label="Limpiar búsqueda"
@@ -24,9 +22,9 @@
             <i class="fas fa-times"></i>
           </button>
         </div>
-        
+
         <div class="filtros-turno">
-          <button 
+          <button
             class="btn-turno"
             :class="{ 'activo': filtroTurno === 'Mañana' }"
             @click="toggleTurno('Mañana')"
@@ -34,7 +32,7 @@
             <i class="fas fa-sun"></i>
             Mañana
           </button>
-          <button 
+          <button
             class="btn-turno"
             :class="{ 'activo': filtroTurno === 'Tarde' }"
             @click="toggleTurno('Tarde')"
@@ -48,73 +46,94 @@
       <div class="controles-superiores">
         <div class="estado-alumnos-sutil">
           <div class="info-alumno-sutil">
-            <span class="numero-sutil">{{ alumnosFiltrados.length }}</span>
+            <span class="numero-sutil">{{ loading ? '-' : alumnosFiltrados.length }}</span>
             <span class="texto-sutil">Mostrando</span>
           </div>
           <div class="separador"></div>
           <div class="info-alumno-sutil">
-            <span class="numero-sutil activo">{{ alumnosActivos }}</span>
+            <span class="numero-sutil activo">{{ loading ? '-' : alumnosActivos }}</span>
             <span class="texto-sutil">Activos</span>
           </div>
           <div class="separador"></div>
           <div class="info-alumno-sutil">
-            <span class="numero-sutil inactivo">{{ alumnosInactivos }}</span>
+            <span class="numero-sutil inactivo">{{ loading ? '-' : alumnosInactivos }}</span>
             <span class="texto-sutil">Inactivos</span>
           </div>
+          <div class="separador"></div>
+          <div class="info-alumno-sutil">
+            <span class="numero-sutil deudor">{{ loading ? '-' : alumnosDeudores }}</span>
+            <span class="texto-sutil">Deudores</span>
+          </div>
+          </div>
+
+        <div class="botones-filtros">
+            <button
+              class="btn-filtrar"
+              :class="{ 'activo': mostrarSoloActivos }"
+              @click="toggleFiltroActivos"
+              aria-label="Filtrar alumnos activos"
+            >
+              <i class="fas fa-user-check"></i>
+              <span class="btn-texto">Solo Activos</span>
+              <span class="btn-badge badge-activos" v-if="mostrarSoloActivos && !loading">{{ alumnosActivos }}</span>
+            </button>
+
+            <button
+              class="btn-filtrar btn-filtrar-deudor"
+              :class="{ 'activo': mostrarSoloDeudores }"
+              @click="toggleFiltroDeudores"
+              aria-label="Filtrar alumnos deudores"
+            >
+              <i class="fas fa-dollar-sign"></i>
+              <span class="btn-texto">Solo Deudores</span>
+              <span class="btn-badge badge-deudores" v-if="mostrarSoloDeudores && !loading">{{ alumnosDeudores }}</span>
+            </button>
+            </div>
         </div>
-
-        <button 
-          class="btn-filtrar"
-          :class="{ 'activo': mostrarSoloActivos }"
-          @click="toggleFiltroActivos"
-          aria-label="Filtrar alumnos activos"
-        >
-          <i class="fas fa-filter"></i>
-          <span class="btn-texto">Solo activos</span>
-          <span class="btn-badge" v-if="mostrarSoloActivos">{{ alumnosActivos }}</span>
-        </button>
-      </div>
     </div>
 
-    <!-- Tabla con los alumnos paginados -->
-    <TablaAlumnos 
-      :alumnos="alumnosPaginados" 
-      @ver-detalles="verAlumno"
-    />
-    
-    <!-- Mensaje cuando no hay resultados -->
-    <div v-if="alumnosFiltrados.length === 0" class="sin-resultados">
-      <i class="fas fa-search fa-2x"></i>
-      <h3>No se encontraron alumnos</h3>
-      <p>Intenta con otros términos de búsqueda o ajusta los filtros</p>
+    <div v-if="loading" class="loading-container">
+        <div class="spinner"></div>
+        <span>Cargando alumnos...</span>
     </div>
-    
-    <!-- Controles de paginación inferiores -->
-    <div class="paginacion-inferior" v-if="totalPaginas > 1 && alumnosFiltrados.length > 0">
+
+    <div v-else>
+        <TablaAlumnos
+          v-if="alumnosPaginados && alumnosPaginados.length > 0"
+          :alumnos="alumnosPaginados"
+          @ver-detalles="verAlumno"
+        />
+        <div v-else-if="alumnosFiltrados.length === 0" class="sin-resultados">
+          <i class="fas fa-search fa-2x"></i>
+          <h3>No se encontraron alumnos</h3>
+          <p>Intenta con otros términos de búsqueda o ajusta los filtros</p>
+        </div>
+    </div>
+
+    <div class="paginacion-inferior" v-if="!loading && totalPaginas > 1 && alumnosFiltrados.length > 0">
       <div class="paginacion-controles">
-        <button 
-          class="btn-paginacion" 
+        <button
+          class="btn-paginacion"
           :disabled="paginaActual === 1"
           @click="cambiarPagina(paginaActual - 1)"
           aria-label="Página anterior"
         >
           <i class="fas fa-chevron-left"></i>
         </button>
-        
+
         <div class="numeros-pagina">
-          <span 
-            v-for="numero in numerosPaginas" 
-            :key="numero"
-            class="numero-pagina"
-            :class="{ 'activa': numero === paginaActual }"
+          <span
+            v-for="numero in numerosPaginas"
+            :key="numero.toString() + '-' + paginaActual" class="numero-pagina"
+            :class="{ 'activa': numero === paginaActual, 'puntos': numero === '...' }"
             @click="cambiarPagina(numero)"
           >
-            {{ numero }}
+            {{ numero === '...' ? '…' : numero }}
           </span>
         </div>
-        
-        <button 
-          class="btn-paginacion" 
+
+        <button
+          class="btn-paginacion"
           :disabled="paginaActual === totalPaginas"
           @click="cambiarPagina(paginaActual + 1)"
           aria-label="Página siguiente"
@@ -127,166 +146,128 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import TablaAlumnos from './TablaAlumnos.vue'
+import { ref, computed, onMounted } from 'vue';
+import TablaAlumnos from './TablaAlumnos.vue';
+import { obtenerTodosLosAlumnos } from '@/api/services/alumnoService';
+// --- NUEVO: Importar funciones de utilidad ---
+import { filterItems } from '@/utils/formatters'; // Ajusta la ruta si es necesario
+// Ya no necesitamos normalizarTexto aquí si filterItems lo hace internamente
 
-import { obtenerTodosLosAlumnos } from '@/api/services/alumnoService' 
-const alumnos = ref([]);    // Lista completa de alumnos
-const loading = ref(false);  // Estado de carga
-const console = ref(null);   // Referencia a la consola del navegador
+const alumnos = ref([]);
+const loading = ref(true); // Cambiado a true para mostrar carga inicial
+// const console = ref(null); // Eliminado, no se usaba
 
 onMounted(async () => {
   loading.value = true;
   try {
     const respuesta = await obtenerTodosLosAlumnos();
-    alumnos.value = respuesta; // Asume que la respuesta tiene una propiedad 'data' con la lista de alumnos
+    // Ordenar al recibir los datos
+    alumnos.value = respuesta.sort((a, b) =>
+        (a.apellido || '').localeCompare(b.apellido || '') ||
+        (a.nombre || '').localeCompare(b.nombre || '')
+    );
   } catch (error) {
     console.error('Error al obtener los alumnos:', error);
+    alumnos.value = []; // Asegurar array vacío en caso de error
   } finally {
     loading.value = false;
   }
-})
+});
 
+const paginaActual = ref(1);
+const elementosPorPagina = 10;
+const mostrarSoloActivos = ref(false);
+const terminoBusqueda = ref('');
+const filtroTurno = ref(null); // null significa sin filtro de turno
+const mostrarSoloDeudores = ref(false);
+const emit = defineEmits(['verAlumno']);
 
+// --- normalizarTexto ELIMINADO ---
 
-const paginaActual = ref(1)
-const elementosPorPagina = 10
-const mostrarSoloActivos = ref(false)
-const terminoBusqueda = ref('')
-const filtroTurno = ref(null)
-
-const emit = defineEmits(['verAlumno'])
-
-// Función para normalizar texto (quitar tildes y convertir a minúsculas)
-const normalizarTexto = (texto) => {
-  return texto
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-}
-
-// Computed properties para la información de estado
-const alumnosActivos = computed(() => 
+// Computed properties para información de estado (sin cambios lógicos, usan alumnosFiltrados)
+const alumnosActivos = computed(() =>
   alumnosFiltrados.value.filter(alumno => alumno.activo).length
-)
-
-const alumnosInactivos = computed(() => 
+);
+const alumnosInactivos = computed(() =>
   alumnosFiltrados.value.filter(alumno => !alumno.activo).length
-)
-
+);
+const alumnosDeudores = computed(() =>
+  // Cuenta sobre la lista ya filtrada
+  alumnosFiltrados.value.filter(alumno => alumno.cuotasPendientes > 0).length
+);
+// --- alumnosFiltrados AHORA USA filterItems ---
 const alumnosFiltrados = computed(() => {
-  let alumnosFiltrados = alumnos.value
+  // Solo filtra si NO está cargando y hay alumnos
+  if (loading.value || !alumnos.value) return [];
+  // Construye el objeto de filtros adicionales
+  const filtros = {
+    turno: filtroTurno.value,
+    activo: mostrarSoloActivos.value ? true : undefined,
+    deudor: mostrarSoloDeudores.value ? true : undefined // <-- AÑADIDO
+  };
+  // Llama a la función reutilizable
+  return filterItems(alumnos.value, terminoBusqueda.value, filtros);
+});
+// --- FIN alumnosFiltrados ---
 
-  // Filtrar por término de búsqueda
-  if (terminoBusqueda.value.trim()) {
-    const termino = terminoBusqueda.value.trim()
-    
-    // Verificar si el término es numérico (posible DNI)
-    const esBusquedaDNI = /^\d+$/.test(termino)
-    
-    alumnosFiltrados = alumnosFiltrados.filter(alumno => {
-      if (esBusquedaDNI) {
-        // Para búsqueda de DNI: buscar coincidencia exacta
-        return alumno.dni === termino
-      } else {
-        // Para búsqueda de texto: normalizar y buscar coincidencias parciales
-        const nombreNormalizado = normalizarTexto(alumno.nombre)
-        const apellidoNormalizado = normalizarTexto(alumno.apellido)
-        const terminoNormalizado = normalizarTexto(termino)
-        
-        return nombreNormalizado.includes(terminoNormalizado) ||
-               apellidoNormalizado.includes(terminoNormalizado) ||
-               `${nombreNormalizado} ${apellidoNormalizado}`.includes(terminoNormalizado)
+
+// Ya no se necesita alumnosMostrados, usamos alumnosFiltrados directamente
+// const alumnosMostrados = computed(() => alumnosFiltrados.value)
+
+// Paginación (usa alumnosFiltrados)
+const totalPaginas = computed(() => Math.ceil((alumnosFiltrados.value?.length || 0) / elementosPorPagina) || 1 ); // Asegura al menos 1
+
+const alumnosPaginados = computed(() => { /* ... sin cambios lógicos ... */
+  const inicio = (paginaActual.value - 1) * elementosPorPagina;
+  const fin = inicio + elementosPorPagina;
+  return alumnosFiltrados.value.slice(inicio, fin); // Usa alumnosFiltrados
+});
+
+const numerosPaginas = computed(() => { /* ... sin cambios lógicos ... */
+  const total = totalPaginas.value;
+  if (!total || total === Infinity || total <= 1) return [1]; // Ajustado para total=1
+  const current = paginaActual.value;
+  const delta = 1;
+  let range = [];
+  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) { range.push(i); }
+  if (current - delta > 2) range.unshift('...');
+  if (current + delta < total - 1) range.push('...');
+  range.unshift(1);
+  if (total > 1) range.push(total);
+   // Filtrar duplicados de '...' (igual que antes)
+  return range.filter((item, index, arr) => {
+      if (item === '...') {
+          if (index === 1 && arr[0] === 1) return false;
+          if (index === arr.length - 2 && arr[arr.length - 1] === total) return false;
+          if (index > 0 && arr[index - 1] === '...') return false;
       }
-    })
-  }
+      return true;
+  });
+});
 
-  // Filtrar por turno
-  if (filtroTurno.value) {
-    alumnosFiltrados = alumnosFiltrados.filter(alumno => alumno.turno === filtroTurno.value)
-  }
 
-  // Filtrar por estado activo
-  if (mostrarSoloActivos.value) {
-    alumnosFiltrados = alumnosFiltrados.filter(alumno => alumno.activo)
-  }
-
-  return alumnosFiltrados
-})
-
-const alumnosMostrados = computed(() => alumnosFiltrados.value)
-
-// Computed properties para la paginación
-const totalPaginas = computed(() => 
-  Math.ceil(alumnosMostrados.value.length / elementosPorPagina)
-)
-
-const alumnosPaginados = computed(() => {
-  const inicio = (paginaActual.value - 1) * elementosPorPagina
-  const fin = inicio + elementosPorPagina
-  return alumnosMostrados.value.slice(inicio, fin)
-})
-
-const numerosPaginas = computed(() => {
-  const total = totalPaginas.value
-  const current = paginaActual.value
-  const delta = 1
-  
-  let range = []
-  for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
-    range.push(i)
-  }
-  
-  if (current - delta > 2) {
-    range.unshift('...')
-  }
-  if (current + delta < total - 1) {
-    range.push('...')
-  }
-  
-  range.unshift(1)
-  if (total > 1) range.push(total)
-  
-  return range
-})
-
-// Métodos
+// Métodos (sin cambios lógicos, pero ahora afectan a filterItems indirectamente)
 const toggleFiltroActivos = () => {
-  mostrarSoloActivos.value = !mostrarSoloActivos.value
-  paginaActual.value = 1
-}
-
+  mostrarSoloActivos.value = !mostrarSoloActivos.value;
+  paginaActual.value = 1; // Resetea página al cambiar filtro
+};
 const toggleTurno = (turno) => {
-  if (filtroTurno.value === turno) {
-    filtroTurno.value = null
-  } else {
-    filtroTurno.value = turno
-  }
-  paginaActual.value = 1
-}
-
-const aplicarFiltros = () => {
-  paginaActual.value = 1
-}
-
-const limpiarBusqueda = () => {
-  terminoBusqueda.value = ''
-  paginaActual.value = 1
-}
-
-const cambiarPagina = (nuevaPagina) => {
+  filtroTurno.value = filtroTurno.value === turno ? null : turno;
+  paginaActual.value = 1; // Resetea página al cambiar filtro
+};
+const toggleFiltroDeudores = () => {
+  mostrarSoloDeudores.value = !mostrarSoloDeudores.value;
+  paginaActual.value = 1; // Resetea página al cambiar filtro
+};
+const aplicarFiltros = () => { paginaActual.value = 1; }; // Solo resetea página al escribir
+const limpiarBusqueda = () => { terminoBusqueda.value = ''; paginaActual.value = 1; };
+const cambiarPagina = (nuevaPagina) => { /* ... sin cambios ... */
   if (nuevaPagina !== '...' && nuevaPagina >= 1 && nuevaPagina <= totalPaginas.value) {
-    paginaActual.value = nuevaPagina
-    document.querySelector('.contenedor-alumnos').scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'start' 
-    })
+    paginaActual.value = nuevaPagina;
+    document.querySelector('.contenedor-alumnos')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Añadido optional chaining
   }
-}
-
-const verAlumno = (alumno) => {
-  emit('verAlumno', alumno)
-}
+};
+const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
 </script>
 
 <style scoped>
@@ -781,5 +762,55 @@ const verAlumno = (alumno) => {
   .numeros-pagina {
     gap: 0.3rem;
   }
+}
+.numero-sutil.deudor {
+  color: #ff9800; /* Naranja */
+}
+
+/* Contenedor para botones de filtro (necesario para espaciado) */
+.botones-filtros {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center; /* Centrar si se envuelven */
+}
+
+/* Clase específica para diferenciar el botón deudor */
+.btn-filtrar-deudor {
+  /* Puedes ajustar el color base si quieres, si no, usa el de .btn-filtrar */
+  border-color: #ff9800; 
+  color: #ff9800; 
+}
+
+/* Estilo ACTIVO para "Deudores" (usa el color naranja) */
+.btn-filtrar.btn-filtrar-deudor.activo {
+    background: #ff9800; /* Naranja */
+    border-color: #ff9800;
+    color: white; /* Hereda de .btn-filtrar.activo si lo tienes, sino añádelo */
+}
+.btn-filtrar.btn-filtrar-deudor.activo:hover {
+    background: #fb8c00; /* Naranja más oscuro */
+    border-color: #fb8c00;
+}
+
+/* Badge para deudores (color naranja) */
+.badge-deudores {
+    background: #ff9800; /* Naranja */
+    color: white; /* Asegura texto blanco */
+}
+/* Badge invertido cuando el botón deudor está activo */
+.btn-filtrar.btn-filtrar-deudor.activo .btn-badge {
+    background: white;
+    color: #ff9800; /* Naranja */
+}
+
+/* Ajuste responsive para el contenedor de botones (si no lo hiciste) */
+@media (max-width: 992px) {
+    .controles-superiores { justify-content: center; flex-direction: column; }
+    .botones-filtros { margin-top: 1rem; }
+}
+@media (max-width: 768px) {
+    .botones-filtros { width: 100%; }
+    .btn-filtrar { width: 100%; justify-content: center; }
 }
 </style>

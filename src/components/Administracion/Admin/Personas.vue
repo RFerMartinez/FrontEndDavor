@@ -75,7 +75,7 @@
 import { ref, computed } from 'vue'
 // *** ASEGÚRATE QUE LA RUTA A TablaAlumnos SEA CORRECTA ***
 import TablaAlumnos from './TablaAlumnos.vue' // O la ruta correcta ej: '../Alumnos/TablaAlumnos.vue'
-
+import { filterItems } from '@/utils/formatters';
 // *** +++++++ Definir el evento que se emitirá +++++++ ***
 const emit = defineEmits(['verIngreso'])
 // ******************************************************

@@ -1,5 +1,16 @@
 <template>
   <div>
+    <div class="tarjeta-header">
+      <div class="info-principal">
+        <h2 class="nombre-completo">{{ datos.nombre || 'N/A' }} {{ datos.apellido || 'N/A' }}</h2>
+        <p class="dni-persona">{{ datos.dni ? `DNI: ${datos.dni}` : 'DNI no disponible' }}</p>
+      </div>
+      <template v-if="datos.hasOwnProperty('activo')">
+        <div class="estado-alumno">
+          <Estado :positivo="datos.activo" :texto="datos.activo ? 'ACTIVO' : 'INACTIVO'" />
+        </div>
+      </template>
+    </div>
     <div class="seccion-tabla">
       <h3 class="titulo-seccion">
         <i class="fas fa-user"></i>
@@ -57,61 +68,60 @@
     </div>
 
     <template v-if="datos.hasOwnProperty('turno') || datos.hasOwnProperty('suscripcion') || datos.hasOwnProperty('trabajoactual') || datos.hasOwnProperty('nivel')">
-        <div class="separador-seccion"></div>
-        <div class="seccion-tabla">
-          <h3 class="titulo-seccion">
-            <i class="fas fa-dumbbell"></i>
-            Información del Gimnasio
-          </h3>
-          <div class="tabla-datos">
-            <div class="fila-tabla">
-              <div class="celda etiqueta">Turno:</div>
-              <div class="celda valor">{{ datos.turno || 'N/A' }}</div>
-              <div class="celda etiqueta">Suscripción:</div>
-              <div class="celda valor">{{ datos.suscripcion || 'N/A' }}</div>
-            </div>
-            <div class="fila-tabla">
-              <div class="celda etiqueta">Trabajo Actual:</div>
-              <div class="celda valor">{{ datos.trabajoactual || 'N/A' }}</div>
-              <div class="celda etiqueta">Nivel:</div>
-              <div class="celda valor">{{ datos.nivel || 'N/A' }}</div>
-            </div>
+      <div class="separador-seccion"></div>
+      <div class="seccion-tabla">
+        <h3 class="titulo-seccion">
+          <i class="fas fa-dumbbell"></i>
+          Información del Gimnasio
+        </h3>
+        <div class="tabla-datos">
+          <div class="fila-tabla">
+            <div class="celda etiqueta">Turno:</div>
+            <div class="celda valor">{{ datos.turno || 'N/A' }}</div>
+            <div class="celda etiqueta">Suscripción:</div>
+            <div class="celda valor">{{ datos.suscripcion || 'N/A' }}</div>
+          </div>
+          <div class="fila-tabla">
+            <div class="celda etiqueta">Trabajo Actual:</div>
+            <div class="celda valor">{{ datos.trabajoactual || 'N/A' }}</div>
+            <div class="celda etiqueta">Nivel:</div>
+            <div class="celda valor">{{ datos.nivel || 'N/A' }}</div>
           </div>
         </div>
+      </div>
     </template>
 
     <template v-if="datos.hasOwnProperty('activo') || datos.hasOwnProperty('cuotasPendientes')">
-        <div class="separador-seccion"></div>
-        <div class="seccion-tabla">
-          <h3 class="titulo-seccion">
-            <i class="fas fa-chart-bar"></i>
-            Estado y Cuotas
-          </h3>
-          <div class="tabla-datos">
-            <div class="fila-tabla">
-              <div class="celda etiqueta">Estado:</div>
-              <div class="celda valor">
-                 <span :class="datos.activo ? 'estado-activo' : 'estado-inactivo'">
-                   {{ datos.activo ? 'ACTIVO' : 'INACTIVO' }}
-                 </span>
-                 </div>
-              <div class="celda etiqueta">Cuotas Pendientes:</div>
-              <div class="celda valor">
-                <span class="badge-cuota" :class="{'ninguna': datos.cuotasPendientes === 0}">
-                  {{ datos.cuotasPendientes }}
-                </span>
-              </div>
+      <div class="separador-seccion"></div>
+      <div class="seccion-tabla">
+        <h3 class="titulo-seccion">
+          <i class="fas fa-chart-bar"></i>
+          Estado y Cuotas
+        </h3>
+        <div class="tabla-datos">
+          <div class="fila-tabla">
+            <div class="celda etiqueta">Estado:</div>
+            <div class="celda valor">
+             <Estado v-if="datos.hasOwnProperty('activo')" :positivo="datos.activo" :texto="datos.activo ? 'ACTIVO' : 'INACTIVO'" />
+             <span v-else class="estado-inactivo">N/A</span> </div>
+            <div class="celda etiqueta">Cuotas Pendientes:</div>
+            <div class="celda valor">
+              <span class="badge-cuota" :class="{'ninguna': !datos.cuotasPendientes || datos.cuotasPendientes === 0}">
+                {{ datos.cuotasPendientes || 0 }}
+              </span>
             </div>
           </div>
         </div>
+      </div>
      </template>
 
   </div>
 </template>
 
 <script setup>
-// Importa Estado si decides usar el componente en lugar de texto simple
-// import Estado from '../Estado.vue';
+// V V V IMPORTAR ESTADO V V V
+import Estado from '../Estado.vue';
+// ^ ^ ^ FIN IMPORTAR ESTADO ^ ^ ^
 
 const props = defineProps({
   datos: {
@@ -122,15 +132,61 @@ const props = defineProps({
 </script>
 
 <style scoped>
-/* Copia aquí TODOS los estilos relevantes de InfoAlumno o IngresoPersona */
-/* para .seccion-tabla, .titulo-seccion, .tabla-datos, .fila-tabla, */
-/* .celda, .etiqueta, .valor, .separador-seccion, .badge-cuota, */
-/* y si usas el componente Estado, sus estilos o los de .estado-activo/.estado-inactivo */
-
-/* Estilos copiados y adaptados */
-.seccion-tabla {
-  margin-bottom: 2rem; /* Ajustado respecto a InfoAlumno */
+/* V V V NUEVOS ESTILOS PARA EL HEADER (Copiados de InfoAlumno/IngresoPersona) V V V */
+.tarjeta-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1.5rem 2rem; /* Ajustado */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #dee2e6;
+  /* Redondea solo las esquinas superiores si el componente se usa al inicio de un .tarjeta-contenido */
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
+
+.info-principal {
+  flex: 1; /* Permite que crezca */
+}
+
+.nombre-completo {
+  font-size: 1.6rem; /* Ajustado */
+  color: #2c3e50;
+  margin: 0 0 0.3rem 0; /* Ajustado */
+  font-weight: 600;
+}
+
+.dni-persona { /* Clase genérica para DNI */
+  font-size: 1rem; /* Ajustado */
+  color: #6c757d;
+  margin: 0;
+  font-weight: 500;
+}
+
+.estado-alumno {
+  flex-shrink: 0; /* Evita que el tag de estado se achique */
+  margin-left: 1rem;
+}
+/* ^ ^ ^ FIN NUEVOS ESTILOS HEADER ^ ^ ^ */
+
+
+/* Estilos existentes */
+.seccion-tabla {
+  margin-bottom: 2rem;
+  /* NUEVO: Añadido padding top para separar del header */
+  padding-top: 2rem;
+}
+
+/* PRIMER TITULO-SECCION no necesita margen superior */
+.seccion-tabla:first-of-type {
+    margin-bottom: 2rem;
+    padding-top: 0; /* Quitar padding-top si es el primer elemento */
+}
+/* APLICAR PADDING TOP AL PRIMERO SI EL HEADER ESTÁ PRESENTE */
+.tarjeta-header + .seccion-tabla {
+    padding-top: 2rem;
+}
+
 
 .titulo-seccion {
   display: flex;
@@ -140,12 +196,12 @@ const props = defineProps({
   color: #2c3e50;
   margin-bottom: 1.5rem;
   font-weight: 600;
-  border-bottom: 2px solid #e91e63; /* Color principal */
+  border-bottom: 2px solid #e91e63;
   padding-bottom: 0.5rem;
 }
 
 .titulo-seccion i {
-  color: #e91e63; /* Color principal */
+  color: #e91e63;
 }
 
 .tabla-datos {
@@ -166,7 +222,7 @@ const props = defineProps({
 }
 
 .celda {
-  padding: 1rem 1.2rem; /* Ajustado */
+  padding: 1rem 1.2rem;
   display: flex;
   align-items: center;
 }
@@ -176,9 +232,9 @@ const props = defineProps({
   color: #495057;
   background-color: #f8f9fa;
   border-right: 1px solid #e0e0e0;
-  min-width: 150px; /* Ajustado */
-  width: 150px;     /* Ajustado */
-  font-size: 0.95rem; /* Ajustado */
+  min-width: 150px;
+  width: 150px;
+  font-size: 0.95rem;
   justify-content: flex-start;
 }
 
@@ -186,57 +242,50 @@ const props = defineProps({
   font-weight: 500;
   color: #2c3e50;
   background-color: white;
-  font-size: 1rem;   /* Ajustado */
+  font-size: 1rem;
   flex: 1;
   justify-content: flex-start;
-  padding-left: 1.5rem; /* Ajustado */
+  padding-left: 1.5rem;
   border-left: 1px solid #f0f0f0;
-  word-break: break-word; /* Para emails largos */
+  word-break: break-word;
 }
 
-/* Separación entre pares de campos */
 .fila-tabla .celda:nth-child(2) {
   border-right: 1px solid #e0e0e0;
 }
 
 .fila-tabla .celda:nth-child(3) {
-  /* Si hay 4 celdas (como en info personal), la 3ra no necesita borde derecho */
    border-right: none;
 }
-/* Asegurar borde si la 3ra celda es la última etiqueta (como en Dirección) */
 .fila-tabla .celda.etiqueta:nth-child(3) {
     border-right: 1px solid #e0e0e0;
 }
 
-
-/* Separador visual */
 .separador-seccion {
   height: 1px;
   background: linear-gradient(to right, transparent, #e0e0e0, transparent);
   margin: 2rem 0;
 }
 
-/* Badge Cuotas (si aplica) */
 .badge-cuota {
   font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 20px;
-  background-color: #ffebee; /* Rojo claro */
-  color: #d32f2f; /* Rojo oscuro */
+  background-color: #ffebee;
+  color: #d32f2f;
   font-size: 1.1rem;
   min-width: 40px;
   text-align: center;
   display: inline-block;
 }
-
 .badge-cuota.ninguna {
-  background-color: #e8f5e9; /* Verde claro */
-  color: #2e7d32; /* Verde oscuro */
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
-/* Estilos para Estado (si no usas el componente) */
+/* Estilos para Estado (copiados de FilaCuota) */
 .estado-activo {
-    background-color: #4CAF50; /* Verde */
+    background-color: #4CAF50;
     color: white;
     padding: 0.3rem 0.8rem;
     border-radius: 15px;
@@ -244,7 +293,7 @@ const props = defineProps({
     font-size: 0.9rem;
 }
 .estado-inactivo {
-    background-color: #F44336; /* Rojo */
+    background-color: #F44336;
     color: white;
     padding: 0.3rem 0.8rem;
     border-radius: 15px;
@@ -253,61 +302,81 @@ const props = defineProps({
 }
 
 
-/* Responsive (copiado y adaptado) */
+/* Responsive */
 @media (max-width: 768px) {
+  /* V V V NUEVO: Responsive Header V V V */
+  .tarjeta-header {
+      padding: 1.5rem;
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+      /* Quitar redondeo superior si el contenido también se redondea */
+      /* border-top-left-radius: 0; */
+      /* border-top-right-radius: 0; */
+  }
+  .nombre-completo {
+      font-size: 1.5rem;
+  }
+  .dni-persona {
+      font-size: 1rem; /* Asegurar consistencia */
+  }
+  /* ^ ^ ^ FIN NUEVO ^ ^ ^ */
+
+  /* Estilos Responsive Existentes */
   .fila-tabla {
     flex-direction: column;
-    border-bottom: 1px solid #e0e0e0; /* Borde entre filas en móvil */
+    border-bottom: 1px solid #e0e0e0;
   }
   .fila-tabla:last-child {
-      border-bottom: none; /* Sin borde extra al final */
+      border-bottom: none;
   }
-
   .celda {
-    padding: 0.8rem 1rem; /* Menos padding */
+    padding: 0.8rem 1rem;
     width: 100% !important;
     min-width: auto !important;
     border-right: none !important;
-    border-bottom: 1px solid #f0f0f0; /* Línea entre etiqueta y valor */
-    justify-content: space-between; /* Etiqueta a la izq, valor a la der */
+    border-bottom: 1px solid #f0f0f0;
+    justify-content: space-between;
   }
-
   .celda:last-child {
-    border-bottom: none; /* La última celda de una fila no necesita borde inferior */
+    border-bottom: none;
   }
-
   .etiqueta {
     background-color: #f8f9fa;
     font-weight: 600;
     border-right: none;
-    border-bottom: none; /* Quitar borde inferior específico de etiqueta */
-    width: auto !important; /* Ancho automático */
+    border-bottom: none;
+    width: auto !important;
     min-width: auto;
   }
-
   .valor {
     border-left: none;
-    padding-left: 1rem; /* Menos padding izq */
-    justify-content: flex-end; /* Alinear valor a la derecha */
+    padding-left: 1rem;
+    justify-content: flex-end;
     text-align: right;
-    border-bottom: none; /* Quitar borde inferior específico de valor */
+    border-bottom: none;
   }
-
-  /* Ocultar celdas vacías en móvil */
   .celda.etiqueta:empty, .celda.valor:empty {
       display: none;
   }
-  /* Ajustar la última fila si tiene celdas vacías */
    .fila-tabla:last-child .celda:not(:empty):last-child {
        border-bottom: none;
    }
-
   .separador-seccion {
     margin: 1.5rem 0;
   }
 }
 
 @media (max-width: 480px) {
+    /* V V V NUEVO: Responsive Header V V V */
+    .tarjeta-header {
+        padding: 1rem;
+    }
+    .nombre-completo {
+        font-size: 1.3rem;
+    }
+    /* ^ ^ ^ FIN NUEVO ^ ^ ^ */
+
     .celda {
         padding: 0.7rem;
         font-size: 0.9rem;
@@ -317,6 +386,6 @@ const props = defineProps({
     }
      .separador-seccion {
         margin: 1rem 0;
-    }
+     }
 }
 </style>

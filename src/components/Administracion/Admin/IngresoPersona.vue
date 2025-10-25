@@ -9,13 +9,6 @@
     </div>
 
     <div class="tarjeta-persona" v-if="persona.dni">
-      <div class="tarjeta-header">
-        <div class="info-principal">
-          <h2 class="nombre-completo">{{ persona.nombre }} {{ persona.apellido }}</h2>
-          <p class="dni-persona">DNI: {{ persona.dni }}</p>
-        </div>
-      </div>
-
       <div class="tarjeta-contenido">
         <DetallePersona :datos="persona" />
         <div class="separador-seccion"></div>
@@ -282,9 +275,6 @@ const confirmarIngreso = () => {
 .titulo { font-size: 2rem; color: #e91e63; text-align: right; font-family: 'Poppins', sans-serif; font-weight: 600; margin: 0; min-width: 200px; }
 
 .tarjeta-persona { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
-.tarjeta-header { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; }
-.nombre-completo { font-size: 1.6rem; color: #2c3e50; margin: 0 0 0.3rem 0; font-weight: 600; }
-.dni-persona { font-size: 1rem; color: #6c757d; margin: 0; font-weight: 500; }
 .tarjeta-contenido { padding: 2rem; }
 
 /* IMPORTANTE: Los estilos para .seccion-tabla, .titulo-seccion, etc. */
@@ -322,8 +312,6 @@ const confirmarIngreso = () => {
   .encabezado-info { flex-direction: column; text-align: center; align-items: stretch; }
   .btn-volver { justify-content: center; margin-bottom: 1rem; }
   .titulo { font-size: 1.6rem; width: 100%; text-align: center; }
-  .tarjeta-header { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
-  .nombre-completo { font-size: 1.5rem; }
   .tarjeta-contenido { padding: 1.5rem; }
   /* Los estilos responsive para tablas ahora están en DetallePersona */
   .separador-seccion { margin: 1.5rem 0; }
@@ -333,8 +321,7 @@ const confirmarIngreso = () => {
 }
 @media (max-width: 480px) {
   .contenedor-ingreso-persona { padding: 1rem; }
-  .tarjeta-header { padding: 1rem; }
-  .nombre-completo { font-size: 1.3rem; }
+  
   .tarjeta-contenido { padding: 1rem; }
   /* Los estilos responsive para tablas ahora están en DetallePersona */
   .separador-seccion { margin: 1rem 0; }

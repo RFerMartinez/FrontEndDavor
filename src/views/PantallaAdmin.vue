@@ -9,13 +9,6 @@
       >
         <button
           class="menu-btn"
-          :class="{ activo: vistaActiva === 'informacion' }"
-          @click="cambiarVista('informacion')"
-        >
-          Información Personal
-        </button>
-        <button
-          class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
           @click="cambiarVista('alumnos')"
         >
@@ -50,13 +43,6 @@
         :apellido="usuario.apellido"
         @logout="cerrarSesion"
       >
-        <button
-          class="menu-btn"
-          :class="{ activo: vistaActiva === 'informacion' }"
-          @click="cambiarVista('informacion')"
-        >
-          Información Personal
-        </button>
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
@@ -116,7 +102,6 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Background from '@/components/Administracion/Background.vue'
 import Sidebar from '@/components/Administracion/Sidebar.vue'
 import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
-import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue'
 import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
 import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
 import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
@@ -179,7 +164,7 @@ const usuario = { nombre: 'Beto', apellido: 'Cristoff' };
 
 
 
-const vistaActiva = ref('informacion'); // O la que prefieras como inicial
+const vistaActiva = ref('alumnos'); // O la que prefieras como inicial
 const isMobile = ref(false);
 
 // *** ===================== NUEVO: Refs para vista secundaria general ===================== ***
@@ -251,7 +236,6 @@ const vistaComponente = computed(() => {
 
   // Si no, mostramos la vista principal según vistaActiva
   switch (vistaActiva.value) {
-    case 'informacion': return InformacionPersonal;
     case 'alumnos': return Alumnos;
     // case 'infoAlumno': return InfoAlumno; // Ya no se maneja aquí
     case 'suscripciones': return Suscripciones;

@@ -98,3 +98,88 @@ export function formatCurrency(value) {
 
 // Puedes agregar otras funciones de formato aquí si las necesitas
 // export function formatDate(date) { ... }
+//ALGORITMO DE BUSQUEDA DE ALUMNOS Y PERSONA
+// src/utils/formatters.js
+
+/**
+ * Normaliza un texto: quita tildes, convierte a minúsculas.
+ * @param {string|null|undefined} texto - El texto a normalizar.
+ * @returns {string} - El texto normalizado o un string vacío.
+ */
+export function normalizarTexto(texto) {
+  if (typeof texto !== 'string') return '';
+  return texto
+    .normalize('NFD') // Separa tildes de las letras
+    .replace(/[\u0300-\u036f]/g, '') // Elimina los diacríticos (tildes)
+    .toLowerCase(); // Convierte a minúsculas
+}
+
+/**
+ * Filtra una lista de items (alumnos o personas) basado en un término de búsqueda
+ * y filtros adicionales opcionales.
+ * @param {Array<Object>} items - La lista completa de items.
+ * @param {string} terminoBusqueda - El texto ingresado en la búsqueda.
+ * @param {Object} [filtrosAdicionales] - Opciones para filtros extra.
+ * @param {string|null} [filtrosAdicionales.turno] - Filtrar por 'Mañana' o 'Tarde'.
+ * @param {boolean|undefined} [filtrosAdicionales.activo] - Si es true, filtra solo activos.
+ * @param {boolean|undefined} [filtrosAdicionales.deudor] - Si es true, filtra solo deudores (cuotasPendientes > 0).
+ * @returns {Array<Object>} - La lista filtrada.
+ */
+export function filterItems(items, terminoBusqueda, filtrosAdicionales = {}) {
+  if (!Array.isArray(items)) {
+    console.error("filterItems: 'items' no es un array válido.");
+    return [];
+  }
+
+  const termino = (terminoBusqueda || '').trim();
+  const { turno, activo, deudor } = filtrosAdicionales; // Añadido 'deudor'
+
+  // Si no hay término ni filtros activos, devuelve la lista original
+  if (!termino && !turno && activo === undefined && deudor === undefined) { // Añadido chequeo 'deudor'
+    return items;
+  }
+
+  const terminoNormalizado = normalizarTexto(termino);
+  const esBusquedaDNI = /^\d+$/.test(termino) && termino.length > 0;
+
+  return items.filter(item => {
+    let coincideBusqueda = true;
+
+    // 1. Filtro Búsqueda
+    if (termino) {
+        const dni = String(item.dni || '');
+        const nombre = String(item.nombre || '');
+        const apellido = String(item.apellido || '');
+        if (esBusquedaDNI) {
+            coincideBusqueda = dni.includes(termino);
+        } else {
+            const nombreNormalizado = normalizarTexto(nombre);
+            const apellidoNormalizado = normalizarTexto(apellido);
+            const nombreCompletoNormalizado = `${nombreNormalizado} ${apellidoNormalizado}`;
+            coincideBusqueda = nombreNormalizado.includes(terminoNormalizado) ||
+                             apellidoNormalizado.includes(terminoNormalizado) ||
+                             nombreCompletoNormalizado.includes(terminoNormalizado);
+        }
+    }
+    if (!coincideBusqueda) return false;
+
+
+    // 2. Filtro Turno
+    if (turno && item.turno !== turno) {
+      return false;
+    }
+
+    // 3. Filtro Activo
+    if (activo === true && !item.activo) {
+      return false;
+    }
+
+    // --- 4. Filtro Deudor ---
+    if (deudor === true && !(item.cuotasPendientes > 0)) {
+        return false;
+    }
+    // --- FIN FILTRO DEUDOR ---
+
+    return true; // Pasa todos los filtros
+  });
+}

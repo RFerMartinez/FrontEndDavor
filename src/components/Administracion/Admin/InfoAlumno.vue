@@ -25,16 +25,6 @@
     </div>
 
     <div class="tarjeta-alumno" v-if="alumno && !mostrandoModificacion">
-      <div class="tarjeta-header">
-        <div class="info-principal">
-          <h2 class="nombre-completo">{{ alumno.nombre }} {{ alumno.apellido }}</h2>
-          <p class="dni-alumno">DNI: {{ alumno.dni }}</p>
-        </div>
-        <div class="estado-alumno">
-          <Estado :positivo="alumno.activo" :texto="alumno.activo ? 'ACTIVO' : 'INACTIVO'" />
-        </div>
-      </div>
-
       <div class="tarjeta-contenido">
         <DetallePersona :datos="alumno" />
         <div class="separador-seccion"></div>
@@ -252,30 +242,6 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
-
-.tarjeta-header {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.nombre-completo {
-  font-size: 1.8rem;
-  color: #2c3e50;
-  margin: 0 0 0.5rem 0;
-  font-weight: 600;
-}
-
-.dni-alumno {
-  font-size: 1.1rem;
-  color: #6c757d;
-  margin: 0;
-  font-weight: 500;
-}
-
 .tarjeta-contenido {
   padding: 2rem;
 }
@@ -349,8 +315,6 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
   .contenedor-info-alumno { padding: 1.5rem; }
   .encabezado-info { flex-direction: column; text-align: center; }
   .titulo { font-size: 1.6rem; }
-  .tarjeta-header { padding: 1.5rem; flex-direction: column; gap: 1rem; text-align: center; }
-  .nombre-completo { font-size: 1.5rem; }
   .tarjeta-contenido { padding: 1.5rem; }
   /* Los estilos responsive para .fila-tabla, .celda, etc. ahora deberían estar en DetallePersona.vue */
   .separador-seccion { margin: 1.5rem 0; }
@@ -361,8 +325,6 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
 }
 @media (max-width: 480px) {
   .contenedor-info-alumno { padding: 1rem; }
-  .tarjeta-header { padding: 1rem; }
-  .nombre-completo { font-size: 1.3rem; }
   .tarjeta-contenido { padding: 1rem; }
   /* Los estilos responsive para .celda, .valor, etc. ahora deberían estar en DetallePersona.vue */
   .separador-seccion { margin: 1rem 0; }
