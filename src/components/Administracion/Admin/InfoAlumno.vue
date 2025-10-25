@@ -121,7 +121,7 @@ const mostrandoModificacion = ref(null)
 const mensajeConfirmacion = ref('')
 const alumnoID = computed(() => props.alumnoSeleccionado)
 
-
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 import { obtenerAlumnoPorDni, obtenerHorariosPorDni } from '@/api/services/alumnoService'
 import { obtenerCuotasDeAlumno } from '@/api/services/cuotasService'
@@ -131,6 +131,9 @@ const horariosAlumno = ref([])
 const cuotas = ref([])
 onMounted(async () => {
   loading.value = true
+
+  await sleep(3000)
+
   try {
     if (alumnoID.value && alumnoID.value["dni"]) {
       const respuestaAlumno = await obtenerAlumnoPorDni(alumnoID.value["dni"])
