@@ -9,6 +9,13 @@
       >
         <button
           class="menu-btn"
+          :class="{ activo: vistaActiva === 'dashboard' }"
+          @click="cambiarVista('dashboard')"
+        >
+          Estadísticas
+        </button>
+        <button
+          class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
           @click="cambiarVista('alumnos')"
         >
@@ -43,6 +50,13 @@
         :apellido="usuario.apellido"
         @logout="cerrarSesion"
       >
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'dashboard' }"
+          @click="cambiarVista('dashboard')"
+        >
+          Estadísticas
+        </button>
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
@@ -106,6 +120,7 @@ import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
 import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
 import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
 import Trabajos_Metodologias from '@/components/Administracion/Admin/Trabajos_Metodologias.vue'
+import Dashboard from '@/components/Administracion/Admin/Dashboard.vue'
 // *** ===================== NUEVO: Importar Personas e IngresoPersona ===================== ***
 // *** USA TUS RUTAS CORRECTAS ***
 import Personas from '@/components/Administracion/Admin/Personas.vue'
@@ -240,7 +255,8 @@ const vistaComponente = computed(() => {
     // case 'infoAlumno': return InfoAlumno; // Ya no se maneja aquí
     case 'suscripciones': return Suscripciones;
     case 'trabajo': return Trabajos_Metodologias;
-    case 'personas': return Personas; // Vista principal de Personas
+    case 'personas': return Personas;
+    case 'dashboard': return Dashboard; // Vista principal de Personas
     default: return InformacionPersonal;
   }
 })
