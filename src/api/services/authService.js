@@ -1,9 +1,8 @@
 // src/api/services/authService.js
-import axios from 'axios';
-import { saveUser, removeUser, getUser } from '../storage/userStorage';
+import apiClient from '../index'; // Importa la instancia de Axios configurada
+import { saveUser, removeUser, getUser as getUserFromStorage } from '../storage/userStorage'; // Renombra getUser para evitar conflicto
 
-// Asegúrate de que esta URL base apunte a tu backend de FastAPI
-const API_URL = 'http://localhost:8000/auth';
+// Ya no necesitas API_URL aquí
 
 /**
  * Inicia sesión en la API.
@@ -16,23 +15,23 @@ export const login = async (username, password) => {
         params.append('username', username);
         params.append('password', password);
 
-        // Hacemos la petición al endpoint /auth/login
-        const response = await axios.post(`${API_URL}/login`, params);
+        // Usa apiClient. Es importante que el interceptor maneje el Content-Type correcto para esta ruta
+        const response = await apiClient.post('/auth/login', params); // El interceptor ajustará el Content-Type
 
         const { access_token } = response.data;
 
-        // Ahora, pedimos los datos del usuario con el token obtenido
-        const userResponse = await axios.get(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${access_token}` },
+        // Pedimos los datos del usuario con el token obtenido
+        // Creamos una solicitud directa con el token porque el interceptor aún no lo tendrá
+        const userResponse = await apiClient.get('/auth/me', {
+            headers: { Authorization: `Bearer ${access_token}` },
         });
-        
+
         // Guardamos todo en el storage
         saveUser(access_token, userResponse.data);
 
         return userResponse.data;
     } catch (error) {
         console.error("Error en el inicio de sesión:", error);
-        // Lanza el error para que el componente de login lo maneje
         throw error;
     }
 };
@@ -42,6 +41,14 @@ export const login = async (username, password) => {
  */
 export const logout = () => {
     removeUser();
+};
+
+/**
+ * Obtiene los datos del usuario actual (si existen en storage).
+ * Esta función ahora solo lee del storage.
+ */
+export const getUser = () => {
+    return getUserFromStorage();
 };
 
 /**
