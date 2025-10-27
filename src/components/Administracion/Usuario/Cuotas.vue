@@ -2,8 +2,7 @@
   <div class="contenedor-cuotas">
     <!-- Encabezado con información de cuotas - Versión sutil -->
     <div class="encabezado-cuotas">
-      <h1 class="titulo">CUOTAS</h1>
-      
+      <Titulo texto="CUOTAS" /> 
       <div class="controles-superiores">
         <div class="estado-cuotas-sutil">
           <div class="info-cuota-sutil">
@@ -46,6 +45,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import TablaCuotas from './TablaCuotas.vue'
+import Titulo from '../Titulo.vue'
 
 // Función del servidor para obtener las cuotas (ferchu)
 import { obtenerMisCuotas } from '@/api/services/cuotasService.js'
@@ -104,14 +104,6 @@ const toggleFiltroPendientes = () => {
   margin-bottom: 2rem;
 }
 
-.titulo {
-  font-size: 2rem;
-  color: #e91e63;
-  margin-bottom: 1.2rem;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-}
 
 .controles-superiores {
   display: flex;

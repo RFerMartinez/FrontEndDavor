@@ -1,6 +1,6 @@
 <template>
   <div class="contenedor-reclamos">
-    <h1 class="titulo">RECLAMOS</h1>
+    <Titulo texto="RECLAMOS" />
     
     <div class="controles-superiores">
       <button 
@@ -73,6 +73,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ListaReclamos from './ListaReclamos.vue'
 import NuevoReclamo from './NuevoReclamo.vue'
+import Titulo from '../Titulo.vue';
 
 // servicios (ferchu)
 import { obtenerReclamos, crearReclamo } from '@/api/services/reclamosService';
@@ -182,14 +183,6 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 
-.titulo {
-  font-size: 2rem;
-  color: #e91e63;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-}
 
 .controles-superiores {
   display: flex;

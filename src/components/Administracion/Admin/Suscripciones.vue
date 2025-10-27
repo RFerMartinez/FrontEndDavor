@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor-suscripciones">
     <div class="encabezado-suscripciones">
-      <h1 class="titulo">SUSCRIPCIONES</h1>
+      <Titulo texto="SUSCRIPCIONES" />
       <p class="subtitulo">Gestiona las suscripciones disponibles para los alumnos</p>
     </div>
 
@@ -56,6 +56,7 @@
 import { ref, computed, onMounted } from 'vue'; // Añadir computed
 import AgregarModificar from './AgregarModificar.vue';
 import Items from './Items.vue';
+import Titulo from '../Titulo.vue';
 
 // --- CONFIGURACIÓN ---
 // Configuración base para el formulario (será ajustada por la computada)
@@ -265,13 +266,6 @@ onMounted(cargarSuscripciones);
   margin-bottom: 2rem;
 }
 
-.titulo {
-  font-size: 2.2rem;
-  color: #e91e63;
-  margin-bottom: 0.5rem;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-}
 
 .subtitulo {
   color: #666;
@@ -399,11 +393,7 @@ onMounted(cargarSuscripciones);
   .contenedor-suscripciones {
     padding: 1.5rem;
   }
-  
-  .titulo {
-    font-size: 1.8rem;
-  }
-  
+
   .mensaje-confirmacion {
     top: 10px;
     right: 10px;
@@ -417,10 +407,6 @@ onMounted(cargarSuscripciones);
     padding: 1rem;
   }
   
-  .titulo {
-    font-size: 1.6rem;
-  }
-    
   .btn-agregar {
     width: 100%;
     justify-content: center;

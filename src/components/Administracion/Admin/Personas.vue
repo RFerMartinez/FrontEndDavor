@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor-personas">
     <div class="encabezado-personas">
-      <h1 class="titulo">PERSONAS INTERESADAS</h1>
+      <Titulo texto="PERSONAS INTERESADAS" />
       <p class="subtitulo">Gestiona las personas registradas antes de su ingreso como alumnos</p>
       <div class="filtros-busqueda">
         <div class="busqueda-input-container">
@@ -72,12 +72,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed } from 'vue';
 // *** ASEGÚRATE QUE LA RUTA A TablaAlumnos SEA CORRECTA ***
-import TablaAlumnos from './TablaAlumnos.vue' // O la ruta correcta ej: '../Alumnos/TablaAlumnos.vue'
-import { filterItems } from '@/utils/formatters';
+import TablaAlumnos from './TablaAlumnos.vue'; // O la ruta correcta ej: '../Alumnos/TablaAlumnos.vue'
+import Titulo from '../Titulo.vue';
+// --- Importar la función de filtrado ---
+import { filterItems } from '@/utils/formatters'; // Asegúrate que esta ruta es correcta
+
 // *** +++++++ Definir el evento que se emitirá +++++++ ***
-const emit = defineEmits(['verIngreso'])
+const emit = defineEmits(['verIngreso']);
 // ******************************************************
 
 // --- Lógica de datos, filtros y paginación ---
@@ -92,41 +95,18 @@ const paginaActual = ref(1);
 const elementosPorPagina = 10;
 const terminoBusqueda = ref('');
 
-const normalizarTexto = (texto) => {
-  if (typeof texto !== 'string') return '';
-  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-};
+// --- normalizarTexto ELIMINADA --- (Ahora está en formatters.js y la usa filterItems)
+// const normalizarTexto = (texto) => { ... };
 
+// --- personasFiltradas MODIFICADA para usar filterItems ---
 const personasFiltradas = computed(() => {
   if (!Array.isArray(personas.value)) { return []; }
-  let listaFiltrada = personas.value;
-  const termino = terminoBusqueda.value.trim();
-  if (termino) {
-    const esBusquedaDNI = /^\d+$/.test(termino);
-    const terminoNormalizado = normalizarTexto(termino);
-    listaFiltrada = listaFiltrada.filter(persona => {
-      const dni = String(persona.dni || '');
-      const nombre = String(persona.nombre || '');
-      const apellido = String(persona.apellido || '');
-      if (esBusquedaDNI) {
-        return dni === termino;
-      } else {
-        try {
-          const nombreNormalizado = normalizarTexto(nombre);
-          const apellidoNormalizado = normalizarTexto(apellido);
-          const nombreCompletoNormalizado = `${nombreNormalizado} ${apellidoNormalizado}`;
-          return nombreNormalizado.includes(terminoNormalizado) ||
-                 apellidoNormalizado.includes(terminoNormalizado) ||
-                 nombreCompletoNormalizado.includes(terminoNormalizado);
-        } catch (e) {
-          console.error("Error en filter:", e);
-          return false;
-        }
-      }
-    });
-  }
-  return listaFiltrada;
+
+  // Llama a la función reutilizable.
+  // No pasa filtros adicionales (tercer argumento) porque Personas no los necesita.
+  return filterItems(personas.value, terminoBusqueda.value);
 });
+// --- FIN MODIFICACIÓN ---
 
 const totalPaginas = computed(() => {
   const total = Math.ceil((personasFiltradas.value?.length || 0) / elementosPorPagina);
@@ -153,7 +133,15 @@ const numerosPaginas = computed(() => {
   if (current + delta < total - 1) range.push('...');
   range.unshift(1);
   if (total > 1) range.push(total);
-  return range;
+  // Filtrar duplicados (lógica sin cambios)
+  return range.filter((item, index, arr) => {
+      if (item === '...') {
+          if (index === 1 && arr[0] === 1) return false;
+          if (index === arr.length - 2 && arr[arr.length - 1] === total) return false;
+          if (index > 0 && arr[index - 1] === '...') return false;
+      }
+      return true;
+  });
 });
 
 const aplicarFiltros = () => {
@@ -175,11 +163,28 @@ const cambiarPagina = (nuevaPagina) => {
   }
 };
 
-// *** +++++++ Función para emitir el evento +++++++ ***
+// *** +++++++ Función para emitir el evento (sin cambios) +++++++ ***
 const emitVerIngreso = (persona) => {
   emit('verIngreso', persona);
 }
 // **************************************************
+
+// --- Función para manejar eliminación (Añadida en la conversación anterior) ---
+// (Asegúrate de que @eliminarPersona="manejarEliminarPersona" esté en tu <TablaAlumnos> en el template)
+const manejarEliminarPersona = (persona) => {
+  console.log("Personas.vue: Recibido evento para eliminar a:", persona);
+  if (confirm(`¿Estás seguro de eliminar a ${persona.nombre} ${persona.apellido}?`)) {
+      // --- Inicio: Lógica API Eliminación ---
+      console.log(`Llamando a API para eliminar DNI: ${persona.dni}`);
+      // Aquí llamarías a tu función API...
+      // Y si tiene éxito, actualizas la lista local:
+      // personas.value = personas.value.filter(p => p.dni !== persona.dni);
+      // --- Fin: Lógica API Eliminación ---
+  } else {
+      console.log('Eliminación cancelada.');
+  }
+};
+
 </script>
 
 <style scoped>
@@ -202,14 +207,7 @@ const emitVerIngreso = (persona) => {
   text-align: center;
   margin-bottom: 2rem;
 }
-.titulo {
-  font-size: 2rem;
-  color: #e91e63;
-  margin-bottom: 0.5rem;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-}
+
 .subtitulo {
   color: #666;
   font-size: 1.1rem;
@@ -362,7 +360,6 @@ const emitVerIngreso = (persona) => {
 
 @media (max-width: 768px) {
   .contenedor-personas { padding: 1.5rem; }
-  .titulo { font-size: 1.8rem; margin-bottom: 1rem; }
   .filtros-busqueda { flex-direction: column; gap: 1rem; }
   .busqueda-input-container { max-width: 100%; min-width: auto; }
   .paginacion-inferior { margin-top: 2rem; padding: 1rem; }
@@ -371,7 +368,6 @@ const emitVerIngreso = (persona) => {
 }
 @media (max-width: 480px) {
   .contenedor-personas { padding: 1rem; }
-  .titulo { font-size: 1.6rem; }
   .filtros-busqueda { gap: 0.8rem; }
   .input-busqueda { padding: 0.7rem 0.9rem 0.7rem 2.8rem; font-size: 0.85rem; }
   .paginacion-inferior { margin-top: 1.5rem; padding: 0.8rem; }

@@ -5,7 +5,7 @@
         <i class="fas fa-arrow-left"></i>
         Volver a Personas
       </button>
-      <h1 class="titulo">INGRESO DE NUEVO ALUMNO</h1>
+      <Titulo texto="INGRESO DE NUEVO ALUMNO" />
     </div>
 
     <div class="tarjeta-persona" v-if="persona.dni">
@@ -104,7 +104,7 @@ import ListadoTrabajos from './ListadoTrabajos.vue';
 import ListadoNiveles from './ListadoNiveles.vue';
 import TablaHorarios from '../TablaHorarios.vue';
 import DetallePersona from './DetallePersona.vue';
-
+import Titulo from '../Titulo.vue';
 const props = defineProps({
   personaSeleccionada: Object
 });
@@ -248,13 +248,17 @@ const confirmarIngreso = () => {
 }
 
 .encabezado-info {
-  display: flex;
-  justify-content: space-between;
+  display: grid; /* <-- CAMBIADO A GRID */
+  grid-template-columns: 1fr auto 1fr; /* <-- Columnas: [Izquierda] [Centro (auto-ajustable)] [Derecha] */
   align-items: center;
   margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
+.encabezado-info .btn-volver {
+  justify-self: start; 
+}
+
 .btn-volver {
   display: flex;
   align-items: center;
@@ -272,7 +276,6 @@ const confirmarIngreso = () => {
   flex-shrink: 0;
 }
 .btn-volver:hover { background: #e91e63; color: white; transform: translateY(-1px); }
-.titulo { font-size: 2rem; color: #e91e63; text-align: right; font-family: 'Poppins', sans-serif; font-weight: 600; margin: 0; min-width: 200px; }
 
 .tarjeta-persona { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
 .tarjeta-contenido { padding: 2rem; }
@@ -309,9 +312,18 @@ const confirmarIngreso = () => {
 
 @media (max-width: 768px) {
   .contenedor-ingreso-persona { padding: 1.5rem; }
-  .encabezado-info { flex-direction: column; text-align: center; align-items: stretch; }
-  .btn-volver { justify-content: center; margin-bottom: 1rem; }
-  .titulo { font-size: 1.6rem; width: 100%; text-align: center; }
+  .encabezado-info {
+    display: flex; /* <-- Asegurar que sea flex */
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+    grid-template-columns: none; /* <-- Añadir esto para anular el grid */
+  }
+  .btn-volver {
+    justify-content: center;
+    margin-bottom: 1rem;
+    justify-self: auto; /* <-- Añadir para anular el 'start' de desktop */
+  }
   .tarjeta-contenido { padding: 1.5rem; }
   /* Los estilos responsive para tablas ahora están en DetallePersona */
   .separador-seccion { margin: 1.5rem 0; }

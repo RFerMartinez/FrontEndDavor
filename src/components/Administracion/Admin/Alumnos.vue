@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor-alumnos">
     <div class="encabezado-alumnos">
-      <h1 class="titulo">ALUMNOS</h1>
+      <Titulo texto="ALUMNOS" />
 
       <div class="filtros-busqueda">
         <div class="busqueda-input-container">
@@ -149,6 +149,7 @@
 import { ref, computed, onMounted } from 'vue';
 import TablaAlumnos from './TablaAlumnos.vue';
 import { obtenerTodosLosAlumnos } from '@/api/services/alumnoService';
+import Titulo from '../Titulo.vue';
 // --- NUEVO: Importar funciones de utilidad ---
 import { filterItems } from '@/utils/formatters'; // Ajusta la ruta si es necesario
 // Ya no necesitamos normalizarTexto aquí si filterItems lo hace internamente
@@ -290,15 +291,6 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   margin-bottom: 2rem;
 }
 
-.titulo {
-  font-size: 2rem;
-  color: #e91e63;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-}
-
 /* Filtros de búsqueda */
 .filtros-busqueda {
   display: flex;
@@ -338,8 +330,8 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
 
 .input-busqueda:focus {
   outline: none;
-  border-color: #e91e63;
-  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+  border-color: #ea280ae0;
+  box-shadow: 0 0 0 3px rgba(233, 44, 30, 0.1);
 }
 
 .btn-limpiar-busqueda {

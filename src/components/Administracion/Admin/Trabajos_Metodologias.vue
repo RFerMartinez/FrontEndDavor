@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor-trabajos">
     <div class="encabezado-trabajos">
-      <h1 class="titulo">TRABAJOS Y METODOLOGÍAS</h1>
+      <Titulo texto="TRABAJOS Y METODOLOGÍAS" />
       <p class="subtitulo">Gestiona los tipos de entrenamiento disponibles para los alumnos</p>
     </div>
 
@@ -53,7 +53,7 @@ import { ref, onMounted } from 'vue'
 // Importamos los nuevos componentes
 import AgregarModificar from './AgregarModificar.vue' // Ajusta la ruta si es necesario
 import Items from './Items.vue' // Ajusta la ruta si es necesario
-
+import Titulo from '../Titulo.vue';
 // --- Configuración para los componentes hijos ---
 const configFormulario = {
   tituloSingular: 'Metodología',
@@ -227,14 +227,6 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
-.titulo {
-  font-size: 2.2rem;
-  color: #e91e63;
-  margin-bottom: 0.5rem;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-}
-
 .subtitulo {
   color: #666;
   font-size: 1.1rem;
@@ -361,10 +353,6 @@ onMounted(() => {
   .contenedor-trabajos {
     padding: 1.5rem;
   }
-  
-  .titulo {
-    font-size: 1.8rem;
-  }
     
   .mensaje-confirmacion {
     top: 10px;
@@ -378,11 +366,7 @@ onMounted(() => {
   .contenedor-trabajos {
     padding: 1rem;
   }
-  
-  .titulo {
-    font-size: 1.6rem;
-  }
-    
+     
   .btn-agregar {
     width: 100%;
     justify-content: center;

@@ -5,7 +5,7 @@
         <i class="fas fa-arrow-left"></i>
         Volver a Alumnos
       </button>
-      <h1 class="titulo">INFORMACIÓN DEL ALUMNO</h1>
+      <Titulo texto="INFORMACIÓN DEL ALUMNO" />
     </div>
 
     <div v-if="mostrandoModificacion === 'datos'">
@@ -100,6 +100,7 @@ import TablaHorarios from '../TablaHorarios.vue'
 import ModificarDatosAlumno from './ModificarDatosAlumno.vue'
 import ModificarSusTrabAlumno from './ModificarSusTrabAlumno.vue'
 import DetallePersona from './DetallePersona.vue'; // <-- Importado
+import Titulo from '../Titulo.vue';
 
 const props = defineProps({
   alumnoSeleccionado: Object
@@ -197,14 +198,16 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
 }
 
 .encabezado-info {
-  display: flex;
-  justify-content: space-between;
+  display: grid; /* <-- CAMBIADO A GRID */
+  grid-template-columns: 1fr auto 1fr; /* <-- Columnas: [Izquierda] [Centro (auto-ajustable)] [Derecha] */
   align-items: center;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Mantenido por si acaso */
   gap: 1rem;
 }
-
+.encabezado-info .btn-volver {
+  justify-self: start; 
+}
 .btn-volver {
   display: flex;
   align-items: center;
@@ -227,14 +230,7 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
   transform: translateY(-1px);
 }
 
-.titulo {
-  font-size: 2rem;
-  color: #e91e63;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  margin: 0;
-}
+
 
 .tarjeta-alumno {
   background: white;
@@ -310,18 +306,50 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
 .btn-cerrar-mensaje { background: none; border: none; color: white; cursor: pointer; padding: 0.2rem; margin-left: 1rem; }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-@media (max-width: 1560px) { .botones-accion { grid-template-columns: repeat(2, 1fr); gap: 1rem; } }
-@media (max-width: 768px) {
+@media (max-width: 1560px) 
+{ 
+  .botones-accion { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1rem; } 
+}
+@media (max-width: 768px) 
+{
   .contenedor-info-alumno { padding: 1.5rem; }
-  .encabezado-info { flex-direction: column; text-align: center; }
-  .titulo { font-size: 1.6rem; }
-  .tarjeta-contenido { padding: 1.5rem; }
+  .encabezado-info {
+    display: flex; /* <-- Asegurar que sea flex */
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+    grid-template-columns: none; /* <-- Añadir esto para anular el grid */
+  }
+  .btn-volver {
+    justify-content: center;
+    margin-bottom: 1rem;
+    justify-self: auto; /* <-- Añadir para anular el 'start' de desktop */
+  }
+  
+  .tarjeta-contenido { 
+    padding: 1.5rem; 
+  }
   /* Los estilos responsive para .fila-tabla, .celda, etc. ahora deberían estar en DetallePersona.vue */
-  .separador-seccion { margin: 1.5rem 0; }
-  .seccion-info { padding: 1rem; }
-  .botones-accion { grid-template-columns: 1fr; }
-  .btn-accion { padding: 0.8rem 1rem; font-size: 0.9rem; }
-  .mensaje-confirmacion { top: 10px; right: 10px; left: 10px; }
+  .separador-seccion { 
+    margin: 1.5rem 0; 
+  }
+  .seccion-info { 
+    padding: 1rem; 
+  }
+  .botones-accion { 
+    grid-template-columns: 1fr; 
+  }
+  .btn-accion { 
+    padding: 0.8rem 1rem; 
+    font-size: 0.9rem; 
+  }
+  .mensaje-confirmacion { 
+    top: 10px; 
+    right: 10px; 
+    left: 10px; 
+  }
 }
 @media (max-width: 480px) {
   .contenedor-info-alumno { padding: 1rem; }
