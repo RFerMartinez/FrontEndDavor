@@ -1,162 +1,271 @@
 <template>
   <div class="sidebar">
-    <!-- Info del usuario -->
-    <div class="user-info">
+    <div class="logo-container">
       <img src="../../assets/logo.png" alt="Logo" class="logo" />
-      <p class="username">{{ nombre }} {{ apellido }}</p>
     </div>
 
-    <!-- Botones personalizados (recibidos por slot) -->
     <nav class="menu">
+      <!-- <button class="menu-btn dashboard-btn" @click="cambiarVista('dashboard')">
+        <i class="fas fa-tachometer-alt icon"></i> <span>Dashboard</span>
+      </button> -->
+
+      <!-- <hr class="separator" /> -->
+
       <slot />
+
+      <button class="menu-btn profile-btn" @click="cambiarVista('configurarPerfil')">
+        <i class="fas fa-user-cog icon"></i> <span>Configurar Perfil</span>
+      </button>
     </nav>
 
-    <!-- Botón cerrar sesión MEJORADO -->
-    <button class="logout-btn" @click="cerrarSesion">
-      <span>Cerrar sesión</span>
-      <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-      </svg>
-    </button>
+    <div class="user-info">
+      <div class="avatar">
+        <i class="fas fa-user"></i> </div>
+      <div class="user-details">
+        <span class="username">{{ nombre }} {{ apellido }}</span>
+        <span class="role">{{ username }}</span>
+        </div>
+      <button class="logout-btn-small" @click="cerrarSesion" title="Cerrar sesión">
+          <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+
   </div>
 </template>
 
 <script setup>
-
 import { ref, onMounted } from 'vue';
-// 1. Importa la función para obtener los datos del usuario
-import { getUser } from '@/api/storage/userStorage';
+import { getUser } from '@/api/storage/userStorage'; // Asegúrate de tener este import
 
-const emit = defineEmits(['logout']);
-
-// 2. Crea variables reactivas para el nombre y el apellido
+// Mantenemos la lógica para obtener el nombre y apellido
 const nombre = ref('');
 const apellido = ref('');
+const username = ref('asd');
 
-// 3. Cuando el componente se monta, carga los datos del usuario
 onMounted(() => {
   const usuario = getUser();
   if (usuario) {
     nombre.value = usuario.nombre;
     apellido.value = usuario.apellido;
+    username.value = usuario.usuario; // <--- AGREGA esta línea (asegúrate que 'usuario' es el nombre correcto del campo)
   }
 });
 
+// Eventos que el componente puede emitir
+const emit = defineEmits(['logout', 'cambiarVista']);
+
+// Función para emitir el cambio de vista
+function cambiarVista(vista) {
+  emit('cambiarVista', vista);
+}
+
+// Función para emitir el logout
 function cerrarSesion() {
   emit('logout');
 }
 </script>
 
 <style scoped>
+/* Estilos generales del Sidebar (ajustados) */
 .sidebar {
-  width: 280px;
+  width: 260px; /* Un poco más angosto */
   height: 100vh;
-  background: rgba(15, 15, 15, 0.95);
-  backdrop-filter: blur(20px);
-  color: white;
+  background: rgba(31, 41, 55, 0.8); /* Fondo gris oscuro semi-transparente */
+  backdrop-filter: blur(15px); /* Efecto blur para el fondo */
+  color: #e5e7eb; /* Color de texto claro */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1rem; /* Ajuste de padding */
   position: fixed;
   left: 0;
   top: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(255, 255, 255, 0.1); /* Borde más sutil */
   z-index: 1000;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
 }
 
-.user-info {
+/* Contenedor del logo */
+.logo-container {
   text-align: center;
   margin-bottom: 2rem;
 }
 
 .logo {
+  max-width: 80%;
+  height: auto;
+  max-height: 85px; /* Ajusta según tu logo */
+}
+
+/* Menú principal */
+.menu {
+  flex-grow: 1; /* Ocupa el espacio disponible */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Espacio entre botones */
+}
+
+/* Estilo común para botones del menú */
+.menu-btn {
+  background: none;
+  border: none;
+  color: #d1d5db; /* Color de texto grisáceo */
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem; /* Ligeramente más pequeño */
+  text-align: left;
+  padding: 0.8rem 1rem; /* Padding ajustado */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px; /* Bordes redondeados */
+  font-weight: 500;
   width: 100%;
-  object-fit: contain;
-  margin-bottom: 1rem;
-  max-height: 80px;
+  display: flex; /* Para alinear icono y texto */
+  align-items: center; /* Centrar verticalmente */
+  gap: 0.8rem; /* Espacio entre icono y texto */
+}
+
+.menu-btn:hover {
+  color: #ffffff; /* Texto blanco al pasar el mouse */
+  background: #374151; /* Fondo gris oscuro al pasar */
+}
+
+.menu-btn.activo {
+  background: linear-gradient(90deg, #a8161d 0%, #f81f2c 100%); /* Degradado rojo */
+  color: #ffffff;
+  font-weight: 400;
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3); /* Sombra más notoria */
+}
+.menu-btn.activo .icon {
+  color: #ffffff;
+}
+
+.menu-btn .icon {
+  width: 18px; /* Tamaño del icono */
+  text-align: center;
+  color: #9ca3af; /* Color gris para iconos */
+  transition: color 0.2s ease;
+}
+.menu-btn:hover .icon {
+  color: #ffffff;
+}
+
+/* Separador */
+.separator {
+  border: none;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.5); /* Más sutil */
+  margin: 1rem 0; /* Espacio vertical */
+}
+
+/* Botón Configurar Perfil (lo colocamos al final del flex) */
+.profile-btn {
+  margin-top: auto; /* EMPUJA este botón hacia abajo */
+}
+
+/* Información del usuario (abajo) */
+/* Información del usuario (abajo) */
+.user-info {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.05); /* Fondo muy sutil */
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Borde sutil */
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: #4b5563; /* Fondo del avatar */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e5e7eb;
+  font-size: 1.1rem;
+}
+.avatar i { line-height: 1; } /* Ajuste para centrar FontAwesome */
+
+.user-details {
+  flex-grow: 1; /* Ocupa espacio */
+  display: flex;
+  flex-direction: column;
 }
 
 .username {
-  font-size: 1.3rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
-  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap; /* Evita que el nombre se parta */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Añade ... si el nombre es muy largo */
+  max-width: 130px; /* Limita el ancho máximo del nombre */
 }
 
-.menu {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  align-items: stretch;
+.role { /* Si añades el rol */
+  font-size: 0.75rem;
+  color: #9ca3af;
 }
 
-/* ESTILOS ESPECÍFICOS PARA BOTONES DE SIDEBAR */
-.menu >>> .menu-btn {
+/* Botón pequeño de cerrar sesión */
+.logout-btn-small {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
-  font-family: 'Inter', sans-serif;
+  color: #9ca3af; /* Color gris */
   font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-left: auto; /* Lo empuja a la derecha */
+  transition: color 0.2s ease;
+  line-height: 1; /* Ajuste para el icono */
+}
+
+.logout-btn-small:hover {
+  color: #ffffff; /* Blanco al pasar el mouse */
+}
+
+:deep(.menu-btn) {
+  background: none;
+  border: none;
+  color: #d1d5db; /* Color de texto grisáceo por defecto */
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem; 
   text-align: left;
-  padding: 1rem 1.2rem;
+  padding: 0.8rem 1rem; 
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 8px;
+  transition: all 0.2s ease;
+  border-radius: 6px; 
   font-weight: 500;
   width: 100%;
+  display: flex; 
+  align-items: center; 
+  gap: 0.8rem; /* Espacio entre icono (si existe) y texto */
+}
+:deep(.menu-btn:hover) {
+  color: #ffffff; /* Texto blanco al pasar */
+  background: rgba(255, 255, 255, 0.05); /* Fondo sutil al pasar */
+}
+/*rgba(31, 41, 55, 0.8)
+/* 3. Estilo ACTIVO con degradado ROJO para TODOS los botones */
+:deep(.menu-btn.activo) {
+  background: linear-gradient(90deg, #a70b13 1%, rgba(31, 41, 55, 0.8) 60%); /* Degradado rojo */
+  color: #ffffff;
+  font-weight: 400;
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3); 
+}
+:deep(.menu-btn.activo .icon) { /* Icono activo también blanco */
+  color: #ffffff;
 }
 
-.menu >>> .menu-btn:hover {
-  color: #e50914;
-  background: rgba(255, 255, 255, 0.05);
-  transform: translateX(5px);
+/* Estilo para los iconos (si los tienen) */
+:deep(.menu-btn .icon) {
+  width: 18px; 
+  text-align: center;
+  color: #9ca3af; /* Icono gris por defecto */
+  transition: color 0.2s ease;
 }
-
-.menu >>> .menu-btn.activo {
-  background: rgba(229, 9, 20, 0.15);
-  color: #e50914;
-  box-shadow: 0 2px 12px rgba(229, 9, 20, 0.2);
-}
-
-/* BOTÓN CERRAR SESIÓN MEJORADO - SIN CAMBIO DE COLOR */
-.logout-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.9);
-  padding: 1.1rem 1.5rem;
-  font-size: 1.1rem;
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: auto;
-}
-
-.logout-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: rgba(255, 255, 255, 0.95);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.logout-icon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.8;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover .logout-icon {
-  opacity: 1;
-  transform: translateX(2px);
+:deep(.menu-btn:hover .icon) {
+   color: #ffffff; /* Icono blanco al pasar */
 }
 </style>
