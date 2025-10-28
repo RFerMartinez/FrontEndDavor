@@ -242,3 +242,30 @@ html {
     text-align: center;
   }
 }
+
+/* Estilos para el boton de volver de infoalumno e ingresopersona
+/* --- Estilo Global Botón Volver --- */
+
+.btn-volver-global {
+  display: inline-flex; /* Usar inline-flex para que se ajuste al contenido */
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.2rem;
+  border: 2px solid #e50914; /* Rojo del logo */
+  background: white;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: #e50914; /* Rojo del logo */
+  text-decoration: none;
+  white-space: nowrap; /* Evita que el texto se parta */
+}
+
+.btn-volver-global:hover {
+  background: #e50914; /* Rojo del logo */
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3); /* Sombra roja */
+}

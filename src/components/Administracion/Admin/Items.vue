@@ -164,7 +164,7 @@ const getCampo2Valor = (item) => {
 /* Estilo específico para el precio en Suscripciones */
 .item-detalle.precio {
   font-size: 1.4rem;
-  color: #e91e63;
+  color: #e50914; /* MODIFICADO: Rojo del logo */
   font-weight: 700;
 }
 
