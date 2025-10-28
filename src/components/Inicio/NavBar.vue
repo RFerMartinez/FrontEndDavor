@@ -95,7 +95,7 @@ function irLogin(modo) {
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(10, 10, 10, 0.95);
+  background: rgba(31, 41, 55, 0.15);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);

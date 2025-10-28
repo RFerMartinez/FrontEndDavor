@@ -61,6 +61,7 @@
           :class="{ activo: vistaActiva === 'dashboard' }"
           @click="cambiarVista('dashboard')"
         >
+          <i class="fas fa-tachometer-alt icon"></i>
           Estadísticas
         </button>
         <button
@@ -68,6 +69,7 @@
           :class="{ activo: vistaActiva === 'alumnos' }"
           @click="cambiarVista('alumnos')"
         >
+          <i class="fas fa-users icon"></i>
           Alumnos
         </button>
         <button
@@ -75,6 +77,7 @@
           :class="{ activo: vistaActiva === 'suscripciones' }"
           @click="cambiarVista('suscripciones')"
         >
+          <i class="fas fa-tags icon"></i>
           Suscripciones
         </button>
         <button
@@ -82,6 +85,7 @@
           :class="{ activo: vistaActiva === 'trabajo' }"
           @click="cambiarVista('trabajo')"
         >
+          <i class="fas fa-dumbbell icon"></i>
           Trabajos Metodologías
         </button>
          <button
@@ -89,6 +93,7 @@
           :class="{ activo: vistaActiva === 'personas' }"
           @click="cambiarVista('personas')"
         >
+          <i class="fas fa-id-card icon"></i>
           Personas
         </button>
         </NavbarMobile>

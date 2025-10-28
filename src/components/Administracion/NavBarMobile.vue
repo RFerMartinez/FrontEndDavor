@@ -28,9 +28,17 @@
       <!-- Menú móvil colapsable -->
       <div class="mobile-menu-container">
         <div class="mobile-menu">
-          <div class="user-info">
-            <p class="username">{{ nombre }} {{ apellido }}</p>
+          <div class="user-info-mobile">
+          <div class="avatar-mobile">
+            <i class="fas fa-user"></i>
           </div>
+          <div class="user-details-mobile">
+            <span class="username-mobile">{{ nombre }} {{ apellido }}</span>
+            <span class="role-mobile">{{ username }}</span>
+          </div>
+        </div>
+
+        <hr class="separator" />
           
           <!-- Slot para los botones del menú -->
           <div class="menu-opciones" @click="cerrarMenuSiEsLink">
@@ -39,9 +47,7 @@
           
           <button class="logout-btn" @click="handleLogout">
             <span>Cerrar sesión</span>
-            <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+            <i class="fas fa-sign-out-alt icon"></i>
           </button>
         </div>
       </div>
@@ -147,12 +153,19 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.separator {
+  border: none;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.5); /* Más sutil */
+  margin: 2rem 0; /* Espacio vertical */
+}
+
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(15, 15, 15, 0.98);
+  background: rgba(31, 41, 55, 0.95);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -270,7 +283,7 @@ onMounted(() => {
 }
 
 .menu-wrapper.open .menu-overlay {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .menu-wrapper.closing .menu-overlay {
@@ -293,7 +306,7 @@ onMounted(() => {
 .menu-wrapper.open .mobile-menu-container {
   opacity: 1;
   transform: translateY(0);
-  max-height: 600px;
+  max-height: 630px;
 }
 
 .menu-wrapper.closing .mobile-menu-container {
@@ -305,7 +318,7 @@ onMounted(() => {
 
 /* Estilos del menú - DISEÑO PROFESIONAL */
 .mobile-menu {
-  background: rgba(20, 20, 20, 0.98);
+  background: rgba(31, 41, 55, 0.8);
   backdrop-filter: blur(30px);
   padding: 2rem;
   border-radius: 16px;
@@ -337,6 +350,68 @@ onMounted(() => {
   gap: 0.5rem;
   margin-bottom: 2rem;
 }
+
+
+
+/* 3. Style for the User Info Card (copied from Sidebar, renamed classes) */
+.user-info-mobile {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 1.5rem; /* Space below card */
+  margin-bottom: 1rem; /* Reduced space before menu items */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+  flex-shrink: 0; 
+  /* Added background/border like Sidebar's user-info */
+  padding: 0.8rem; 
+  background: rgba(255, 255, 255, 0.05); 
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+}
+
+.avatar-mobile {
+  width: 40px; /* Slightly larger for touch */
+  height: 40px;
+  background: #4b5563; 
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e5e7eb;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.avatar-mobile i { line-height: 1; }
+
+.user-details-mobile {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.username-mobile {
+  font-size: 0.95rem; /* Slightly larger */
+  font-weight: 600;
+  color: #ffffff; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role-mobile {
+  font-size: 0.8rem; /* Consistent size */
+  color: #9ca3af; 
+  margin-top: 2px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+
+
 
 /* Estilos para los botones que vienen del slot */
 .menu-opciones >>> .menu-btn {
