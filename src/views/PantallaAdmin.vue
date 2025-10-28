@@ -104,7 +104,7 @@
             :is="vistaComponente"
             :key="vistaSecundaria ? (datosSecundarios?.id || datosSecundarios?.dni) : vistaActiva"
             :alumno-seleccionado="vistaSecundaria === 'infoAlumno' ? datosSecundarios : undefined"
-            :persona="vistaSecundaria === 'ingresoPersona' ? datosSecundarios : undefined"
+            :personaSeleccionada="vistaSecundaria === 'ingresoPersona' ? datosSecundarios : undefined"
             @ver-alumno="verAlumno"
             @volver-alumnos="volverAlumnos"
             @verIngreso="verIngresoPersona"

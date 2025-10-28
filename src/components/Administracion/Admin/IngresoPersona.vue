@@ -105,9 +105,11 @@ import ListadoNiveles from './ListadoNiveles.vue';
 import TablaHorarios from '../TablaHorarios.vue';
 import DetallePersona from './DetallePersona.vue';
 import Titulo from '../Titulo.vue';
+
 const props = defineProps({
   personaSeleccionada: Object
 });
+const personaID = computed(() => props.personaSeleccionada)
 
 const persona = ref({
   dni: "11223344",
@@ -132,13 +134,22 @@ const nuevosHorarios = ref([]);
 const mostrarMensajeValidacion = ref(false);
 
 onMounted(() => {
-  if (props.personaSeleccionada) {
-    // Copia los datos, asegurándose de que todos los campos base existan
-    persona.value = { ...persona.value, ...props.personaSeleccionada };
-    console.log("Datos de personaSeleccionada copiados a ref local:", persona.value);
+  // Esta lógica sigue siendo necesaria para que 'DetallePersona'
+  // y el resto del formulario muestren los datos inmediatamente.
+  if (props.personaSeleccionada) { 
+    console.log("IngresoPersona montado. Datos recibidos en personaID.value:", personaID.value);
+    //console.log("Datos de personaSeleccionada copiados a ref local:", persona.value);
   } else {
-    console.warn("IngresoPersona: No se recibieron datos en personaSeleccionada.");
+    //console.warn("IngresoPersona: No se recibieron datos en personaSeleccionada.");
   }
+  
+  // Ahora también podrías usar personaID.value si necesitaras
+  // hacer un fetch inicial de datos adicionales para 'persona.value'
+  // Ejemplo:
+  // if (personaID.value && personaID.value.dni) {
+  //   const masDatos = await obtenerMasDatosDePersona(personaID.value.dni);
+  //   persona.value = { ...persona.value, ...masDatos };
+  // }
 });
 
 // --- VALIDACIÓN (sin cambios) ---
