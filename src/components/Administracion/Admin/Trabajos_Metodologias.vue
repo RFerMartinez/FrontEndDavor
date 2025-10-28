@@ -7,8 +7,8 @@
 
     <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBoton">
       <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
-        <button class="btn-agregar" @click="iniciarTransicionAFormulario">
-          <i class="fas fa-plus"></i>
+        <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
+      <i class="fas fa-plus"></i>
           Agregar Nueva Metodología
         </button>
       </div>
@@ -35,12 +35,12 @@
     />
 
     <transition name="slide-in">
-      <div v-if="mensajeConfirmacion" class="mensaje-confirmacion">
-        <div class="contenido-mensaje">
-          <i class="fas fa-check-circle"></i>
+      <div v-if="mensajeConfirmacion" class="mensaje-confirmacion-global">
+        <div class="contenido-mensaje-global">
+      <i class="fas fa-check-circle"></i>
           <span>{{ mensajeConfirmacion }}</span>
-          <button class="btn-cerrar-mensaje" @click="mensajeConfirmacion = ''">
-            <i class="fas fa-times"></i>
+          <button class="btn-cerrar-mensaje-global" @click="mensajeConfirmacion = ''">
+          <i class="fas fa-times"></i>
           </button>
         </div>
       </div>
@@ -49,165 +49,130 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-// Importamos los nuevos componentes
-import AgregarModificar from './AgregarModificar.vue' // Ajusta la ruta si es necesario
-import Items from './Items.vue' // Ajusta la ruta si es necesario
+// --- SCRIPT (SIN CAMBIOS) ---
+import { ref, onMounted } from 'vue';
+import AgregarModificar from './AgregarModificar.vue';
+import Items from './Items.vue';
 import Titulo from '../Titulo.vue';
-// --- Configuración para los componentes hijos ---
+
+// Configuración (ahora incluye contexto)
 const configFormulario = {
   tituloSingular: 'Metodología',
-  layout: 'stacked', // 1fr (apilado)
-  campo1: { key: 'nombre', label: 'Nombre:', placeholder: 'Ej: Musculación', esTextarea: false },
-  campo2: { key: 'descripcion', label: 'Descripción:', placeholder: 'Describe la metodología...', esTextarea: true }
-}
-
+  layout: 'stacked',
+  contexto: 'trabajos', // <-- CONTEXTO
+  campo1: { key: 'nombre', label: 'Nombre:', placeholder: 'Ej: Musculación', esTextarea: false, tipoInput: 'text', readonly: false },
+  campo2: { key: 'descripcion', label: 'Descripción:', placeholder: 'Describe la metodología...', esTextarea: true, tipoInput: 'text', readonly: false }
+};
 const configLista = {
-  key1: 'nombre',    // Propiedad para el título
-  showKey2: false,   // NO mostramos el segundo campo
-  key2: 'descripcion', // (Igual lo pasamos por si acaso)
+  contexto: 'trabajos', // <-- CONTEXTO
+  key1: 'nombre',
+  showKey2: false,
+  key2: 'descripcion',
   styleKey2: 'descripcion'
-}
-// ----------------------------------------------
+  // formatoPrecio: false (no se necesita)
+};
 
+const trabajos = ref([]);
+const mostrarFormulario = ref(false);
+const trabajoEditando = ref(null);
+const mensajeConfirmacion = ref('');
+const transicionEnProgreso = ref(false);
 
-// Estado de los trabajos (TODA LA LÓGICA SE MANTIENE EN EL PADRE)
-const trabajos = ref([])
-const mostrarFormulario = ref(false)
-const trabajoEditando = ref(null) // Ahora guarda el ID
-const mensajeConfirmacion = ref('')
-const transicionEnProgreso = ref(false)
-
-// Nuevo trabajo temporal (usada por v-model en AgregarModificar)
 const nuevoTrabajo = ref({
   nombre: '',
   descripcion: ''
-})
+});
 
-// EVENTO: Cargar trabajos al montar el componente
 const cargarTrabajos = async () => {
   try {
-    // TODO: Reemplazar con llamada a API real
-    const metodologiasData = await import('../../../../public/data/metodologias.json')
+    const metodologiasData = await import('../../../../public/data/metodologias.json');
     trabajos.value = metodologiasData.default.map((item, index) => ({
       id: index + 1,
       nombre: item.nombre,
-      descripcion: item.descripcion
-    }))
-    console.log('Trabajos cargados:', trabajos.value)
+      descripcion: item.descripcion || '' // Asegurar que descripción exista
+    }));
+    console.log('Trabajos cargados:', trabajos.value);
   } catch (error) {
-    console.error('Error cargando trabajos:', error)
-    // Datos de ejemplo en caso de error
+    console.error('Error cargando trabajos:', error);
     trabajos.value = [
-      { 
-        id: 1, 
-        nombre: "Musculación", 
-        descripcion: "Entrenamiento centrado en el desarrollo de la masa muscular y fuerza con cargas progresivas." 
-      },
-      { 
-        id: 2, 
-        nombre: "Funcional", 
-        descripcion: "Ejercicios que imitan movimientos de la vida diaria, mejorando la movilidad y estabilidad general." 
-      }
-    ]
+      { id: 1, nombre: "Musculación", descripcion: "Entrenamiento centrado en el desarrollo de la masa muscular y fuerza con cargas progresivas." },
+      { id: 2, nombre: "Funcional", descripcion: "Ejercicios que imitan movimientos de la vida diaria, mejorando la movilidad y estabilidad general." }
+    ];
   }
-}
+};
 
-// FUNCIÓN DE SCROLL INMEDIATO (Se mantiene por si el formulario queda lejos)
 const scrollArribaInmediato = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  })
-}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
-// Iniciar transición hacia el formulario (para "Agregar")
 const iniciarTransicionAFormulario = () => {
-  nuevoTrabajo.value = { nombre: '', descripcion: '' } // Limpiamos el v-model
-  trabajoEditando.value = null
-  transicionEnProgreso.value = true
-  scrollArribaInmediato()
-}
+  nuevoTrabajo.value = { nombre: '', descripcion: '' };
+  trabajoEditando.value = null;
+  transicionEnProgreso.value = true;
+  scrollArribaInmediato();
+};
 
-// Mostrar formulario después de que el botón desaparezca
 const mostrarFormularioDespuesDeBoton = () => {
-  mostrarFormulario.value = true
-}
+  mostrarFormulario.value = true;
+};
 
-// Iniciar transición hacia el botón (para "Cancelar")
 const iniciarTransicionABoton = () => {
-  mostrarFormulario.value = false
-  trabajoEditando.value = null
-  nuevoTrabajo.value = { nombre: '', descripcion: '' }
-}
+  mostrarFormulario.value = false;
+  trabajoEditando.value = null;
+  nuevoTrabajo.value = { nombre: '', descripcion: '' };
+};
 
-// EVENTO: Editar trabajo existente (lo llama el @editar de Items)
 const editarTrabajo = (trabajo) => {
-  // Copiamos los datos del item al v-model del formulario
-  nuevoTrabajo.value = { ...trabajo }
-  trabajoEditando.value = trabajo.id
-  
+  nuevoTrabajo.value = { ...trabajo };
+  trabajoEditando.value = trabajo.id;
   if (!mostrarFormulario.value) {
-    transicionEnProgreso.value = true // Oculta el botón
+    transicionEnProgreso.value = true;
   }
-  mostrarFormulario.value = true // Mostramos el formulario
-  scrollArribaInmediato()
-}
+  mostrarFormulario.value = true;
+  scrollArribaInmediato();
+};
 
-// EVENTO: Guardar trabajo (lo llama el @guardar de AgregarModificar)
-const guardarTrabajo = () => {
-  // Leemos los datos directamente desde el v-model (nuevoTrabajo)
-  if (!nuevoTrabajo.value.nombre || !nuevoTrabajo.value.descripcion) {
-    mensajeConfirmacion.value = 'Por favor completa todos los campos obligatorios'
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
-    return
+const guardarTrabajo = (datosRecibidos) => { // Recibe datos de AgregarModificar
+  if (!datosRecibidos.nombre) { // Solo validar nombre aquí
+    mensajeConfirmacion.value = 'Por favor completa el campo Nombre';
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    return;
   }
   
   if (trabajoEditando.value) {
-    // EVENTO: Actualizar trabajo existente
-    const index = trabajos.value.findIndex(t => t.id === trabajoEditando.value)
+    const index = trabajos.value.findIndex(t => t.id === trabajoEditando.value);
     if (index !== -1) {
-      trabajos.value[index] = { 
-        ...nuevoTrabajo.value, 
-        id: trabajoEditando.value,
-      }
-      mensajeConfirmacion.value = 'Metodología actualizada correctamente'
+      trabajos.value[index] = { ...datosRecibidos, id: trabajoEditando.value };
+      mensajeConfirmacion.value = 'Metodología actualizada correctamente';
     }
   } else {
-    // EVENTO: Crear nuevo trabajo
-    const nuevoId = Math.max(...trabajos.value.map(t => t.id), 0) + 1
-    trabajos.value.push({
-      id: nuevoId,
-      ...nuevoTrabajo.value,
-    })
-    mensajeConfirmacion.value = 'Metodología creada correctamente'
+    // Validar si ya existe
+    if (trabajos.value.some(t => t.nombre.toLowerCase() === datosRecibidos.nombre.toLowerCase())) {
+        mensajeConfirmacion.value = `La metodología "${datosRecibidos.nombre}" ya existe.`;
+        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+        return;
+    }
+    const nuevoId = Math.max(...trabajos.value.map(t => t.id), 0) + 1;
+    trabajos.value.push({ id: nuevoId, ...datosRecibidos });
+    mensajeConfirmacion.value = 'Metodología creada correctamente';
   }
+  iniciarTransicionABoton();
+  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+};
 
-  // Usamos la misma función de "Cancelar" para cerrar el formulario
-  iniciarTransicionABoton()
-  
-  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
-}
-
-// EVENTO: Eliminar trabajo (lo llama el @eliminar de Items)
 const eliminarTrabajo = (id) => {
   if (confirm('¿Estás seguro de que quieres eliminar esta metodología?')) {
-    trabajos.value = trabajos.value.filter(t => t.id !== id)
-    mensajeConfirmacion.value = 'Metodología eliminada correctamente'
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000)
+    trabajos.value = trabajos.value.filter(t => t.id !== id);
+    mensajeConfirmacion.value = 'Metodología eliminada correctamente';
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
   }
-}
+};
 
-// Cargar trabajos al montar el componente
-onMounted(() => {
-  cargarTrabajos()
-})
+onMounted(cargarTrabajos);
 </script>
 
 <style scoped>
-/* Estilos del Contenedor, Encabezado, Botón Agregar y Mensaje */
-/* Todos los estilos del formulario y la lista se fueron a los hijos */
-/* CSS limpiado de caracteres inválidos */
+/* --- ESTILOS LOCALES (Limpiados) --- */
 
 .contenedor-trabajos {
   padding: 2rem;
@@ -234,37 +199,12 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* Botón agregar */
-.contenedor-boton-agregar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
+/* Estilos para .contenedor-boton-agregar, .btn-agregar,
+  .mensaje-confirmacion, .contenido-mensaje, .btn-cerrar-mensaje
+  AHORA ESTÁN EN EL CSS GLOBAL.
+*/
 
-.btn-agregar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: #C2185B;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.3);
-}
-
-.btn-agregar:hover {
-  background: #AD1457;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(194, 24, 91, 0.4);
-}
-
-/* Animaciones secuenciales - MÁS RÁPIDAS */
+/* Animaciones secuenciales */
 .fade-scale-enter-active {
   transition: all 0.2s ease-out;
 }
@@ -295,7 +235,7 @@ onMounted(() => {
   transform: translateY(-8px);
 }
 
-/* Mensaje de confirmación - MÁS RÁPIDO */
+/* Animación mensaje confirmación */
 .slide-in-enter-active {
   transition: all 0.25s ease-out;
 }
@@ -311,65 +251,21 @@ onMounted(() => {
   opacity: 0;
 }
 
-.mensaje-confirmacion {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #C2185B;
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(194, 24, 91, 0.3);
-  z-index: 1000;
-}
-
-.contenido-mensaje {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-}
-
-.btn-cerrar-mensaje {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 0.3rem;
-  margin-left: 1rem;
-  border-radius: 50%;
-  transition: background 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-cerrar-mensaje:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 /* Responsive */
 @media (max-width: 768px) {
   .contenedor-trabajos {
     padding: 1.5rem;
   }
-    
-  .mensaje-confirmacion {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-    text-align: center;
-  }
+  
+  /* .mensaje-confirmacion (global) ya es responsive */
 }
 
 @media (max-width: 480px) {
   .contenedor-trabajos {
     padding: 1rem;
   }
-     
-  .btn-agregar {
-    width: 100%;
-    justify-content: center;
-  }
+  
+  /* .btn-agregar (global) ya es responsive */
 }
 </style>

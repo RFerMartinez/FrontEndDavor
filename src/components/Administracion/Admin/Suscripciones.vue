@@ -7,8 +7,8 @@
 
     <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBotón">
       <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
-        <button class="btn-agregar" @click="iniciarTransicionAFormulario">
-          <i class="fas fa-plus"></i>
+        <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
+      <i class="fas fa-plus"></i>
           Agregar Nueva Suscripción
         </button>
       </div>
@@ -33,12 +33,12 @@
     />
 
     <transition name="slide-in">
-      <div v-if="mensajeConfirmacion" class="mensaje-confirmacion">
-        <div class="contenido-mensaje">
-          <i class="fas fa-check-circle"></i>
+      <div v-if="mensajeConfirmacion" class="mensaje-confirmacion-global">
+        <div class="contenido-mensaje-global">
+      <i class="fas fa-check-circle"></i>
           <span>{{ mensajeConfirmacion }}</span>
-          <button class="btn-cerrar-mensaje" @click="mensajeConfirmacion = ''">
-            <i class="fas fa-times"></i>
+          <button class="btn-cerrar-mensaje-global" @click="mensajeConfirmacion = ''">
+          <i class="fas fa-times"></i>
           </button>
         </div>
       </div>
@@ -53,83 +53,64 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'; // Añadir computed
+// --- SCRIPT (SIN CAMBIOS) ---
+import { ref, computed, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
 import Items from './Items.vue';
 import Titulo from '../Titulo.vue';
 
-// --- CONFIGURACIÓN ---
-// Configuración base para el formulario (será ajustada por la computada)
 const configFormBase = {
   tituloSingular: 'Suscripción',
   layout: 'inline',
-  contexto: 'suscripciones', // <-- CONTEXTO
-  // Los campos se definen en la computada
+  contexto: 'suscripciones',
 };
-
-// Configuración para la lista (ahora con formatoPrecio)
 const configLista = ref({
-  contexto: 'suscripciones', // <-- CONTEXTO
+  contexto: 'suscripciones',
   key1: 'descripcion',
   showKey2: true,
   key2: 'precio',
   styleKey2: 'precio',
-  formatoPrecio: true // <-- Indica a Items que formatee el precio
+  formatoPrecio: true
 });
-// --------------------
 
-
-// --- ESTADO ---
-const suscripciones = ref([]); // Lista principal
+const suscripciones = ref([]);
 const mostrarFormulario = ref(false);
-const suscripcionEditando = ref(null); // Guarda el ID del item en edición
+const suscripcionEditando = ref(null);
 const mensajeConfirmacion = ref('');
 const transicionEnProgreso = ref(false);
-const datosFormulario = ref({ descripcion: '', precio: '' }); // v-model para AgregarModificar
-const suscripcionNuevaGuardada = ref(null); // <-- NUEVO: Para guardar temporalmente
-// --------------
+const datosFormulario = ref({ descripcion: '', precio: '' });
+const suscripcionNuevaGuardada = ref(null);
 
-
-// --- CONFIGURACIÓN COMPUTADA DEL FORMULARIO ---
 const configFormularioComputada = computed(() => {
   const esEdicion = suscripcionEditando.value !== null;
   return {
-    ...configFormBase, // Copia la base
+    ...configFormBase,
     campo1: esEdicion
-      ? { key: 'descripcion', label: 'Descripción:', placeholder: 'Descripción (No editable)', esTextarea: false, tipoInput: 'text', readonly: true } // Edición: readonly
-      : { key: 'descripcion', label: 'Días por semana:', placeholder: 'Ej: 3', esTextarea: false, tipoInput: 'number', min: '1', readonly: false }, // Agregado: number
-    campo2: { key: 'precio', label: 'Precio (número):', placeholder: 'Ej: 20000', esTextarea: false, tipoInput: 'number', min: '0', readonly: false } // Siempre number
+      ? { key: 'descripcion', label: 'Descripción:', placeholder: 'Descripción (No editable)', esTextarea: false, tipoInput: 'text', readonly: true }
+      : { key: 'descripcion', label: 'Días por semana:', placeholder: 'Ej: 3', esTextarea: false, tipoInput: 'number', min: '1', readonly: false },
+    campo2: { key: 'precio', label: 'Precio (número):', placeholder: 'Ej: 20000', esTextarea: false, tipoInput: 'number', min: '0', readonly: false }
   };
 });
-// ------------------------------------------
 
-// --- FUNCIONES ---
 const parsePriceString = (priceString) => {
     if (typeof priceString !== 'string') return NaN;
-    // Quitar puntos de miles (si los hubiera) y reemplazar coma decimal por punto
     const cleanedString = priceString.replace(/\./g, '').replace(',', '.');
     const number = parseFloat(cleanedString);
-    return isNaN(number) ? NaN : number; // Devolver NaN si falla
+    return isNaN(number) ? NaN : number;
 };
 
 const cargarSuscripciones = async () => {
   try {
     const preciosData = await import('../../../../public/data/precios.json');
     suscripciones.value = preciosData.default.map((item, index) => {
-        const precioNum = parsePriceString(item.precio); // Parsea el string del JSON
-        if (isNaN(precioNum)) {
-             console.warn(`Precio inválido en JSON para "${item.descripcion}": ${item.precio}`);
-        }
-        return {
-            id: index + 1,
-            descripcion: item.descripcion,
-            precio: isNaN(precioNum) ? 0 : precioNum // Guarda como número, 0 si falla
-        };
+        const precioNum = parsePriceString(item.precio);
+        if (isNaN(precioNum)) { console.warn(`Precio inválido en JSON para "${item.descripcion}": ${item.precio}`); }
+        return { id: index + 1, descripcion: item.descripcion, precio: isNaN(precioNum) ? 0 : precioNum };
     });
     console.log('Suscripciones cargadas (precio como número):', suscripciones.value);
   } catch (error) {
     console.error('Error cargando suscripciones:', error);
-    suscripciones.value = [ // Datos de ejemplo con precio numérico
+    suscripciones.value = [
         { id: 1, descripcion: '1 Día a la semana', precio: 10000 },
         { id: 2, descripcion: '2 Días a la semana', precio: 15000 },
         { id: 3, descripcion: '3 Días a la semana', precio: 20000 },
@@ -141,7 +122,7 @@ const cargarSuscripciones = async () => {
 const iniciarTransicionAFormulario = () => {
   datosFormulario.value = { descripcion: '', precio: '' };
   suscripcionEditando.value = null;
-  suscripcionNuevaGuardada.value = null; // Limpiar temp al abrir para agregar
+  suscripcionNuevaGuardada.value = null;
   transicionEnProgreso.value = true;
 };
 
@@ -151,36 +132,31 @@ const iniciarTransicionABoton = () => {
   mostrarFormulario.value = false;
   suscripcionEditando.value = null;
   datosFormulario.value = { descripcion: '', precio: '' };
-  // No limpiar suscripcionNuevaGuardada aquí para poder verla
 };
 
 const editarSuscripcion = (suscripcion) => {
-  // Al editar, pasamos la descripción textual y el precio numérico LIMPIO
   datosFormulario.value = {
       descripcion: suscripcion.descripcion,
-      precio: suscripcion.precio // Ya debería ser número por cargarSuscripciones
+      precio: suscripcion.precio
   };
   suscripcionEditando.value = suscripcion.id;
-  suscripcionNuevaGuardada.value = null; // Limpiar temp al abrir para editar
+  suscripcionNuevaGuardada.value = null;
   if (!mostrarFormulario.value) { transicionEnProgreso.value = true; }
   mostrarFormulario.value = true;
 };
 
 const guardarSuscripcion = (datosRecibidos) => {
-  const claveCampo1 = configFormularioComputada.value.campo1.key; // 'descripcion'
-  const claveCampo2 = configFormularioComputada.value.campo2.key; // 'precio'
+  const claveCampo1 = configFormularioComputada.value.campo1.key;
+  const claveCampo2 = configFormularioComputada.value.campo2.key;
+  const valorCampo1 = datosRecibidos[claveCampo1];
+  const valorCampo2 = datosRecibidos[claveCampo2];
 
-  const valorCampo1 = datosRecibidos[claveCampo1]; // Puede ser número (días) o string (descripción en edición)
-  const valorCampo2 = datosRecibidos[claveCampo2]; // Debería ser un string numérico del input
-
-  // Validaciones
   if (valorCampo1 === '' || valorCampo1 === null || valorCampo1 === undefined ||
       valorCampo2 === '' || valorCampo2 === null || valorCampo2 === undefined) {
     mensajeConfirmacion.value = 'Por favor completa todos los campos';
     setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
     return;
   }
-
   const precioNum = parseFloat(valorCampo2);
   if (isNaN(precioNum) || precioNum < 0) {
       mensajeConfirmacion.value = 'El precio debe ser un número válido mayor o igual a 0.';
@@ -188,17 +164,15 @@ const guardarSuscripcion = (datosRecibidos) => {
       return;
   }
 
-  if (suscripcionEditando.value !== null) { // Editando
+  if (suscripcionEditando.value !== null) {
     const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value);
     if (index !== -1) {
-      // --- Lógica API Actualización (SOLO PRECIO) ---
-      suscripciones.value[index].precio = precioNum; // Actualiza solo el precio
+      suscripciones.value[index].precio = precioNum;
       console.log("Llamando a API para ACTUALIZAR suscripción:", suscripciones.value[index]);
       mensajeConfirmacion.value = 'Precio de suscripción actualizado';
-      // --- Fin Lógica API ---
     }
-  } else { // Agregando
-    const diasNum = parseInt(valorCampo1); // valorCampo1 son los días
+  } else {
+    const diasNum = parseInt(valorCampo1);
      if (isNaN(diasNum) || diasNum <= 0) {
         mensajeConfirmacion.value = 'La cantidad de días debe ser un número entero mayor a 0.';
         setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
@@ -210,26 +184,18 @@ const guardarSuscripcion = (datosRecibidos) => {
         setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
         return;
     }
-
     const nuevoId = Math.max(...suscripciones.value.map(s => s.id), 0) + 1;
-    const nuevaSub = {
-      id: nuevoId,
-      descripcion: descripcionFormateada,
-      precio: precioNum
-    };
-    // --- Lógica API Creación ---
-    suscripcionNuevaGuardada.value = { ...nuevaSub }; // <-- Guarda en variable temporal
-    suscripciones.value.push(nuevaSub); // Añade a la lista principal
+    const nuevaSub = { id: nuevoId, descripcion: descripcionFormateada, precio: precioNum };
+    suscripcionNuevaGuardada.value = { ...nuevaSub };
+    suscripciones.value.push(nuevaSub);
     console.log("Llamando a API para CREAR suscripción:", nuevaSub);
     mensajeConfirmacion.value = 'Suscripción creada correctamente';
-    // --- Fin Lógica API ---
   }
-
-  iniciarTransicionABoton(); // Cierra el formulario
+  iniciarTransicionABoton();
   setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
 };
 
-const eliminarSuscripcion = (id) => { /* ... sin cambios ... */
+const eliminarSuscripcion = (id) => {
     if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
         console.log("Llamando a API para ELIMINAR suscripción con ID:", id);
         suscripciones.value = suscripciones.value.filter(s => s.id !== id);
@@ -237,16 +203,13 @@ const eliminarSuscripcion = (id) => { /* ... sin cambios ... */
         setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
     }
 };
-// --------------
 
 onMounted(cargarSuscripciones);
 </script>
 
 
 <style scoped>
-/* Estilos del Contenedor, Encabezado, Botón Agregar y Mensaje */
-/* Todos los estilos del formulario y la lista se fueron a los hijos */
-/* CSS limpiado de caracteres inválidos */
+/* --- ESTILOS LOCALES (Limpiados) --- */
 
 .contenedor-suscripciones {
   padding: 2rem;
@@ -266,7 +229,6 @@ onMounted(cargarSuscripciones);
   margin-bottom: 2rem;
 }
 
-
 .subtitulo {
   color: #666;
   font-size: 1.1rem;
@@ -274,35 +236,10 @@ onMounted(cargarSuscripciones);
   letter-spacing: 0.5px;
 }
 
-/* Botón agregar */
-.contenedor-boton-agregar {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.btn-agregar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: #C2185B;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.3);
-}
-
-.btn-agregar:hover {
-  background: #AD1457;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(194, 24, 91, 0.4);
-}
+/* Los estilos para .contenedor-boton-agregar, .btn-agregar,
+  .mensaje-confirmacion, .contenido-mensaje, .btn-cerrar-mensaje
+  y sus :hover AHORA ESTÁN EN EL CSS GLOBAL.
+*/
 
 /* Animaciones secuenciales */
 .fade-scale-enter-active {
@@ -335,7 +272,7 @@ onMounted(cargarSuscripciones);
   transform: translateY(-10px);
 }
 
-/* Mensaje de confirmación */
+/* Animación mensaje confirmación */
 .slide-in-enter-active {
   transition: all 0.3s ease-out;
 }
@@ -351,55 +288,14 @@ onMounted(cargarSuscripciones);
   opacity: 0;
 }
 
-.mensaje-confirmacion {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: #C2185B;
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(194, 24, 91, 0.3);
-  z-index: 1000;
-}
-
-.contenido-mensaje {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
-}
-
-.btn-cerrar-mensaje {
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 0.3rem;
-  margin-left: 1rem;
-  border-radius: 50%;
-  transition: background 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-cerrar-mensaje:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 /* Responsive */
 @media (max-width: 768px) {
   .contenedor-suscripciones {
     padding: 1.5rem;
   }
-
-  .mensaje-confirmacion {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-    text-align: center;
-  }
+  
+  /* .mensaje-confirmacion (global) ya es responsive */
 }
 
 @media (max-width: 480px) {
@@ -407,9 +303,6 @@ onMounted(cargarSuscripciones);
     padding: 1rem;
   }
   
-  .btn-agregar {
-    width: 100%;
-    justify-content: center;
-  }
+  /* .btn-agregar (global) ya es responsive */
 }
 </style>

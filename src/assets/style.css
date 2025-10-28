@@ -151,3 +151,94 @@ html {
 .login-layout > :first-child {
   flex: 1; /* ocupa el espacio disponible */
 }
+
+/* --- Estilos Globales para Botones de Acción --- */
+
+/* Contenedor para centrar el botón (opcional, pero útil) */
+.contenedor-boton-agregar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+/* Botón principal de "Agregar" */
+.btn-agregar-global {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: #e50914; /* Rojo del logo */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3); /* Sombra roja */
+}
+
+.btn-agregar-global:hover {
+  background: #d32f2f; /* Rojo más oscuro */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(229, 9, 20, 0.4);
+}
+
+/* Responsive para el botón global */
+@media (max-width: 480px) {
+  .btn-agregar-global {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* --- Estilos Globales para Mensajes de Confirmación --- */
+/* (Ya que ambos componentes los usan, mejor hacerlos globales también) */
+
+.mensaje-confirmacion-global {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #e50914; /* Rojo del logo */
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+  z-index: 1000;
+}
+
+.contenido-mensaje-global {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.btn-cerrar-mensaje-global {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.3rem;
+  margin-left: 1rem;
+  border-radius: 50%;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cerrar-mensaje-global:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive para mensaje */
+@media (max-width: 768px) {
+  .mensaje-confirmacion-global {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    text-align: center;
+  }
+}

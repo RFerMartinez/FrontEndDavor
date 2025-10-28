@@ -272,6 +272,7 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
 </script>
 
 <style scoped>
+/* --- Contenedor Principal --- */
 .contenedor-alumnos {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
@@ -285,13 +286,14 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   box-sizing: border-box;
 }
 
-/* Encabezado con información de alumnos */
+/* --- Encabezado y Título --- */
 .encabezado-alumnos {
   text-align: center;
   margin-bottom: 2rem;
 }
+/* El estilo .titulo se maneja en Titulo.vue */
 
-/* Filtros de búsqueda */
+/* --- Filtros (Búsqueda y Turno) --- */
 .filtros-busqueda {
   display: flex;
   gap: 1.5rem;
@@ -363,28 +365,32 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.2rem;
-  border: 2px solid #e9ecef;
+  border: 2px solid #adb5bd; /* Gris neutral */
   background: white;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
-  color: #6c757d;
+  color: #495057; /* Texto gris oscuro */
   white-space: nowrap;
 }
 
 .btn-turno:hover {
-  border-color: #e91e63;
-  color: #e91e63;
+  border-color: #2c3e50; /* Gris oscuro */
+  color: #2c3e50;
+  background: #f8f9fa;
+  transform: translateY(-1px);
 }
 
 .btn-turno.activo {
-  background: #e91e63;
-  border-color: #e91e63;
+  background: #2c3e50;    /* Carbón */
+  border-color: #2c3e50;
   color: white;
+  box-shadow: 0 4px 10px rgba(44, 62, 80, 0.2);
 }
 
+/* --- Controles Superiores (Contadores y Botones Filtro) --- */
 .controles-superiores {
   display: flex;
   justify-content: space-between;
@@ -421,14 +427,9 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   font-family: 'Poppins', sans-serif;
   margin-bottom: 0.3rem;
 }
-
-.numero-sutil.activo {
-  color: #4caf50;
-}
-
-.numero-sutil.inactivo {
-  color: #ff4d4d;
-}
+.numero-sutil.activo { color: #4caf50; }
+.numero-sutil.inactivo { color: #ff4d4d; }
+.numero-sutil.deudor { color: #ff9800; }
 
 .texto-sutil {
   font-size: 0.75rem;
@@ -445,75 +446,133 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   margin: 0 0.5rem;
 }
 
-/* Botón de filtrar activos */
+/* Contenedor para botones de filtro */
+.botones-filtros {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Estilo BASE para TODOS los botones de filtro */
 .btn-filtrar {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.2rem;
-  border: 2px solid #e91e63;
+  border: 2px solid #adb5bd; /* Gris neutral */
   background: white;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: 'Poppins', sans-serif;
   font-weight: 500;
-  color: #e91e63;
+  color: #495057; /* Texto gris oscuro */
   white-space: nowrap;
   position: relative;
 }
-
-.btn-filtrar:hover {
-  background: #e3f2fd;
-  transform: translateY(-1px);
-}
-
-.btn-filtrar.activo {
-  background: #e91e63;
-  color: white;
-}
-
-.btn-filtrar.activo:hover {
-  background: #e91e63;
-  transform: translateY(-1px);
-}
-
-.btn-texto {
+.btn-filtrar .btn-texto {
   font-size: 0.85rem;
 }
+.btn-filtrar:hover {
+  border-color: #6c757d; /* Borde gris más oscuro */
+  color: #212529;
+  background: #f8f9fa; /* Fondo gris suave */
+  transform: translateY(-1px);
+}
 
-.btn-badge {
+/* Estilo para "Solo Activos" (Verde) */
+.btn-filtrar.activo:not(.btn-filtrar-deudor) {
   background: #4caf50;
+  border-color: #4caf50;
+  color: white;
+}
+.btn-filtrar.activo:not(.btn-filtrar-deudor):hover {
+  background: #43a047;
+  border-color: #43a047;
+}
+
+/* Estilo para "Solo Deudores" (Naranja) */
+.btn-filtrar-deudor {
+  border-color: #ff9800; 
+  color: #ff9800; 
+}
+.btn-filtrar-deudor:hover {
+  border-color: #fb8c00; 
+  color: #fb8c00;
+  background: #fff8e1;
+}
+.btn-filtrar.btn-filtrar-deudor.activo {
+  background: #ff9800;
+  border-color: #ff9800;
+  color: white;
+}
+.btn-filtrar.btn-filtrar-deudor.activo:hover {
+  background: #fb8c00;
+  border-color: #fb8c00;
+}
+
+/* --- Badges (Contadores internos) --- */
+.btn-badge {
   color: white;
   border-radius: 12px;
   padding: 0.2rem 0.6rem;
   font-size: 0.75rem;
   font-weight: 600;
   margin-left: 0.3rem;
+  transition: all 0.3s ease;
+}
+/* Badge "Activos" (Inactivo) */
+.btn-badge.badge-activos {
+  background: #4caf50;
+}
+/* Badge "Activos" (Activo -> INVERTIDO) */
+.btn-filtrar:not(.btn-filtrar-deudor).activo .btn-badge.badge-activos {
+  background: white;
+  color: #4caf50; /* Texto verde */
+}
+/* Badge "Deudores" (Inactivo) */
+.btn-badge.badge-deudores {
+  background: #ff9800;
+}
+/* Badge "Deudores" (Activo -> INVERTIDO - CORREGIDO) */
+.btn-filtrar.btn-filtrar-deudor.activo .btn-badge.badge-deudores {
+  background: white;     /* Fondo blanco */
+  color: #E65100; /* Texto naranja oscuro (legible) */
 }
 
-/* Mensaje sin resultados */
+
+/* --- Carga, Paginación y Sin Resultados --- */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #6c757d;
+  font-style: italic;
+  gap: 1rem;
+  padding: 2rem;
+}
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #e91e63;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
 .sin-resultados {
   text-align: center;
   padding: 3rem 2rem;
   color: #6c757d;
 }
+.sin-resultados i { margin-bottom: 1rem; color: #e9ecef; }
+.sin-resultados h3 { margin-bottom: 0.5rem; color: #495057; }
+.sin-resultados p { font-size: 0.9rem; }
 
-.sin-resultados i {
-  margin-bottom: 1rem;
-  color: #e9ecef;
-}
-
-.sin-resultados h3 {
-  margin-bottom: 0.5rem;
-  color: #495057;
-}
-
-.sin-resultados p {
-  font-size: 0.9rem;
-}
-
-/* Paginación inferior */
 .paginacion-inferior {
   margin-top: 2.5rem;
   padding: 1.2rem;
@@ -524,13 +583,11 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   justify-content: center;
   align-items: center;
 }
-
 .paginacion-controles {
   display: flex;
   align-items: center;
   gap: 0.8rem;
 }
-
 .btn-paginacion {
   width: 40px;
   height: 40px;
@@ -545,27 +602,23 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   color: #e91e63;
   font-size: 0.9rem;
 }
-
 .btn-paginacion:hover:not(:disabled) {
   background: #e91e63;
   color: white;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
 }
-
 .btn-paginacion:disabled {
   opacity: 0.4;
   cursor: not-allowed;
   border-color: #ccc;
   color: #ccc;
 }
-
 .numeros-pagina {
   display: flex;
   gap: 0.4rem;
   align-items: center;
 }
-
 .numero-pagina {
   width: 35px;
   height: 35px;
@@ -581,228 +634,69 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); }; // Sin cambios
   color: #6c757d;
   font-size: 0.85rem;
 }
-
-.numero-pagina:hover {
+.numero-pagina:hover:not(.puntos) {
   border-color: #e91e63;
   color: #e91e63;
   transform: scale(1.05);
 }
-
 .numero-pagina.activa {
   background: #e91e63;
   border-color: #e91e63;
   color: white;
   transform: scale(1.1);
 }
+.numero-pagina.puntos {
+  cursor: default;
+  border: none;
+  font-weight: bold;
+}
 
-/* Ajustes responsivos */
-@media (max-width: 768px) {
-  .contenedor-alumnos {
-    padding: 1.5rem;
-  }
-  
-  .titulo {
-    font-size: 1.8rem;
-    margin-bottom: 1rem;
-  }
-  
-  .filtros-busqueda {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .busqueda-input-container {
-    max-width: 100%;
-    min-width: auto;
-  }
-  
-  .filtros-turno {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .btn-turno {
-    flex: 1;
-    justify-content: center;
-  }
-  
+/* --- Responsive --- */
+@media (max-width: 992px) {
   .controles-superiores {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .estado-alumnos-sutil {
-    padding: 0.7rem 1.2rem;
-    width: 100%;
-  }
-  
-  .info-alumno-sutil {
-    padding: 0.4rem 0.8rem;
-  }
-  
-  .numero-sutil {
-    font-size: 1.1rem;
-  }
-  
-  .texto-sutil {
-    font-size: 0.7rem;
-  }
-  
-  .separador {
-    height: 25px;
-  }
-  
-  .btn-filtrar {
-    width: 100%;
     justify-content: center;
-    padding: 0.6rem 1rem;
+    flex-direction: column;
   }
-  
-  .paginacion-inferior {
-    margin-top: 2rem;
-    padding: 1rem;
+  .botones-filtros {
+    margin-top: 1rem;
   }
-  
-  .btn-paginacion {
-    width: 35px;
-    height: 35px;
-    font-size: 0.8rem;
-  }
-  
-  .numero-pagina {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-  }
+}
+
+@media (max-width: 768px) {
+  .contenedor-alumnos { padding: 1.5rem; }
+  .filtros-busqueda { flex-direction: column; gap: 1rem; }
+  .busqueda-input-container { max-width: 100%; min-width: auto; }
+  .filtros-turno { width: 100%; justify-content: center; }
+  .btn-turno { flex: 1; justify-content: center; }
+  .controles-superiores { flex-direction: column; gap: 1rem; }
+  .estado-alumnos-sutil { padding: 0.7rem 1.2rem; width: 100%; }
+  .info-alumno-sutil { padding: 0.4rem 0.8rem; }
+  .numero-sutil { font-size: 1.1rem; }
+  .texto-sutil { font-size: 0.7rem; }
+  .separador { height: 25px; }
+  .botones-filtros { width: 100%; }
+  .btn-filtrar { width: 100%; justify-content: center; padding: 0.6rem 1rem; }
+  .paginacion-inferior { margin-top: 2rem; padding: 1rem; }
+  .btn-paginacion { width: 35px; height: 35px; font-size: 0.8rem; }
+  .numero-pagina { width: 30px; height: 30px; font-size: 0.8rem; }
 }
 
 @media (max-width: 480px) {
-  .contenedor-alumnos {
-    padding: 1rem;
-  }
-  
-  .titulo {
-    font-size: 1.6rem;
-  }
-  
-  .filtros-busqueda {
-    gap: 0.8rem;
-  }
-  
-  .input-busqueda {
-    padding: 0.7rem 0.9rem 0.7rem 2.8rem;
-    font-size: 0.85rem;
-  }
-  
-  .btn-turno {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-  }
-  
-  .estado-alumnos-sutil {
-    padding: 0.6rem 1rem;
-  }
-  
-  .info-alumno-sutil {
-    padding: 0.3rem 0.6rem;
-  }
-  
-  .numero-sutil {
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-  }
-  
-  .texto-sutil {
-    font-size: 0.65rem;
-    letter-spacing: 0.2px;
-  }
-  
-  .separador {
-    height: 20px;
-    margin: 0 0.3rem;
-  }
-  
-  .btn-filtrar {
-    padding: 0.5rem 0.8rem;
-  }
-  
-  .btn-texto {
-    font-size: 0.8rem;
-  }
-  
-  .paginacion-inferior {
-    margin-top: 1.5rem;
-    padding: 0.8rem;
-  }
-  
-  .paginacion-controles {
-    gap: 0.6rem;
-  }
-  
-  .btn-paginacion {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
-  }
-  
-  .numero-pagina {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-  
-  .numeros-pagina {
-    gap: 0.3rem;
-  }
-}
-.numero-sutil.deudor {
-  color: #ff9800; /* Naranja */
-}
-
-/* Contenedor para botones de filtro (necesario para espaciado) */
-.botones-filtros {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center; /* Centrar si se envuelven */
-}
-
-/* Clase específica para diferenciar el botón deudor */
-.btn-filtrar-deudor {
-  /* Puedes ajustar el color base si quieres, si no, usa el de .btn-filtrar */
-  border-color: #ff9800; 
-  color: #ff9800; 
-}
-
-/* Estilo ACTIVO para "Deudores" (usa el color naranja) */
-.btn-filtrar.btn-filtrar-deudor.activo {
-    background: #ff9800; /* Naranja */
-    border-color: #ff9800;
-    color: white; /* Hereda de .btn-filtrar.activo si lo tienes, sino añádelo */
-}
-.btn-filtrar.btn-filtrar-deudor.activo:hover {
-    background: #fb8c00; /* Naranja más oscuro */
-    border-color: #fb8c00;
-}
-
-/* Badge para deudores (color naranja) */
-.badge-deudores {
-    background: #ff9800; /* Naranja */
-    color: white; /* Asegura texto blanco */
-}
-/* Badge invertido cuando el botón deudor está activo */
-.btn-filtrar.btn-filtrar-deudor.activo .btn-badge {
-    background: white;
-    color: #ff9800; /* Naranja */
-}
-
-/* Ajuste responsive para el contenedor de botones (si no lo hiciste) */
-@media (max-width: 992px) {
-    .controles-superiores { justify-content: center; flex-direction: column; }
-    .botones-filtros { margin-top: 1rem; }
-}
-@media (max-width: 768px) {
-    .botones-filtros { width: 100%; }
-    .btn-filtrar { width: 100%; justify-content: center; }
+  .contenedor-alumnos { padding: 1rem; }
+  .filtros-busqueda { gap: 0.8rem; }
+  .input-busqueda { padding: 0.7rem 0.9rem 0.7rem 2.8rem; font-size: 0.85rem; }
+  .btn-turno { padding: 0.6rem 1rem; font-size: 0.85rem; }
+  .estado-alumnos-sutil { padding: 0.6rem 1rem; }
+  .info-alumno-sutil { padding: 0.3rem 0.6rem; }
+  .numero-sutil { font-size: 1rem; margin-bottom: 0.2rem; }
+  .texto-sutil { font-size: 0.65rem; letter-spacing: 0.2px; }
+  .separador { height: 20px; margin: 0 0.3rem; }
+  .btn-filtrar { padding: 0.5rem 0.8rem; }
+  .btn-texto { font-size: 0.8rem; }
+  .paginacion-inferior { margin-top: 1.5rem; padding: 0.8rem; }
+  .paginacion-controles { gap: 0.6rem; }
+  .btn-paginacion { width: 32px; height: 32px; font-size: 0.75rem; }
+  .numero-pagina { width: 28px; height: 28px; font-size: 0.75rem; }
+  .numeros-pagina { gap: 0.3rem; }
 }
 </style>

@@ -103,7 +103,7 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
 </script>
 
 <style scoped>
-/* --- ESTILOS INDENTADOS Y CON MODIFICACIONES --- */
+/* --- ESTILOS INDENTADOS Y CON COLORES MODIFICADOS --- */
 
 .formulario-item {
   background: #f8f9fa;
@@ -126,7 +126,7 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
   grid-template-columns: 1fr 1fr; /* Layout 'inline' por defecto */
   gap: 1.5rem;
   margin-bottom: 1.5rem;
-  align-items: start; /* Alinea los items al inicio verticalmente */
+  align-items: start;
 }
 
 /* Layout 'stacked' */
@@ -134,23 +134,18 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
   grid-template-columns: 1fr;
 }
 
-/* V V V NUEVA REGLA ESPECÍFICA PARA LAYOUT DE AGREGAR SUSCRIPCIÓN V V V */
-/* Ajusta las columnas solo cuando NO está apilado Y es el input de días */
+/* Layout 'auto 1fr' para "Agregar Suscripción" */
 .campos-formulario:not(.stacked) .campo:has(.input-dias) {
-  grid-column: 1 / 2; /* Asegura que el campo días esté en la primera columna */
+  grid-column: 1 / 2;
 }
-
 .campos-formulario:not(.stacked) .campo:has(.input-dias) + .campo {
-  grid-column: 2 / 3; /* Asegura que el campo precio esté en la segunda */
+  grid-column: 2 / 3;
 }
-
-/* Aplica 'auto 1fr' cuando el primer campo (días) tiene la clase .input-dias */
 .campos-formulario:not(.stacked):has(.campo .input-dias) {
-  grid-template-columns: auto 1fr; /* Columna 1 (días) auto, Columna 2 (precio) llena el resto */
+  grid-template-columns: auto 1fr;
 }
-/* ^ ^ ^ FIN NUEVA REGLA ^ ^ ^ */
 
-
+/* Campos del formulario */
 .campo {
   display: flex;
   flex-direction: column;
@@ -179,7 +174,7 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
 .input-text:focus,
 .input-textarea:focus {
   outline: none;
-  border-color: #e91e63;
+  border-color: #e91e63; /* Color de foco (rosa/rojo) */
   box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
 }
 
@@ -198,12 +193,11 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
   cursor: default;
 }
 
-/* Estilo para input de días (mantiene el ancho limitado) */
 .input-text.input-dias {
   max-width: 150px;
-  /* El layout del grid se encarga del espacio ahora */
 }
 
+/* --- Botones del Formulario --- */
 .botones-formulario {
   display: flex;
   gap: 1rem;
@@ -224,32 +218,34 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
   transition: all 0.3s ease;
 }
 
+/* Botón Guardar (MODIFICADO al rojo del tema) */
 .btn-guardar {
-  background: #C2185B;
+  background: #e50914; /* Rojo del logo */
   color: white;
-  box-shadow: 0 2px 8px rgba(194, 24, 91, 0.3);
+  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.3); /* Sombra roja */
 }
 .btn-guardar:hover {
-  background: #AD1457;
+  background: #d32f2f; /* Rojo más oscuro (consistente con eliminar) */
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(194, 24, 91, 0.4);
+  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4);
 }
 
+/* Botón Cancelar (MODIFICADO a gris profesional) */
 .btn-cancelar {
-  background: #9E9E9E;
+  background: #6c757d; /* Gris profesional */
   color: white;
-  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.3);
+  box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 .btn-cancelar:hover {
-  background: #757575;
+  background: #5a6268; /* Gris más oscuro */
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(158, 158, 158, 0.4);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
 }
 
-/* Responsive */
+/* --- Responsive --- */
 @media (max-width: 768px) {
   .campos-formulario,
-  .campos-formulario:not(.stacked):has(.campo .input-dias) { /* Anula la regla específica en móvil */
+  .campos-formulario:not(.stacked):has(.campo .input-dias) {
     grid-template-columns: 1fr; /* Siempre apilado */
   }
 
@@ -263,7 +259,7 @@ const emitirGuardar = () => { emit('guardar', itemLocal.value); };
   }
 
   .input-text.input-dias {
-      max-width: 100%; /* Ancho completo en móvil */
+    max-width: 100%; /* Ancho completo en móvil */
   }
 }
 </style>
