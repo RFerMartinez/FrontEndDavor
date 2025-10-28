@@ -38,6 +38,7 @@
     <TablaCuotas 
       :cuotas="cuotasMostradas" 
       :elementos-por-pagina="6"
+      :cargando="cargando"
     />
   </div>
 </template>
@@ -50,6 +51,8 @@ import Titulo from '../Titulo.vue'
 // Función del servidor para obtener las cuotas (ferchu)
 import { obtenerMisCuotas } from '@/api/services/cuotasService.js'
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 const cuotas = ref([])
 const cargando = ref(true) //para mostrar un estado de carga
 
@@ -58,6 +61,7 @@ const mostrarSoloPendientes = ref(false)
 // Llama a la API cuando el componente se monta
 onMounted(async () => {
   cargando.value = true;
+  await sleep(500);
   // Llama a la función del servicio y guarda los datos en nuestro ref
   cuotas.value = await obtenerMisCuotas();
   cargando.value = false;

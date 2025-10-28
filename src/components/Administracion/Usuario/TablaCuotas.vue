@@ -49,36 +49,36 @@
 
     <div class="paginacion-inferior" v-if="!cargando && totalPaginas > 1">
         <div class="paginacion-controles">
-           <button
-             class="btn-paginacion"
-             :disabled="paginaActual === 1"
-             @click="cambiarPagina(paginaActual - 1)"
-             aria-label="Página anterior"
-           >
-             <i class="fas fa-chevron-left"></i>
-           </button>
+          <button
+            class="btn-paginacion"
+            :disabled="paginaActual === 1"
+            @click="cambiarPagina(paginaActual - 1)"
+            aria-label="Página anterior"
+          >
+            <i class="fas fa-chevron-left"></i>
+          </button>
 
-           <div class="numeros-pagina">
-             <span
-               v-for="numero in numerosPaginas"
-               :key="numero"
-               class="numero-pagina"
-               :class="{ 'activa': numero === paginaActual, 'puntos': numero === '...' }"
-               @click="cambiarPagina(numero)"
-             >
-               {{ numero === '...' ? '…' : numero }}
-             </span>
-           </div>
+          <div class="numeros-pagina">
+            <span
+              v-for="numero in numerosPaginas"
+              :key="numero"
+              class="numero-pagina"
+              :class="{ 'activa': numero === paginaActual, 'puntos': numero === '...' }"
+              @click="cambiarPagina(numero)"
+            >
+              {{ numero === '...' ? '…' : numero }}
+            </span>
+          </div>
 
-           <button
-             class="btn-paginacion"
-             :disabled="paginaActual === totalPaginas"
-             @click="cambiarPagina(paginaActual + 1)"
-             aria-label="Página siguiente"
-           >
-             <i class="fas fa-chevron-right"></i>
-           </button>
-         </div>
+          <button
+            class="btn-paginacion"
+            :disabled="paginaActual === totalPaginas"
+            @click="cambiarPagina(paginaActual + 1)"
+            aria-label="Página siguiente"
+          >
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
     </div>
   </div>
 </template>

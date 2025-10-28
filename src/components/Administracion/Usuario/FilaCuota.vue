@@ -135,7 +135,7 @@ const obtenerNombreMes = (mes) => {
   const mesNum = parseInt(mes);
   if (isNaN(mesNum) || mesNum < 1 || mesNum > 12) return mes;
   const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-                 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   return meses[mesNum - 1];
 };
 

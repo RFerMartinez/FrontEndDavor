@@ -71,23 +71,23 @@
     </div>
 
     <div v-else-if="!mostrandoModificacion" class="sin-alumno">
-         <i class="fas fa-exclamation-triangle fa-3x"></i>
-         <h3>No se encontró información del alumno</h3>
-         <p>Por favor, vuelve a la lista de alumnos</p>
-         <button class="btn-volver-centrado" @click="volverAlumnos">
-            <i class="fas fa-arrow-left"></i>
-            Volver a Alumnos
-         </button>
+        <i class="fas fa-exclamation-triangle fa-3x"></i>
+        <h3>No se encontró información del alumno</h3>
+        <p>Por favor, vuelve a la lista de alumnos</p>
+        <button class="btn-volver-centrado" @click="volverAlumnos">
+          <i class="fas fa-arrow-left"></i>
+          Volver a Alumnos
+        </button>
     </div>
 
     <div v-if="mensajeConfirmacion" class="mensaje-confirmacion" :class="{'mostrar': mensajeConfirmacion}">
-         <div class="contenido-mensaje">
+        <div class="contenido-mensaje">
             <i class="fas fa-check-circle"></i>
             <span>{{ mensajeConfirmacion }}</span>
             <button class="btn-cerrar-mensaje" @click="mensajeConfirmacion = ''">
-               <i class="fas fa-times"></i>
+              <i class="fas fa-times"></i>
             </button>
-         </div>
+        </div>
     </div>
   </div>
 </template>
@@ -120,10 +120,15 @@ const loading = ref(false)
 const alumno = ref(null)
 const horariosAlumno = ref([])
 const cuotas = ref([])
+
+
+
 onMounted(async () => {
   loading.value = true
 
-  await sleep(3000)
+  // console.log('Cargando información del alumno con ID:', alumnoID.value["dni"])
+
+  await sleep(2000)
 
   try {
     if (alumnoID.value && alumnoID.value["dni"]) {
@@ -148,9 +153,12 @@ onMounted(async () => {
 
 const volverAlumnos = () => { emit('volverAlumnos') }
 
-const manejarHorariosActualizados = (nuevosHorarios) => {
+const manejarHorariosActualizados = async (nuevosHorarios) => {
   console.log('Horarios actualizados:', nuevosHorarios)
-  horariosAlumno.value = nuevosHorarios
+  horariosAlumno.value = nuevosHorarios;
+
+  const respuestaHorarios = await obtenerHorariosPorDni(alumnoID.value["dni"])
+      horariosAlumno.value = respuestaHorarios
 }
 
 const modificarDatos = () => { mostrandoModificacion.value = 'datos' }
