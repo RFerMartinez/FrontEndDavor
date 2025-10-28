@@ -185,7 +185,7 @@ const usuario = { nombre: 'Beto', apellido: 'Cristoff' };
 
 
 
-const vistaActiva = ref('alumnos'); // O la que prefieras como inicial
+const vistaActiva = ref('dashboard'); // O la que prefieras como inicial
 const isMobile = ref(false);
 
 // *** ===================== NUEVO: Refs para vista secundaria general ===================== ***
