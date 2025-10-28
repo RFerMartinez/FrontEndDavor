@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 // *** ASEGÚRATE QUE LA RUTA A TablaAlumnos SEA CORRECTA ***
 import TablaAlumnos from './TablaAlumnos.vue'; // O la ruta correcta ej: '../Alumnos/TablaAlumnos.vue'
 import Titulo from '../Titulo.vue';
@@ -84,16 +84,33 @@ const emit = defineEmits(['verIngreso']);
 // ******************************************************
 
 // --- Lógica de datos, filtros y paginación ---
-const personas = ref([
-  { dni: "11223344", nombre: "Laura", apellido: "Martinez" },
-  { dni: "55667788", nombre: "Roberto", apellido: "Sanchez" },
-  { dni: "99887766", nombre: "Sofia", apellido: "Gomez"},
-  { dni: "12121212", nombre: "Esteban", apellido: "Quito"},
-].sort((a, b) => (a.apellido || '').localeCompare(b.apellido || '')));
+const personas = ref([]);
 
 const paginaActual = ref(1);
 const elementosPorPagina = 10;
 const terminoBusqueda = ref('');
+
+
+
+import { listarPersonas } from '@/api/services/personaService';
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const loading = ref(false);
+
+onMounted(async () => {
+  loading.value = true
+
+  await sleep(1000)
+
+  try {
+    const respuestaAlumnos = await listarPersonas()
+    personas.value = respuestaAlumnos
+  } catch (error) {
+    console.error('Error al cargar la información del alumno:', error)
+  } finally {
+    loading.value = false
+  }
+})
 
 // --- normalizarTexto ELIMINADA --- (Ahora está en formatters.js y la usa filterItems)
 // const normalizarTexto = (texto) => { ... };

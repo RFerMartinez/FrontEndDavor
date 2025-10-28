@@ -111,18 +111,8 @@ const props = defineProps({
 });
 const personaID = computed(() => props.personaSeleccionada)
 
-const persona = ref({
-  dni: "11223344",
-  nombre: "Laura",
-  apellido: "Martinez",
-  email: "laura@email.com",
-  sexo: "F",
-  telefono: "333-444",
-  provincia: "Chaco",
-  localidad: "Resistencia",
-  Calle: "Av Italia",
-  nro: "100"
-}); // Inicializar vacío o con estructura base
+const persona = ref({});
+
 
 const emit = defineEmits(['volverPersonas', 'ingresoConfirmado']);
 
@@ -133,23 +123,23 @@ const nuevoNivel = ref('');
 const nuevosHorarios = ref([]);
 const mostrarMensajeValidacion = ref(false);
 
-onMounted(() => {
-  // Esta lógica sigue siendo necesaria para que 'DetallePersona'
-  // y el resto del formulario muestren los datos inmediatamente.
-  if (props.personaSeleccionada) { 
-    console.log("IngresoPersona montado. Datos recibidos en personaID.value:", personaID.value);
-    //console.log("Datos de personaSeleccionada copiados a ref local:", persona.value);
-  } else {
-    //console.warn("IngresoPersona: No se recibieron datos en personaSeleccionada.");
+import { obtenerPersonaPorDni, activarAlumno } from '@/api/services/personaService';
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const loading = ref(false);
+
+onMounted(async () => {
+  loading.value = true
+  await sleep(1000) // Simular retardo de carga
+  try {
+    if (props.personaSeleccionada && personaID.value["dni"]) {
+      const respuestaPersona = await obtenerPersonaPorDni(personaID.value["dni"])
+      persona.value = respuestaPersona;
+    }
+  } catch (error) {
+    console.error('Error al cargar la información del alumno:', error)
+  } finally {
+    loading.value = false
   }
-  
-  // Ahora también podrías usar personaID.value si necesitaras
-  // hacer un fetch inicial de datos adicionales para 'persona.value'
-  // Ejemplo:
-  // if (personaID.value && personaID.value.dni) {
-  //   const masDatos = await obtenerMasDatosDePersona(personaID.value.dni);
-  //   persona.value = { ...persona.value, ...masDatos };
-  // }
 });
 
 // --- VALIDACIÓN (sin cambios) ---
@@ -198,7 +188,8 @@ const actualizarHorarios = (horarios) => {
   }
 };
 
-const confirmarIngreso = () => {
+
+const confirmarIngreso = async () => {
   if (!formularioIngresoValido.value) {
     console.error("Formulario de ingreso inválido. Datos actuales:", {
       suscripcion: nuevaSuscripcion.value,
@@ -206,40 +197,82 @@ const confirmarIngreso = () => {
       nivel: nuevoNivel.value,
       horarios: nuevosHorarios.value
     });
-    // Asegurarse de que el mensaje se muestre si falla la validación al hacer clic
     mostrarMensajeValidacion.value = true;
     return;
   }
   mostrarMensajeValidacion.value = false;
 
-  const datosCompletosIngreso = {
-    ...persona.value,
-    suscripcion: nuevaSuscripcion.value,
-    trabajoactual: nuevoTrabajo.value,
-    nivel: nuevoNivel.value,
-    // Asegurar que si es Día Libre, los horarios van vacíos
-    horarios: nuevaSuscripcion.value === 'Día Libre' ? [] : (nuevosHorarios.value || []),
-    activo: true,
-    cuotasPendientes: 0,
-    turno: '',
+  // --- 2. PREPARA los datos para la API ---
+  const datosParaAPI = {
+    dni: persona.value.dni, 
+    sexo: persona.value.sexo || 'M', // O usa el valor real si lo tienes
+    nombreTrabajo: nuevoTrabajo.value,
+    nombreSuscripcion: nuevaSuscripcion.value,
+    nivel: nuevoNivel.value || null, 
+    deporte: persona.value.deporte || null, // Si tienes este campo
+    // Verifica que el formato de horarios sea [{ nroGrupo, dia }]
+    // horarios: nuevaSuscripcion.value === 'Día Libre' ? [] : (nuevosHorarios.value || []),
+    horarios: nuevaSuscripcion.value === 'Día Libre' 
+      ? [] // Si es Día Libre, envía array vacío
+      : (nuevosHorarios.value || []).map(item => ({ // Si no, mapea el array
+          nroGrupo: item.nroGrupo, // Toma el nroGrupo del item original
+          dia: item.dia            // Toma el dia del item original
+        }))
   };
+// --- 3. AGREGA el bloque try...catch para llamar a la API ---
+  try {
+      // (Opcional: Muestra indicador de carga)
+      // cargandoActivacion.value = true; 
 
-  // Determinar turno
-  if (datosCompletosIngreso.horarios && datosCompletosIngreso.horarios.length > 0) {
-      const primerHorario = datosCompletosIngreso.horarios[0]?.horario;
-      if (primerHorario && typeof primerHorario === 'string') {
-          try {
-              const horaInicioStr = primerHorario.split(':')[0];
-              const horaInicio = parseInt(horaInicioStr);
-              if (!isNaN(horaInicio)) {
-                  datosCompletosIngreso.turno = horaInicio < 14 ? 'Mañana' : 'Tarde';
-              } else { console.warn("No se pudo parsear hora:", primerHorario); }
-          } catch (e) { console.error("Error procesando horario:", primerHorario, e); }
+      console.log("Enviando datos a la API para activar:", datosParaAPI);
+      const alumnoActivado = await activarAlumno(datosParaAPI);
+      console.log('Alumno activado con éxito por la API:', alumnoActivado);
+      
+      // --- 4. SI LA API TUVO ÉXITO, CONTINÚA CON TU LÓGICA ORIGINAL ---
+
+      // Construye el objeto que quieres emitir (puedes usar datos de alumnoActivado si prefieres)
+      const datosCompletosIngreso = {
+        ...persona.value, // Datos originales de la persona
+        suscripcion: nuevaSuscripcion.value,
+        trabajoactual: nuevoTrabajo.value, // ¿Seguro que es 'trabajoactual' y no 'nombreTrabajo'?
+        nivel: nuevoNivel.value,
+        horarios: datosParaAPI.horarios, // Usamos los horarios ya formateados
+        activo: true, // La activación lo pone activo
+        cuotasPendientes: 0,
+        turno: '', // Mantenemos tu lógica de turno
+      };
+
+      // Determinar turno (tu lógica original)
+      if (datosCompletosIngreso.horarios && datosCompletosIngreso.horarios.length > 0) {
+          // IMPORTANTE: Verifica que 'nuevosHorarios.value' contenga objetos con una propiedad 'horario' que sea un string "HH:MM-HH:MM"
+          // Si 'nuevosHorarios.value' tiene [{ nroGrupo, dia }], esta lógica de turno fallará.
+          const primerHorario = datosCompletosIngreso.horarios[0]?.horario; // Ajusta esto si la estructura cambió
+          if (primerHorario && typeof primerHorario === 'string') {
+              try {
+                  const horaInicioStr = primerHorario.split(':')[0];
+                  const horaInicio = parseInt(horaInicioStr);
+                  if (!isNaN(horaInicio)) {
+                      datosCompletosIngreso.turno = horaInicio < 14 ? 'Mañana' : 'Tarde';
+                  } else { console.warn("No se pudo parsear hora:", primerHorario); }
+              } catch (e) { console.error("Error procesando horario:", primerHorario, e); }
+          }
       }
-  }
 
-  console.log("Confirmando ingreso con datos completos:", datosCompletosIngreso);
-  emit('ingresoConfirmado', datosCompletosIngreso);
+      console.log("Confirmando ingreso con datos completos (después de API):", datosCompletosIngreso);
+      // Emitimos el evento como lo tenías planeado
+      emit('ingresoConfirmado', datosCompletosIngreso);
+      
+      // (Opcional: Muestra mensaje de éxito)
+
+  } catch (error) {
+      // --- 5. SI LA API FALLA, MUESTRA UN ERROR ---
+      console.error('Fallo al activar alumno en la API:', error);
+      alert(`Error al activar: ${error.response?.data?.detail || error.message}`);
+      // IMPORTANTE: NO emitimos 'ingresoConfirmado' si la API falla
+  } finally {
+      // (Opcional: Oculta indicador de carga)
+      // cargandoActivacion.value = false;
+  }
 };
 </script>
 
