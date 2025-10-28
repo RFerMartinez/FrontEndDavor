@@ -245,9 +245,8 @@ html {
 
 /* Estilos para el boton de volver de infoalumno e ingresopersona
 /* --- Estilo Global Botón Volver --- */
-
 .btn-volver-global {
-  display: inline-flex; /* Usar inline-flex para que se ajuste al contenido */
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1.2rem;

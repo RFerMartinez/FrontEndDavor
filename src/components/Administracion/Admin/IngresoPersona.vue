@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor-ingreso-persona">
     <div class="encabezado-info">
-      <button class="btn-volver" @click="volverPersonas">
+      <button class="btn-volver-global" @click="volverPersonas">
         <i class="fas fa-arrow-left"></i>
         Volver a Personas
       </button>
@@ -65,7 +65,7 @@
 
         <div class="seccion-botones">
           <div class="botones-accion">
-            <button class="btn-accion btn-cancelar-ingreso" @click="volverPersonas">
+            <button class="btn-volver-global" @click="volverPersonas">
               <i class="fas fa-times"></i>
               Cancelar Ingreso
             </button>
@@ -255,30 +255,9 @@ const confirmarIngreso = () => {
   flex-wrap: wrap;
   gap: 1rem;
 }
-.encabezado-info .btn-volver {
+.encabezado-info .btn-volver-global {
   justify-self: start; 
 }
-
-.btn-volver {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.2rem;
-  border: 2px solid #e91e63;
-  background: white;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  color: #e91e63;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-.btn-volver:hover { background: #e91e63; color: white; transform: translateY(-1px); }
-
-.tarjeta-persona { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
-.tarjeta-contenido { padding: 2rem; }
 
 /* IMPORTANTE: Los estilos para .seccion-tabla, .titulo-seccion, etc. */
 /* ahora deberían estar definidos DENTRO de DetallePersona.vue */
@@ -319,10 +298,10 @@ const confirmarIngreso = () => {
     align-items: stretch;
     grid-template-columns: none; /* <-- Añadir esto para anular el grid */
   }
-  .btn-volver {
+  .encabezado-info .btn-volver-global {
     justify-content: center;
     margin-bottom: 1rem;
-    justify-self: auto; /* <-- Añadir para anular el 'start' de desktop */
+    justify-self: auto;
   }
   .tarjeta-contenido { padding: 1.5rem; }
   /* Los estilos responsive para tablas ahora están en DetallePersona */

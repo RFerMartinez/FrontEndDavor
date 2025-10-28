@@ -1,7 +1,7 @@
 <template>
   <div class="contenedor-info-alumno">
     <div class="encabezado-info" v-if="!mostrandoModificacion">
-      <button class="btn-volver" @click="volverAlumnos">
+      <button class="btn-volver-global" @click="volverAlumnos">
         <i class="fas fa-arrow-left"></i>
         Volver a Alumnos
       </button>
@@ -74,7 +74,7 @@
         <i class="fas fa-exclamation-triangle fa-3x"></i>
         <h3>No se encontró información del alumno</h3>
         <p>Por favor, vuelve a la lista de alumnos</p>
-        <button class="btn-volver-centrado" @click="volverAlumnos">
+        <button class="btn-volver-global" @click="volverAlumnos">
           <i class="fas fa-arrow-left"></i>
           Volver a Alumnos
         </button>
@@ -213,32 +213,9 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
   flex-wrap: wrap; /* Mantenido por si acaso */
   gap: 1rem;
 }
-.encabezado-info .btn-volver {
+.encabezado-info .btn-volver-global {
   justify-self: start; 
 }
-.btn-volver {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.2rem;
-  border: 2px solid #e91e63;
-  background: white;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  color: #e91e63;
-  text-decoration: none;
-}
-
-.btn-volver:hover {
-  background: #e91e63;
-  color: white;
-  transform: translateY(-1px);
-}
-
-
 
 .tarjeta-alumno {
   background: white;
@@ -249,10 +226,6 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
 .tarjeta-contenido {
   padding: 2rem;
 }
-
-/* IMPORTANTE: Los estilos para .seccion-tabla, .titulo-seccion, etc. */
-/* ahora deberían estar definidos DENTRO de DetallePersona.vue */
-/* pero los mantenemos aquí por si se usan en las secciones específicas */
 
 .separador-seccion {
   height: 1px;
@@ -294,9 +267,6 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
 .sin-alumno i { margin-bottom: 1.5rem; color: #e9ecef; }
 .sin-alumno h3 { margin-bottom: 1rem; color: #495057; font-size: 1.5rem; }
 .sin-alumno p { margin-bottom: 2rem; font-size: 1rem; }
-.btn-volver-centrado { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; border: 2px solid #e91e63; background: white; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; font-family: 'Poppins', sans-serif; font-weight: 500; color: #e91e63; text-decoration: none; }
-.btn-volver-centrado:hover { background: #e91e63; color: white; transform: translateY(-1px); }
-
 .seccion-botones { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e0e0e0; }
 .botones-accion { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
 .btn-accion { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 1.5rem; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
@@ -330,10 +300,10 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
     align-items: stretch;
     grid-template-columns: none; /* <-- Añadir esto para anular el grid */
   }
-  .btn-volver {
+  .encabezado-info .btn-volver-global {
     justify-content: center;
     margin-bottom: 1rem;
-    justify-self: auto; /* <-- Añadir para anular el 'start' de desktop */
+    justify-self: auto;
   }
   
   .tarjeta-contenido { 
