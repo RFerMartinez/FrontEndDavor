@@ -47,7 +47,7 @@ onMounted(() => {
   if (usuario) {
     nombre.value = usuario.nombre;
     apellido.value = usuario.apellido;
-    username.value = usuario.usuario; // <--- AGREGA esta línea (asegúrate que 'usuario' es el nombre correcto del campo)
+    username.value = "cerrar sesion"; // <--- AGREGA esta línea (asegúrate que 'usuario' es el nombre correcto del campo)
   }
 });
 
