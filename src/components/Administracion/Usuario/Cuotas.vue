@@ -39,7 +39,19 @@
       :cuotas="cuotasMostradas" 
       :elementos-por-pagina="6"
       :cargando="cargando"
+      @iniciar-pago="abrirModalPago"
     />
+
+    <Modal 
+      v-if="modalVisible" 
+      @close="cerrarModal"
+    >
+      <BrickPago 
+        v-if="cuotaSeleccionada"
+        :cuotaId="cuotaSeleccionada.idCuota"
+        :monto="cuotaSeleccionada.monto"
+      />
+    </Modal>
   </div>
 </template>
 
@@ -48,16 +60,21 @@ import { ref, computed, onMounted } from 'vue'
 import TablaCuotas from './TablaCuotas.vue'
 import Titulo from '../Titulo.vue'
 
+// MercadoPago
+import Modal from '@/components/Modal.vue'
+import BrickPago from '@/components/MercadoPago/BrickPago.vue'
+
+
+
+
+
+
 // Función del servidor para obtener las cuotas (ferchu)
 import { obtenerMisCuotas } from '@/api/services/cuotasService.js'
-
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
 const cuotas = ref([])
 const cargando = ref(true) //para mostrar un estado de carga
-
 const mostrarSoloPendientes = ref(false)
-
 // Llama a la API cuando el componente se monta
 onMounted(async () => {
   cargando.value = true;
@@ -85,6 +102,46 @@ const cuotasMostradas = computed(() =>
 // Métodos
 const toggleFiltroPendientes = () => {
   mostrarSoloPendientes.value = !mostrarSoloPendientes.value
+}
+
+
+
+// --- LÓGICA DEL MODAL DE PAGO (Añadido) ---
+
+// 1. Refs para controlar el estado del modal
+const modalVisible = ref(false)
+const cuotaSeleccionada = ref(null)
+
+/**
+ * 2. Función para ABRIR el modal.
+ * Esta función será llamada por el evento @iniciar-pago de TablaCuotas en tu template.
+ * @param {object} cuota - La cuota que viene del evento emitido por la fila.
+ */
+const abrirModalPago = (cuota) => {
+  // Verificamos que la cuota no esté ya pagada antes de abrir
+  if (cuota.pagada) {
+    alert("Esta cuota ya ha sido pagada.");
+    return;
+  }
+  console.log("Abriendo modal para cuota:", cuota.idCuota);
+  cuotaSeleccionada.value = cuota;
+  modalVisible.value = true;
+}
+
+/**
+ * 3. Función para CERRAR el modal.
+ * Esta función será llamada por el evento @close del Modal en tu template.
+ */
+const cerrarModal = () => {
+  modalVisible.value = false;
+  cuotaSeleccionada.value = null;
+  console.log("Modal cerrado. Recargando cuotas...");
+  
+  // 4. Recargamos las cuotas
+  // Le damos un pequeño delay para dar tiempo al webhook de actualizar la BD
+  setTimeout(() => {
+    cargarCuotas();
+  }, 1000); // 1 segundo de espera
 }
 </script>
 

@@ -41,6 +41,7 @@
             :cuota="cuota"
             :is-mobile="isMobile"
             :modo="modo"
+            @accion-principal="manejarAccionDeFila"
           />
         </div>
       </template>
@@ -86,6 +87,16 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import FilaCuota from './FilaCuota.vue';
+
+
+const emit = defineEmits(['iniciar-pago'])
+const manejarAccionDeFila = (cuota) => {
+  if (cuota.estado !== 'pagada') {
+    emit('iniciar-pago', cuota) // 2. Emite hacia arriba
+  }
+}
+
+
 
 const props = defineProps({
   cuotas: {

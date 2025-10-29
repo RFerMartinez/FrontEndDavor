@@ -110,6 +110,11 @@
 </template>
 
 <script setup>
+
+
+
+
+
 import { ref, computed } from 'vue';
 import BotonAccion from './BotonAccion.vue';
 import Estado from '../Estado.vue';
@@ -181,8 +186,12 @@ const claseVencimiento = computed(() => { /* ... igual que antes ... */
 
 // Acciones (sin cambios)
 const manejarAccionPrincipal = () => { /* ... igual que antes ... */
-  if (props.modo === 'cuota') { console.log('Acción de PAGAR para cuota:', props.cuota); }
-  else { console.log('Acción de MARCAR PAGADA para cuota:', props.cuota); }
+  if (props.modo === 'cuota') {
+    // Aquí debería ir la API para pagar la cuota
+    console.log('Acción de PAGAR para cuota:', props.cuota["idCuota"]);
+  } else {
+    console.log('Acción de MARCAR PAGADA para cuota:', props.cuota);
+  }
   emit('accion-principal', props.cuota);
 };
 const manejarModificar = () => { /* ... igual que antes ... */
