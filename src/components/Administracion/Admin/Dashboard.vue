@@ -225,226 +225,11 @@ const procesarDatosMetodologia = (rawData) => {
   };
 };
 
+import { obtenerHorariosCompletos } from '@/api/services/horarioService';
 
 
 
-const datosOcupacion = [
-  {
-    "nroGrupo": "1",
-    "horaInicio": "07:00:00",
-    "horaFin": "10:00:00",
-    "dias_asignados": [
-      {
-        "dia": "Lunes",
-        "capacidadMax": 20,
-        "empleado": null,
-        "alumnos_inscritos": 19
-      },
-      {
-        "dia": "Martes",
-        "capacidadMax": 20,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Miércoles",
-        "capacidadMax": 20,
-        "empleado": null,
-        "alumnos_inscritos": 15
-      },
-      {
-        "dia": "Jueves",
-        "capacidadMax": 20,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Viernes",
-        "capacidadMax": 20,
-        "empleado": null,
-        "alumnos_inscritos": 13
-      },
-      {
-        "dia": "Sábado",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 1
-      }
-    ]
-  },
-  {
-    "nroGrupo": "2",
-    "horaInicio": "10:00:00",
-    "horaFin": "13:00:00",
-    "dias_asignados": [
-      {
-        "dia": "Lunes",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Martes",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 15
-      },
-      {
-        "dia": "Miércoles",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Jueves",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Viernes",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Sábado",
-        "capacidadMax": 12,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      }
-    ]
-  },
-  {
-    "nroGrupo": "3",
-    "horaInicio": "13:00:00",
-    "horaFin": "16:00:00",
-    "dias_asignados": [
-      {
-        "dia": "Lunes",
-        "capacidadMax": 18,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Martes",
-        "capacidadMax": 18,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Miércoles",
-        "capacidadMax": 18,
-        "empleado": null,
-        "alumnos_inscritos": 1
-      },
-      {
-        "dia": "Jueves",
-        "capacidadMax": 18,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Viernes",
-        "capacidadMax": 18,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Sábado",
-        "capacidadMax": 15,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      }
-    ]
-  },
-  {
-    "nroGrupo": "4",
-    "horaInicio": "16:00:00",
-    "horaFin": "19:00:00",
-    "dias_asignados": [
-      {
-        "dia": "Lunes",
-        "capacidadMax": 25,
-        "empleado": null,
-        "alumnos_inscritos": 1
-      },
-      {
-        "dia": "Martes",
-        "capacidadMax": 25,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Miércoles",
-        "capacidadMax": 25,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Jueves",
-        "capacidadMax": 25,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Viernes",
-        "capacidadMax": 25,
-        "empleado": null,
-        "alumnos_inscritos": 1
-      },
-      {
-        "dia": "Sábado",
-        "capacidadMax": 20,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      }
-    ]
-  },
-  {
-    "nroGrupo": "5",
-    "horaInicio": "19:00:00",
-    "horaFin": "22:00:00",
-    "dias_asignados": [
-      {
-        "dia": "Lunes",
-        "capacidadMax": 22,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Martes",
-        "capacidadMax": 22,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Miércoles",
-        "capacidadMax": 22,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Jueves",
-        "capacidadMax": 22,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Viernes",
-        "capacidadMax": 22,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      },
-      {
-        "dia": "Sábado",
-        "capacidadMax": 18,
-        "empleado": null,
-        "alumnos_inscritos": 0
-      }
-    ]
-  }
-]
+const datosOcupacion = ref([]);
 //const loadingOcupacion = ref(true);
 const errorOcupacion = ref(false);
 const horariosPicoData = ref({});
@@ -464,29 +249,19 @@ const cargarDatosDashboard = async () => {
   ];
   console.log('Datos de KPIs cargados (ejemplo)');
 
+  // Carga datos de ocupación
+  errorOcupacion.value = false;
+  try {
+    const response = await obtenerHorariosCompletos();
+    datosOcupacion.value = response;
+    console.log("Datos de ocupación cargados:", datosOcupacion.value);
+  } catch (error) {
+    console.error("Error al cargar datos de ocupación:", error);
+    errorOcupacion.value = true;
+  } finally {
+    // carga del componente finalizada
+  }
 
-  // // 👇 Carga datos de ocupación (simulando API)
-  // loadingOcupacion.value = true;
-  // errorOcupacion.value = false;
-  // try {
-  //   // Aquí llamarías a tu API real:
-  //   // const response = await fetch('/api/ocupacion'); // O tu endpoint
-  //   // datosOcupacion.value = await response.json();
-
-  //   // Usando el JSON local mientras tanto:
-  //   const response = await import('../../../public/data/grupos.json'); // Ajusta la ruta si es necesario
-  //   datosOcupacion.value = response.default;
-
-  // } catch (err) {
-  //   console.error("Error al cargar datos de ocupación:", err);
-  //   errorOcupacion.value = true;
-  //   datosOcupacion.value = []; // Limpia datos en caso de error
-  // } finally {
-  //   loadingOcupacion.value = false;
-  // }
-
-  // // Carga otros datos...
-  // // horariosPicoData.value = ...
 
   procesarDatosMetodologia(datosMetodologiaEjemplo.value);
 };
