@@ -7,7 +7,6 @@
       </button>
       <Titulo texto="INFORMACIÓN DEL ALUMNO" />
     </div>
-
     <div v-if="mostrandoModificacion === 'datos'">
       <ModificarDatosAlumno
         :alumno="alumno"
@@ -23,8 +22,11 @@
         @cancelar="mostrandoModificacion = null"
       />
     </div>
-
-    <div class="tarjeta-alumno" v-if="alumno && !mostrandoModificacion">
+    <div v-if="loading" class="loading-container">
+      <div class="spinner"></div>
+      <span>Cargando información del alumno...</span>
+    </div>
+    <div class="tarjeta-alumno" v-else-if="alumno && !mostrandoModificacion">
       <div class="tarjeta-contenido">
         <DetallePersona :datos="alumno" />
         <div class="separador-seccion"></div>
@@ -44,7 +46,7 @@
             <i class="fas fa-history"></i>
             Historial de Cuotas
           </h3>
-          <TablaCuota :modo="'infoAlumno'" :cuotas="cuotas" />
+          <TablaCuota :modo="'infoAlumno'" :cuotas="cuotas" :cargando="loading" />
         </div>
 
         <div class="seccion-botones">
@@ -74,10 +76,6 @@
         <i class="fas fa-exclamation-triangle fa-3x"></i>
         <h3>No se encontró información del alumno</h3>
         <p>Por favor, vuelve a la lista de alumnos</p>
-        <button class="btn-volver-global" @click="volverAlumnos">
-          <i class="fas fa-arrow-left"></i>
-          Volver a Alumnos
-        </button>
     </div>
 
     <div v-if="mensajeConfirmacion" class="mensaje-confirmacion" :class="{'mostrar': mensajeConfirmacion}">

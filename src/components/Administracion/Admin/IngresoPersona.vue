@@ -7,8 +7,11 @@
       </button>
       <Titulo texto="INGRESO DE NUEVO ALUMNO" />
     </div>
-
-    <div class="tarjeta-persona" v-if="persona.dni">
+    <div v-if="loading" class="loading-container">
+      <div class="spinner"></div>
+      <span>Cargando datos de la persona...</span>
+    </div>
+    <div class="tarjeta-persona" v-else-if="persona.dni">
       <div class="tarjeta-contenido">
         <DetallePersona :datos="persona" />
         <div class="separador-seccion"></div>
@@ -89,10 +92,6 @@
        <i class="fas fa-exclamation-triangle fa-3x"></i>
        <h3>No se encontró información de la persona</h3>
        <p>Por favor, vuelve a la lista de personas</p>
-       <button class="btn-volver-centrado" @click="volverPersonas">
-          <i class="fas fa-arrow-left"></i>
-          Volver a Personas
-       </button>
     </div>
   </div>
 </template>
@@ -292,6 +291,7 @@ const confirmarIngreso = async () => {
   min-height: 80vh;
   overflow-y: auto;
   box-sizing: border-box;
+  position: relative;
 }
 
 .encabezado-info {
