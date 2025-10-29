@@ -249,10 +249,10 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
     color: #2c3e50;
     margin-bottom: 1.5rem;
     font-weight: 600;
-    border-bottom: 2px solid #e91e63;
+    border-bottom: 2px solid #d32f2f;
     padding-bottom: 0.5rem;
 }
-.seccion-info .titulo-seccion i { color: #e91e63; }
+.seccion-info .titulo-seccion i { color: #d32f2f; }
 
 
 .seccion-info:last-child {

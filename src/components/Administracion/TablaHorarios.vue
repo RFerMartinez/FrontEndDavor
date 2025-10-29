@@ -485,7 +485,7 @@ onUnmounted(() => {
 }
 
 .titulo i {
-  color: #e91e63;
+  color: #d32f2f;
 }
 
 .controles {

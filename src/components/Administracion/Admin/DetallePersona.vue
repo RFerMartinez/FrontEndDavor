@@ -196,12 +196,12 @@ const props = defineProps({
   color: #2c3e50;
   margin-bottom: 1.5rem;
   font-weight: 600;
-  border-bottom: 2px solid #e91e63;
+  border-bottom: 2px solid #d32f2f; /* <-- LÍNEA MODIFICADA */
   padding-bottom: 0.5rem;
 }
 
 .titulo-seccion i {
-  color: #e91e63;
+  color: #d32f2f; /* <-- LÍNEA MODIFICADA */
 }
 
 .tabla-datos {

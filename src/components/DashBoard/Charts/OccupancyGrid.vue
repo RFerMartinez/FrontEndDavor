@@ -186,7 +186,7 @@ const getShortDayName = (dia) => {
 }
 
 .occupancy-title i {
-    color: #e91e63;
+    color: #d32f2f;
 }
 
 .occupancy-grid {
