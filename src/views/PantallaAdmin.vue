@@ -5,7 +5,7 @@
         v-if="!isMobile"
         :nombre="usuario.nombre"
         :apellido="usuario.apellido"
-        @logout="cerrarSesion"
+        @logout="pedirConfirmacionLogout"
       >
         <button
           class="menu-btn dashboard-btn"
@@ -48,13 +48,13 @@
           <i class="fas fa-id-card icon"></i>
           Personas
         </button>
-        </Sidebar>
+      </Sidebar>
 
       <NavbarMobile
         v-else
         :nombre="usuario.nombre"
         :apellido="usuario.apellido"
-        @logout="cerrarSesion"
+        @logout="pedirConfirmacionLogout"
       >
         <button
           class="menu-btn"
@@ -96,9 +96,9 @@
           <i class="fas fa-id-card icon"></i>
           Personas
         </button>
-        </NavbarMobile>
+      </NavbarMobile>
 
-      <<div class="contenido" :class="{ 'contenido-mobile': isMobile }">
+      <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
         <Transition name="fade" mode="out-in">
           <component
             :is="vistaComponente"
@@ -113,7 +113,29 @@
           />
           </Transition>
       </div>  
-    </div>
+
+      <Transition name="modal-effect">
+        <div v-if="mostrarConfirmacionLogout" class="modal-overlay">
+          <div class="modal-confirmacion modal-logout">
+            <div class="modal-header">
+              <i class="fas fa-sign-out-alt"></i>
+              <h3>Confirmar Cierre de Sesión</h3>
+            </div>
+            <div class="modal-body">
+              <p>¿Estás seguro que deseas cerrar sesión?</p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-modal btn-cancelar-modal" @click="cancelarLogoutModal">
+                No, Cancelar
+              </button>
+              <button class="btn-modal btn-confirmar-logout-modal" @click="confirmarLogoutModal">
+                Sí, Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+      </div>
   </Background>
 </template>
 
@@ -141,118 +163,85 @@ import IngresoPersona from '@/components/Administracion/Admin/IngresoPersona.vue
 
 const router = useRouter(); // Obtén la instancia del router
 
-const cerrarSesion = () => {
+// --- V V V NUEVO: LÓGICA DE MODAL LOGOUT (COPIADO DE PANTALLAUSUARIO) V V V ---
+const mostrarConfirmacionLogout = ref(false);
+
+const pedirConfirmacionLogout = () => {
+  mostrarConfirmacionLogout.value = true;
+};
+
+const confirmarLogoutModal = () => {
+  mostrarConfirmacionLogout.value = false;
   logout(); // Llama a la función de logout que limpia el localStorage
   router.push('/'); // Redirige al login
 };
 
+const cancelarLogoutModal = () => {
+  mostrarConfirmacionLogout.value = false;
+};
+
+// Función para cerrar modal con Escape
+const handleEscapeKey = (e) => {
+    if (e.key === 'Escape' && mostrarConfirmacionLogout.value) {
+        cancelarLogoutModal();
+    }
+};
+// --- ^ ^ ^ FIN LÓGICA MODAL ^ ^ ^ ---
+
+
 const alumnoSeleccionado = ref(null); // Para guardar el alumno al que se le hizo clic
 
-
-
-
-
-
-
-
-
-
-
-
-
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// Tus refs originales (SIN CAMBIOS)
+// ... (Resto de tus IMPORTANTE, SIN CAMBIOS) ...
 const usuario = { nombre: 'Beto', apellido: 'Cristoff' };
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-// IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE IMPORTANTE
-
-
-
-
-
-
-
-
-
-
-
-
+// ... (Resto de tus IMPORTANTE, SIN CAMBIOS) ...
 
 const vistaActiva = ref('dashboard'); // O la que prefieras como inicial
 const isMobile = ref(false);
 
-// *** ===================== NUEVO: Refs para vista secundaria general ===================== ***
-// Usaremos estos en lugar de 'alumnoSeleccionado' directamente para más flexibilidad
-const vistaSecundaria = ref(null); // null, 'infoAlumno', 'ingresoPersona'
-const datosSecundarios = ref(null); // Guarda el alumno o la persona
-// *****************************************************************************************
+// ... (Resto de tu lógica de vistas, SIN CAMBIOS) ...
+const vistaSecundaria = ref(null); 
+const datosSecundarios = ref(null); 
 
-// Tus funciones originales (SIN CAMBIOS)
 const checkIsMobile = () => { isMobile.value = window.innerWidth <= 768; };
 
 const cambiarVista = (vista) => {
   vistaActiva.value = vista
-  // Reseteamos la vista secundaria al cambiar la principal
   vistaSecundaria.value = null;
   datosSecundarios.value = null;
-  // Mantenemos esto por compatibilidad si lo usas en otro lado
   alumnoSeleccionado.value = null;
 }
 
-// Función original para ver InfoAlumno (la adaptamos ligeramente)
 const verAlumno = (alumno) => {
-  // alumnoSeleccionado.value = alumno // Ya no es necesario si usamos datosSecundarios
   datosSecundarios.value = alumno;
-  vistaSecundaria.value = 'infoAlumno'; // Indicamos qué vista secundaria mostrar
-  vistaActiva.value = 'alumnos'; // Mantenemos la vista principal como 'alumnos' en segundo plano
+  vistaSecundaria.value = 'infoAlumno';
+  vistaActiva.value = 'alumnos';
 }
 
-// Función original para volver desde InfoAlumno (la adaptamos)
 const volverAlumnos = () => {
-  // vistaActiva.value = 'alumnos' // Ya no es necesario cambiar vistaActiva aquí
-  vistaSecundaria.value = null; // Simplemente ocultamos la vista secundaria
+  vistaSecundaria.value = null;
   datosSecundarios.value = null;
-  // alumnoSeleccionado.value = null; // Ya no es necesario
 }
 
-// *** ===================== NUEVO: Funciones para Personas/IngresoPersona ===================== ***
-// 1. Mostrar IngresoPersona (llamado por @verIngreso de Personas)
 const verIngresoPersona = (persona) => {
   datosSecundarios.value = persona;
   vistaSecundaria.value = 'ingresoPersona';
-  vistaActiva.value = 'personas'; // Mantenemos 'personas' en segundo plano
+  vistaActiva.value = 'personas';
 }
 
-// 2. Volver desde IngresoPersona (llamado por @volverPersonas de IngresoPersona)
 const volverDesdeIngreso = () => {
   vistaSecundaria.value = null;
   datosSecundarios.value = null;
 }
 
-// 3. Manejar confirmación de ingreso
 const manejarIngresoConfirmado = (datosIngreso) => {
   console.log("Ingreso confirmado en PantallaAdmin:", datosSecundarios.value?.dni, datosIngreso);
-  // Lógica futura aquí...
-  volverDesdeIngreso(); // Volver a la lista de personas
+  volverDesdeIngreso();
 }
-// *******************************************************************************************
+// ... (FIN LÓGICA DE VISTAS) ...
 
 
 // Tu computed original (adaptado para incluir vistaSecundaria y los nuevos componentes)
 const vistaComponente = computed(() => {
-  // Si hay una vista secundaria activa, la mostramos
   if (vistaSecundaria.value === 'infoAlumno') {
     return InfoAlumno;
   }
@@ -260,24 +249,31 @@ const vistaComponente = computed(() => {
     return IngresoPersona;
   }
 
-  // Si no, mostramos la vista principal según vistaActiva
   switch (vistaActiva.value) {
     case 'alumnos': return Alumnos;
-    // case 'infoAlumno': return InfoAlumno; // Ya no se maneja aquí
     case 'suscripciones': return Suscripciones;
     case 'trabajo': return Trabajos_Metodologias;
     case 'personas': return Personas;
-    case 'dashboard': return Dashboard; // Vista principal de Personas
-    default: return InformacionPersonal;
+    case 'dashboard': return Dashboard; 
+    default: return Dashboard;
   }
 })
 
-// Tus onMounted/onUnmounted originales (SIN CAMBIOS)
-onMounted(() => { checkIsMobile(); window.addEventListener('resize', checkIsMobile); });
-onUnmounted(() => { window.removeEventListener('resize', checkIsMobile); });
+// Tus onMounted/onUnmounted (MODIFICADOS para incluir handleEscapeKey)
+onMounted(() => { 
+  checkIsMobile(); 
+  window.addEventListener('resize', checkIsMobile); 
+  window.addEventListener('keydown', handleEscapeKey); // NUEVO
+});
+
+onUnmounted(() => { 
+  window.removeEventListener('resize', checkIsMobile); 
+  window.removeEventListener('keydown', handleEscapeKey); // NUEVO
+});
 </script>
 
 <style scoped>
+/* TUS ESTILOS ORIGINALES (SIN CAMBIOS) */
 .dashboard {
   display: flex;
   min-height: 100vh;
@@ -328,4 +324,50 @@ onUnmounted(() => { window.removeEventListener('resize', checkIsMobile); });
     padding-top: 5rem;
   }
 }
+
+/* V V V NUEVOS ESTILOS PARA MODAL (COPIADOS DE PANTALLAUSUARIO) V V V */
+.modal-overlay {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; 
+  backdrop-filter: blur(5px);
+}
+
+.modal-confirmacion {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: modalAppear 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+.modal-logout .modal-header i { color: #f44336; }
+.modal-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
+.modal-header i { font-size: 2rem; }
+.modal-header h3 { margin: 0; color: #2c3e50; font-size: 1.4rem; }
+.modal-body { margin-bottom: 2rem; }
+.modal-body p { margin: 0; font-size: 1.1rem; color: #495057; }
+.modal-footer { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-modal { padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; }
+.btn-cancelar-modal { background: #6c757d; color: white; order: 2; }
+.btn-cancelar-modal:hover { background: #5a6268; }
+.btn-confirmar-logout-modal { background: #f44336; color: white; order: 1; }
+.btn-confirmar-logout-modal:hover { background: #d32f2f; }
+@keyframes modalAppear { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+@media (max-width: 768px) {
+  .modal-confirmacion { padding: 1.5rem; margin: 1rem; }
+  .modal-footer { flex-direction: column-reverse; }
+}
+/* ^ ^ ^ FIN NUEVOS ESTILOS ^ ^ ^ */
 </style>

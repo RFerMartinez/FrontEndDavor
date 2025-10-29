@@ -1,6 +1,6 @@
 <template>
   <div class="tabla-completa">
-    <div class="tabla-container" :class="{ 'mobile': isMobile }">
+    <div class="tabla-container" :class="{ 'mobile': isMobile, 'is-loading': cargando }">
 
       <div v-if="cargando" class="loading-container">
         <div class="spinner"></div>
@@ -170,8 +170,6 @@ onUnmounted(() => { /* ... sin cambios ... */
 </script>
 
 <style scoped>
-/* --- ESTILOS RE-INDENTADOS Y CON NUEVOS ESTILOS PARA CARGA --- */
-
 /* Contenedor principal */
 .tabla-completa {
   width: 100%;
@@ -194,33 +192,7 @@ onUnmounted(() => { /* ... sin cambios ... */
   min-height: 150px; /* Altura mínima para mostrar spinner */
 }
 
-/* V V V NUEVOS ESTILOS: Indicador de Carga V V V */
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 150px; /* Coincide con min-height de tabla-container */
-  color: #6c757d;
-  font-style: italic;
-  gap: 1rem;
-}
-
-.spinner {
-  border: 4px solid #f3f3f3; /* Gris claro */
-  border-top: 4px solid #e91e63; /* Color principal */
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-/* ^ ^ ^ FIN NUEVOS ESTILOS ^ ^ ^ */
-
+/* --- ¡ESTILOS DE SPINNER BORRADOS DE AQUÍ! --- */
 
 /* Mensaje "Sin Cuotas" (Estilos existentes) */
 .no-cuotas-mensaje {
@@ -367,7 +339,6 @@ onUnmounted(() => { /* ... sin cambios ... */
   .btn-paginacion { width: 35px; height: 35px; font-size: 0.8rem; }
   .numero-pagina { width: 30px; height: 30px; font-size: 0.8rem; }
   .no-cuotas-mensaje { padding: 2rem 1rem; font-size: 1rem;}
-  .loading-container { min-height: 120px; } /* Menos altura en móvil */
 }
 
 @media (max-width: 480px) {
@@ -378,8 +349,6 @@ onUnmounted(() => { /* ... sin cambios ... */
   .numero-pagina { width: 28px; height: 28px; font-size: 0.75rem; }
   .numeros-pagina { gap: 0.3rem; }
   .no-cuotas-mensaje { font-size: 0.9rem;}
-  .spinner { width: 30px; height: 30px; border-width: 3px; }
-  .loading-container { min-height: 100px; }
 }
 
 @media (max-width: 380px) {
