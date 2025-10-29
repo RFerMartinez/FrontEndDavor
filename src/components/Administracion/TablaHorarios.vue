@@ -170,8 +170,9 @@ import FilaHorario from './FilaHorario.vue';
 
 const props = defineProps({
   horariosAlumno: {
-    type: Array,
-    default: () => []
+    // 1. MODIFICADO: Aceptar Array (de IngresoPersona) u Objeto (de InfoAlumno)
+    type: [Array, Object, null],
+    default: () => ([]) // El default es un array vacío
   },
   suscripcion: {
     type: String,
@@ -183,68 +184,151 @@ const props = defineProps({
   }
 });
 
+// 2. MODIFICADO: El emit SIEMPRE devolverá el formato Objeto
 const emit = defineEmits(['horarios-actualizados']);
 
 // Datos y estado
 const datosGrupos = ref([]);
 const isMobile = ref(false);
-const modoEdicion = ref(props.modoEmbebido); // Correcto: empieza en edición si está embebido
-const horariosSeleccionados = ref([]); // Estado interno para la selección
+const modoEdicion = ref(props.modoEmbebido);
+const horariosSeleccionados = ref([]); // Estado interno SIEMPRE en formato [{dia, horario}]
 const diaExpandido = ref(null);
+const datosListos = ref(false); // <-- NUEVO: Bandera para saber si el "diccionario" está cargado
 
-// --- WATCH REVISADO ---
-// Este watch asegura que horariosSeleccionados se inicialice la primera vez
-// que props.horariosAlumno tenga datos, y también actualiza si las props
-// cambian DESDE AFUERA mientras NO estamos editando.
-watch(() => props.horariosAlumno, (nuevosHorariosProp) => {
-    // Si NO estamos en modo edición O si es la carga inicial y aún no tenemos horarios seleccionados
-    if (!modoEdicion.value || (modoEdicion.value && horariosSeleccionados.value.length === 0 && nuevosHorariosProp.length > 0)) {
-        console.log("TablaHorarios Watch (props.horariosAlumno): Actualizando/Inicializando horariosSeleccionados.");
-        horariosSeleccionados.value = JSON.parse(JSON.stringify(nuevosHorariosProp || []));
+// 3. MODIFICADO: El "diccionario" de traducción
+const horariosProcesados = computed(() => {
+    return datosGrupos.value.map(grupo => ({
+        nroGrupo: String(grupo.nroGrupo).trim(), // Limpiar espacios (ej: "3 " -> "3")
+        horario: `${grupo.horaInicio.slice(0, 5)}-${grupo.horaFin.slice(0, 5)}`,
+        dias_asignados: grupo.dias_asignados || []
+    }));
+});
+
+// --- 4. NUEVO: FUNCIONES DE TRADUCCIÓN ---
+/**
+ * TRADUCTOR DE ENTRADA:
+ * Toma la prop (Objeto o Array) y la convierte al formato interno [{dia, horario}]
+ */
+const convertirFormatoApiAInterno = (data) => {
+  if (!datosListos.value) {
+      console.warn("Traducción pausada: El diccionario (grupos.json) no está listo.");
+      return []; // No traducir si el diccionario no está listo
+  }
+
+  let horariosAPI = []; // Array de formato API [{dia, nroGrupo}]
+
+  // Desenvolver el objeto si es { horarios: [...] } (Caso InfoAlumno)
+  if (data && typeof data === 'object' && !Array.isArray(data) && data.hasOwnProperty('horarios')) {
+    horariosAPI = data.horarios || [];
+  } 
+  // Si ya es un array (Caso IngresoPersona, o si el padre ya envió un array)
+  else if (Array.isArray(data)) {
+    // Si ya está en formato interno (raro, pero por si acaso)
+    if (data.length > 0 && data[0].hasOwnProperty('horario')) {
+        console.log("TablaHorarios: Detectado formato interno, usando directamente.");
+        return [...data]; // Devolver una copia
     }
-}, { deep: true, immediate: true }); // 'immediate' es clave para la carga inicial
-// --- FIN WATCH REVISADO ---
+    horariosAPI = data; // Asumir formato API [{dia, nroGrupo}]
+  }
+  
+  if (!Array.isArray(horariosAPI)) {
+     console.warn("TablaHorarios: No se pudo determinar un array de horarios desde props.", data);
+     return [];
+  }
+
+  // Traducir de [{dia, nroGrupo}] a [{dia, horario}]
+  return horariosAPI
+    .map(hApi => {
+      const nroGrupoLimpio = String(hApi.nroGrupo).trim();
+      const grupoCorrespondiente = horariosProcesados.value.find(g => g.nroGrupo === nroGrupoLimpio);
+      if (grupoCorrespondiente) {
+        return { dia: hApi.dia, horario: grupoCorrespondiente.horario };
+      }
+      console.warn(`No se encontró grupo para nroGrupo: ${hApi.nroGrupo} (limpio: ${nroGrupoLimpio})`);
+      return null;
+    })
+    .filter(Boolean); // Quitar nulos
+};
+
+/**
+ * TRADUCTOR DE SALIDA:
+ * Convierte el formato interno [{dia, horario}] al formato API [{dia, nroGrupo}]
+ */
+const revertirFormatoInternoAApi = (horariosInternos) => {
+  if (!Array.isArray(horariosInternos) || !datosListos.value) return [];
+  
+  return horariosInternos
+    .map(hInterno => {
+      const grupoCorrespondiente = horariosProcesados.value.find(g => g.horario === hInterno.horario);
+      if (grupoCorrespondiente) {
+        return { nroGrupo: grupoCorrespondiente.nroGrupo, dia: hInterno.dia };
+      }
+      console.warn(`No se encontró grupo para horario: ${hInterno.horario}`);
+      return null;
+    })
+    .filter(Boolean);
+};
+// --- FIN FUNCIONES DE TRADUCCIÓN ---
 
 
-const cargarDatos = async () => { /* ... sin cambios ... */
+// --- 5. WATCH MODIFICADO ---
+// Sincroniza el estado interno cuando las props cambian
+watch(() => props.horariosAlumno, (nuevosHorariosProp) => {
+  if (datosListos.value) { // Solo si el diccionario está listo
+    if (!modoEdicion.value) { // Si no estamos editando, actualiza la vista
+      console.log("TablaHorarios Watch: props cambiaron (modo no-edición), traduciendo.");
+      horariosSeleccionados.value = convertirFormatoApiAInterno(nuevosHorariosProp);
+    } else if (props.modoEmbebido) { // Si estamos embebidos (IngresoPersona)
+      let arrayEntrante = [];
+      if (nuevosHorariosProp && typeof nuevosHorariosProp === 'object' && !Array.isArray(nuevosHorariosProp) && nuevosHorariosProp.hasOwnProperty('horarios')) {
+         arrayEntrante = nuevosHorariosProp.horarios || [];
+      } else if (Array.isArray(nuevosHorariosProp)) {
+         arrayEntrante = nuevosHorariosProp;
+      }
+      
+      if (arrayEntrante.length === 0) {
+         console.log("TablaHorarios Watch: Props reseteados, limpiando selección interna (modo embebido).");
+         horariosSeleccionados.value = [];
+      }
+    }
+  }
+}, { deep: true });
+// --- FIN WATCH ---
+
+const cargarDatos = async () => {
   try {
     const response = await import('../../../public/data/grupos.json');
     datosGrupos.value = response.default;
+    datosListos.value = true; // <-- Marcar diccionario como listo
+    console.log("TablaHorarios: datosGrupos cargados (diccionario listo).");
   } catch (error) {
-    console.error('Error cargando grupos:', error);
+    console.error('Error cargando grupos.json:', error);
   }
 };
 
 // --- COMPUTED PROPERTIES (sin cambios) ---
 const esSuscripcionLibre = computed(() => props.suscripcion.toLowerCase().includes('libre'));
-const limiteDias = computed(() => { /* ... sin cambios ... */
+const limiteDias = computed(() => {
     if (esSuscripcionLibre.value) return 0;
     const match = props.suscripcion.match(/\d+/);
     return match ? parseInt(match[0]) : 3;
 });
-const diasUnicos = computed(() => { /* ... sin cambios ... */
+const diasUnicos = computed(() => {
     if (datosGrupos.value.length === 0) return [];
     return datosGrupos.value[0]?.dias_asignados?.map(d => d.dia) || [];
-});
-const horariosProcesados = computed(() => { /* ... sin cambios ... */
-    return datosGrupos.value.map(grupo => ({
-        nroGrupo: grupo.nroGrupo,
-        horario: `${grupo.horaInicio.slice(0, 5)}-${grupo.horaFin.slice(0, 5)}`,
-        dias_asignados: grupo.dias_asignados || []
-    }));
 });
 const textoBoton = computed(() => modoEdicion.value ? 'Guardar Cambios' : 'Modificar Horarios');
 const iconoBoton = computed(() => modoEdicion.value ? 'fa-save' : 'fa-edit');
 const esSeleccionValida = computed(() => {
-    if (!modoEdicion.value) return true; // No aplica validación si no estamos editando
+    if (!modoEdicion.value) return true;
     return horariosSeleccionados.value.length === limiteDias.value;
 });
 
-// --- MÉTODOS MOBILE (sin cambios lógicos) ---
-const getClasesHorarioMobile = (dia, horarioObj) => { /* ... igual que antes ... */
+// --- MÉTODOS MOBILE (MODIFICADOS) ---
+// (Eliminada dependencia de estaAsignadoOriginal)
+const getClasesHorarioMobile = (dia, horarioObj) => {
     const cupos = obtenerCuposDia(dia, horarioObj);
-    const estaSeleccionadoActual = horariosSeleccionados.value.some(h => h.dia === dia && h.horario === horarioObj.horario);
-
+    const estaSeleccionadoActual = estaSeleccionado(dia, horarioObj.horario); // Usa ref local
     if (!modoEdicion.value) {
         return { 'asignado': estaSeleccionadoActual, 'no-asignado': !estaSeleccionadoActual };
     } else {
@@ -255,10 +339,9 @@ const getClasesHorarioMobile = (dia, horarioObj) => { /* ... igual que antes ...
         };
     }
 };
-const getIconoHorarioMobile = (dia, horarioObj) => { /* ... igual que antes ... */
+const getIconoHorarioMobile = (dia, horarioObj) => {
     const cupos = obtenerCuposDia(dia, horarioObj);
-    const estaSeleccionadoActual = horariosSeleccionados.value.some(h => h.dia === dia && h.horario === horarioObj.horario);
-
+    const estaSeleccionadoActual = estaSeleccionado(dia, horarioObj.horario); // Usa ref local
     if (!modoEdicion.value) {
         return estaSeleccionadoActual ? 'fas fa-check asignado' : 'fas fa-minus no-asignado';
     } else {
@@ -268,36 +351,47 @@ const getIconoHorarioMobile = (dia, horarioObj) => { /* ... igual que antes ... 
     }
 };
 const obtenerAsignadosDia = (dia) => { return horariosSeleccionados.value.filter(h => h.dia === dia); };
-const estaAsignadoOriginal = (dia, horario) => { return props.horariosAlumno.some(h => h.dia === dia && h.horario === horario); };
+// --- estaAsignadoOriginal ELIMINADA ---
+// const estaAsignadoOriginal = ...
 
-
-// --- toggleModoEdicion (sin cambios respecto a la última versión) ---
+// --- 6. toggleModoEdicion MODIFICADO ---
 const toggleModoEdicion = () => {
   if (modoEdicion.value) {
+    // --- GUARDANDO ---
     if (esSeleccionValida.value) {
-      console.log("TablaHorarios: Guardando y emitiendo horarios actualizados:", horariosSeleccionados.value);
-      emit('horarios-actualizados', JSON.parse(JSON.stringify(horariosSeleccionados.value)));
-      // Siempre salimos del modo edición después de guardar exitosamente
-      modoEdicion.value = false;
+      console.log("TablaHorarios: Guardando. Estado interno:", horariosSeleccionados.value);
+      
+      // 1. Traducir de vuelta al formato API [{dia, nroGrupo}]
+      const horariosTraducidos = revertirFormatoInternoAApi(horariosSeleccionados.value);
+      
+      // 2. Envolver en el objeto { horarios: [...] }
+      const datosParaEmitir = { horarios: horariosTraducidos }; 
+      
+      console.log("TablaHorarios: Emitiendo objeto formato API:", datosParaEmitir);
+      emit('horarios-actualizados', datosParaEmitir); // <-- Emitir el objeto
+      
+      modoEdicion.value = false; // Salir de modo edición
       console.log("TablaHorarios: Cambios guardados, volviendo a modo visualización.");
     } else {
         alert(`Debes seleccionar exactamente ${limiteDias.value} días diferentes.`);
     }
   } else {
-    // Entrando en modo edición (solo si no está embebido)
-    horariosSeleccionados.value = JSON.parse(JSON.stringify(props.horariosAlumno));
+    // --- ENTRANDO EN MODO EDICIÓN ---
+    // Copiar los props (convertidos) al estado interno
+    horariosSeleccionados.value = convertirFormatoApiAInterno(props.horariosAlumno);
     modoEdicion.value = true;
-    console.log("TablaHorarios: Entrando en modo edición, horarios copiados:", horariosSeleccionados.value);
+    console.log("TablaHorarios: Entrando en modo edición, horarios copiados y convertidos:", horariosSeleccionados.value);
   }
 };
+// --- FIN toggleModoEdicion ---
 
-// --- MÉTODOS DE SELECCIÓN (sin cambios lógicos) ---
-const manejarSeleccion = (horario, seleccionado) => { /* ... igual que antes ... */
+// --- MÉTODOS DE SELECCIÓN (sin cambios) ---
+// (Estos usan el estado interno {dia, horario})
+const manejarSeleccion = (horario, seleccionado) => {
     if (!modoEdicion.value) return;
     const dia = horario.dia;
     const horarioStr = horario.horario;
     const yaSeleccionado = estaSeleccionado(dia, horarioStr);
-
     if (yaSeleccionado) {
         horariosSeleccionados.value = horariosSeleccionados.value.filter(h => !(h.dia === dia && h.horario === horarioStr));
     } else {
@@ -307,15 +401,13 @@ const manejarSeleccion = (horario, seleccionado) => { /* ... igual que antes ...
         }
     }
 };
-const manejarSeleccionMobile = (dia, horario) => { /* ... igual que antes ... */
+const manejarSeleccionMobile = (dia, horario) => {
     if (!modoEdicion.value) return;
     const horarioObjCompleto = horariosProcesados.value.find(h => h.horario === horario);
     if (!horarioObjCompleto) return;
     const cupos = obtenerCuposDia(dia, horarioObjCompleto);
     const yaSeleccionado = estaSeleccionado(dia, horario);
-
     if (cupos === 0 && !yaSeleccionado) return;
-
     if (yaSeleccionado) {
         horariosSeleccionados.value = horariosSeleccionados.value.filter(h => !(h.dia === dia && h.horario === horario));
     } else {
@@ -326,35 +418,36 @@ const manejarSeleccionMobile = (dia, horario) => { /* ... igual que antes ... */
     }
 };
 const toggleDiaMobile = (dia) => { diaExpandido.value = diaExpandido.value === dia ? null : dia; };
-const obtenerCuposDia = (dia, horarioObj) => { /* ... igual que antes ... */
+const obtenerCuposDia = (dia, horarioObj) => {
     if (!horarioObj || !horarioObj.dias_asignados) return 0;
     const diaInfo = horarioObj.dias_asignados.find(d => d.dia === dia);
     return diaInfo ? (diaInfo.capacidadMax || 0) - (diaInfo.alumnos_inscritos || 0) : 0;
 };
-const obtenerTotalCuposDia = (dia) => { /* ... igual que antes ... */
+const obtenerTotalCuposDia = (dia) => {
      return horariosProcesados.value.reduce((total, horario) => {
         const diaInfo = horario.dias_asignados?.find(d => d.dia === dia);
         return total + (diaInfo ? obtenerCuposDia(dia, horario) : 0);
     }, 0);
 };
 const obtenerSeleccionadosDia = (dia) => { return horariosSeleccionados.value.filter(h => h.dia === dia); };
-const estaSeleccionado = (dia, horario) => { /* ... igual que antes ... */
+const estaSeleccionado = (dia, horario) => {
     return horariosSeleccionados.value.some(h => h.dia === dia && h.horario === horario);
 };
 const checkIsMobile = () => { isMobile.value = window.innerWidth <= 768; };
 
-// --- onMounted (simplificado) ---
-onMounted(() => {
-  cargarDatos();
+// --- 7. onMounted MODIFICADO ---
+onMounted(async () => {
   checkIsMobile();
   window.addEventListener('resize', checkIsMobile);
-  // La inicialización ahora la maneja principalmente el watch con immediate: true
-  // Podemos dejar una verificación por si acaso, pero el watch debería ser suficiente
-  if (horariosSeleccionados.value.length === 0 && props.horariosAlumno.length > 0) {
-     console.log("TablaHorarios onMounted: Backup - Inicializando horariosSeleccionados desde props.");
-     horariosSeleccionados.value = JSON.parse(JSON.stringify(props.horariosAlumno));
-  }
-  console.log("TablaHorarios: Montado. Modo Edición inicial:", modoEdicion.value);
+  
+  // 1. Cargar el "diccionario" de grupos primero
+  await cargarDatos(); 
+  
+  // 2. Ahora que datosListos.value es true, traducir los props iniciales
+  console.log("TablaHorarios onMounted: Datos cargados. Convirtiendo props iniciales...");
+  horariosSeleccionados.value = convertirFormatoApiAInterno(props.horariosAlumno);
+  
+  console.log("TablaHorarios: Montado. Horarios internos iniciales:", horariosSeleccionados.value, "Modo Edición inicial:", modoEdicion.value);
 });
 // --- FIN onMounted ---
 
