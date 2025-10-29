@@ -178,11 +178,14 @@ watch(nuevaSuscripcion, (newValue, oldValue) => {
 
 const volverPersonas = () => { emit('volverPersonas'); };
 
-const actualizarHorarios = (horarios) => {
-  nuevosHorarios.value = horarios || [];
-  console.log("IngresoPersona: Horarios actualizados desde TablaHorarios:", nuevosHorarios.value);
-  // Ocultar mensaje de validación si el formulario ahora es válido
-  // (esto se recalcula automáticamente por la computed 'formularioIngresoValido')
+const actualizarHorarios = (datosEmitidos) => {
+  // ✅ CORRECCIÓN: Extrae el array 'horarios' del objeto recibido
+  const horariosArray = datosEmitidos?.horarios || []; 
+
+  nuevosHorarios.value = horariosArray; // Asigna solo el array a nuevosHorarios
+
+  console.log("IngresoPersona: Horarios actualizados (array extraído):", nuevosHorarios.value);
+
   if (formularioIngresoValido.value) {
     mostrarMensajeValidacion.value = false;
   }
