@@ -36,13 +36,11 @@
 
         <div v-else class="mobile-view">
           <FilaCuota
-            v-for="(cuota, index) in cuotasPaginadas"
-            :key="cuota.mes + '-' + cuota.anio + '-' + index"
+            v-for="cuota in cuotas"
+            :key="cuota.idCuota"
             :cuota="cuota"
-            :is-mobile="isMobile"
-            :modo="modo"
-            @accion-principal="manejarAccionDeFila"
-          />
+            modo="cuota"
+            @accion-principal="manejarAccionDeFila"  />
         </div>
       </template>
 
@@ -89,10 +87,13 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import FilaCuota from './FilaCuota.vue';
 
 
+
 const emit = defineEmits(['iniciar-pago'])
+
 const manejarAccionDeFila = (cuota) => {
-  if (cuota.estado !== 'pagada') {
-    emit('iniciar-pago', cuota) // 2. Emite hacia arriba
+  // Solo emitimos si es una cuota pendiente
+  if (cuota.estado !== 'pagada' && cuota.pagada !== true) { 
+    emit('iniciar-pago', cuota) // Emite el evento hacia arriba
   }
 }
 
