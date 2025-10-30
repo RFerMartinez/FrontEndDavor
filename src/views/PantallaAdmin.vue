@@ -252,8 +252,7 @@ const volverDesdeIngreso = () => {
   datosSecundarios.value = null;
 }
 
-const manejarIngresoConfirmado = (datosIngreso) => {
-  console.log("Ingreso confirmado en PantallaAdmin:", datosSecundarios.value?.dni, datosIngreso);
+const manejarIngresoConfirmado = () => {
   volverDesdeIngreso();
 }
 // ... (FIN LÓGICA DE VISTAS) ...

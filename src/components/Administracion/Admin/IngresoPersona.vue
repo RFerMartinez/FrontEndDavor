@@ -314,7 +314,7 @@ const confirmarIngreso = async () => {
 function handleContinuar() {
   if (datosParaEmitir.value) {
     // 1. Emite el evento de éxito con los datos
-    emit('ingresoConfirmado', datosParaEmitir.value);
+    emit('ingresoConfirmado');
   }
 
   // 2. Oculta el modal
