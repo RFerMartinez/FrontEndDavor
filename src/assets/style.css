@@ -329,3 +329,341 @@ html {
     border-width: 3px;
   }
 }
+
+/* ================================================= */
+/* ===     ESTILOS COMPARTIDOS (Formulario)      === */
+/* ================================================= */
+
+/* Contenedor principal de la vista (usado por IngresoPersona y NuevoAlumno) */
+.contenedor-vista-admin {
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  min-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  position: relative; /* Clave para centrar el loading */
+}
+
+/* Encabezado (Botón Volver + Título) */
+.encabezado-info {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+.encabezado-info .btn-volver-global {
+  justify-self: start; 
+}
+
+/* Tarjeta principal que contiene todo */
+.tarjeta-formulario {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.tarjeta-contenido {
+  padding: 2rem;
+}
+
+/* Separador visual */
+.separador-seccion { 
+  height: 1px; 
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent); 
+  margin: 2rem 0; 
+}
+
+/* --- Estilos para Formulario (Nuevos y Reutilizados) --- */
+
+/* Contenedor de una sección de formulario (ej. Suscripción) */
+.seccion-formulario { 
+  margin-bottom: 2.5rem; 
+}
+
+/* Título de una sección de formulario */
+.titulo-seccion-formulario { 
+  font-size: 1.3rem; 
+  color: #2c3e50; 
+  margin-bottom: 1.5rem; 
+  border-bottom: 2px solid #d32f2f;
+  padding-bottom: 0.5rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.8rem; 
+}
+.titulo-seccion-formulario i { 
+  color: #d32f2f;
+}
+
+/* --- Estilos para Inputs (Nuevos) --- */
+.formulario-grid-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+.form-label i {
+  margin-right: 0.3rem;
+  color: #9ca3af;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: #fdfdfd;
+}
+.form-control:focus {
+  outline: none;
+  border-color: #e91e63;
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+  background: white;
+}
+/* Estilo específico para Selects */
+.form-control.select-localidad:disabled {
+  background: #f8f9fa;
+  cursor: not-allowed;
+}
+
+
+/* --- Estilos para Sección Gimnasio (Reutilizados) --- */
+.seccion-ingreso { 
+  margin-top: 2rem; 
+  padding-top: 2rem; 
+  border-top: 1px solid #e0e0e0; 
+}
+.seccion-horarios.deshabilitado { 
+  opacity: 0.5; 
+  pointer-events: none; 
+}
+.info-horarios { 
+  font-size: 0.9rem; 
+  color: #6c757d; 
+  margin-bottom: 1rem; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  background-color: #f8f9fa; 
+  padding: 0.8rem 1rem; 
+  border-radius: 6px; 
+  border: 1px solid #e9ecef; 
+}
+.info-horarios i { 
+  color: #17a2b8; 
+}
+.contenedor-tabla-horarios { 
+  border: 1px solid #e0e0e0; 
+  border-radius: 8px; 
+  padding: 1rem; 
+  background: #fafafa; 
+}
+
+/* --- Estilos para Botones (Reutilizados) --- */
+.seccion-botones { 
+  margin-top: 2rem; 
+  padding-top: 2rem; 
+  border-top: 1px solid #e0e0e0; 
+}
+.botones-accion { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+  gap: 1rem; 
+}
+.btn-accion { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 0.5rem; 
+  padding: 0.9rem 1.2rem; 
+  border: none; 
+  border-radius: 8px; 
+  font-family: 'Poppins', sans-serif; 
+  font-weight: 600; 
+  font-size: 0.95rem; 
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+}
+.btn-cancelar { /* Renombrado de 'btn-cancelar-ingreso' */
+  background: #f44336; 
+  color: white; 
+} 
+.btn-cancelar:hover { 
+  background: #D32F2F; 
+  transform: translateY(-2px); 
+}
+.btn-confirmar { /* Renombrado de 'btn-confirmar-ingreso' */
+  background: #4CAF50; 
+  color: white; 
+}
+.btn-confirmar:hover:not(:disabled) { 
+  background: #388E3C; 
+  transform: translateY(-2px); 
+}
+.btn-confirmar:disabled { 
+  background: #cccccc; 
+  cursor: not-allowed; 
+  transform: none; 
+}
+.mensaje-validacion { 
+  color: #d32f2f; 
+  font-size: 0.9rem; 
+  margin-top: 1rem; 
+  text-align: right; 
+  display: flex; 
+  align-items: center; 
+  justify-content: flex-end; 
+  gap: 0.3rem; 
+}
+.mensaje-validacion.full-width {
+  justify-content: center;
+  text-align: center;
+}
+
+/* --- Responsive (General) --- */
+@media (max-width: 768px) {
+  .contenedor-vista-admin { padding: 1.5rem; }
+  .encabezado-info {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+    grid-template-columns: none;
+  }
+  .encabezado-info .btn-volver-global {
+    justify-content: center;
+    margin-bottom: 1rem;
+    justify-self: auto;
+  }
+  .tarjeta-contenido { padding: 1.5rem; }
+  .separador-seccion { margin: 1.5rem 0; }
+  .botones-accion { grid-template-columns: 1fr; }
+  .btn-accion { padding: 0.8rem 1rem; font-size: 0.9rem; }
+  .mensaje-validacion { justify-content: center; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .contenedor-vista-admin { padding: 1rem; }
+  .tarjeta-contenido { padding: 1rem; }
+  .separador-seccion { margin: 1rem 0; }
+  .form-control { padding: 0.7rem; }
+}
+/* --- V V V NUEVO: ESTILOS PARA MODAL DE ÉXITO V V V --- */
+
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; 
+  backdrop-filter: blur(5px);
+}
+
+.modal-exito {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  border-top: 5px solid #4CAF50; /* Borde verde de éxito */
+}
+
+.modal-header-exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header-exito i {
+  font-size: 3rem;
+  color: #4CAF50; /* Verde */
+}
+
+.modal-header-exito h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.modal-body-exito {
+  margin-bottom: 2rem;
+}
+
+.modal-body-exito p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #495057;
+  line-height: 1.5;
+}
+
+.modal-body-exito p b {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.modal-footer-exito {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-modal-continuar {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background: #4CAF50;
+  color: white;
+}
+
+.btn-modal-continuar:hover {
+  background: #388E3C;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* ^ ^ ^ FIN ESTILOS MODAL ^ ^ ^ */

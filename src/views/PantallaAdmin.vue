@@ -48,6 +48,14 @@
           <i class="fas fa-id-card icon"></i>
           Personas
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'nuevoalumno' }"
+          @click="cambiarVista('nuevoalumno')"
+        >
+          <i class="fas fa-id-card icon"></i>
+          Nuevo Alumno
+        </button>
       </Sidebar>
 
       <NavbarMobile
@@ -96,6 +104,14 @@
           <i class="fas fa-id-card icon"></i>
           Personas
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'nuevoalumno' }"
+          @click="cambiarVista('nuevoalumno')"
+        >
+          <i class="fas fa-id-card icon"></i>
+          Nuevo Alumno
+        </button>
       </NavbarMobile>
 
       <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
@@ -110,6 +126,8 @@
             @verIngreso="verIngresoPersona"
             @volverPersonas="volverDesdeIngreso"
             @ingresoConfirmado="manejarIngresoConfirmado"
+            @nuevoIngresoConfirmado="irAAlumnos"
+            @cancelarIngreso="irADashboard"
           />
           </Transition>
       </div>  
@@ -154,6 +172,7 @@ import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
 import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
 import Trabajos_Metodologias from '@/components/Administracion/Admin/Trabajos_Metodologias.vue'
 import Dashboard from '@/components/Administracion/Admin/Dashboard.vue'
+import NuevoAlumno from '@/components/Administracion/Admin/NuevoAlumno.vue';
 // *** ===================== NUEVO: Importar Personas e IngresoPersona ===================== ***
 // *** USA TUS RUTAS CORRECTAS ***
 import Personas from '@/components/Administracion/Admin/Personas.vue'
@@ -255,6 +274,7 @@ const vistaComponente = computed(() => {
     case 'trabajo': return Trabajos_Metodologias;
     case 'personas': return Personas;
     case 'dashboard': return Dashboard; 
+    case 'nuevoalumno': return NuevoAlumno;
     default: return Dashboard;
   }
 })
@@ -270,6 +290,15 @@ onUnmounted(() => {
   window.removeEventListener('resize', checkIsMobile); 
   window.removeEventListener('keydown', handleEscapeKey); // NUEVO
 });
+
+//Para que muestre Alumnos cuando se confirma un ingreso
+const irAAlumnos = () => {
+  cambiarVista('alumnos');
+}
+
+const irADashboard= () => {
+  cambiarVista('Dashboard');
+}
 </script>
 
 <style scoped>
