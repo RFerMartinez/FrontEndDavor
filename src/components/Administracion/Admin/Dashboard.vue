@@ -63,33 +63,46 @@ const alumnosPorMetodologiaData = ref({
 });
 
 // --- 👇 Variable local (ref) con los datos de ejemplo ---
-const datosMetodologiaEjemplo = ref([
+const datosMetodologiaEjemplo = ref(
+  [
   {
     "id": 1,
     "data": [
-      { "nombre": "Musculación", "cantidad": 85 }
+      {
+        "nombre": "Musculación",
+        "cantidad": 85
+      }
     ]
   },
   {
     "id": 2,
     "data": [
-      { "nombre": "Funcional", "cantidad": 42 }
+      {
+        "nombre": "Funcional",
+        "cantidad": 42
+      }
     ]
   },
   {
     "id": 3,
     "data": [
-      { "nombre": "Preparación Física", "cantidad": 26 }
+      {
+        "nombre": "Preparación Física",
+        "cantidad": 26
+      }
     ]
   },
   {
     "id": 4,
     "data": [
-      { "nombre": "Rehabilitación", "cantidad": 15 }
+      {
+        "nombre": "Rehabilitación",
+        "cantidad": 15
+      }
     ]
   }
-  // Puedes añadir más objetos si necesitas
-]);
+]
+);
 
 const alumnosPorTurnoMesData = ref({
   labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul"], // Puedes poner los 12 meses
@@ -225,7 +238,7 @@ const procesarDatosMetodologia = (rawData) => {
   };
 };
 
-import { obtenerHorariosCompletos } from '@/api/services/horarioService';
+import { obtenerHorariosCompletos, obtenerOcupacionTotal } from '@/api/services/dashboardService';
 
 
 
@@ -258,6 +271,17 @@ const cargarDatosDashboard = async () => {
   } catch (error) {
     console.error("Error al cargar datos de ocupación:", error);
     errorOcupacion.value = true;
+  } finally {
+    // carga del componente finalizada
+  }
+
+  // Carga de datos de Metodologías
+  try {
+    const response = await obtenerOcupacionTotal();
+    datosMetodologiaEjemplo.value = response;
+    console.log("datos de las metodologías:", datosMetodologiaEjemplo.value);
+  } catch (error) {
+    console.error("Error al cargar datos de ocupación:", error);
   } finally {
     // carga del componente finalizada
   }

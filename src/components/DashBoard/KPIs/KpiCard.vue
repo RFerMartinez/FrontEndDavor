@@ -36,8 +36,8 @@ const props = defineProps({
 const cardColorClass = computed(() => {
     const colorMap = {
         info: 'bg-blue',
-        success: 'bg-green',
-        warning: 'bg-yellow',
+        success: 'bg-yellow',
+        warning: 'bg-green',
         danger: 'bg-red',
         primary: 'bg-purple', // Ejemplo adicional
         secondary: 'bg-gray' // Ejemplo adicional

@@ -20,6 +20,16 @@ export const obtenerHorariosCompletos = async () => {
     }
 };
 
+export const obtenerOcupacionTotal = async () => {
+    try {
+        const response = await api.get('/admin/estadisticas/alumnos-por-trabajo');
+        return response.data;
+    } catch (error) {
+        console.error("Error en la carga de datos de las metodologias:", error.response?.data  || error.message);
+        return [];
+    }
+}
+
 // --- Futuras funciones ---
 // Aquí podrías añadir más funciones si necesitas interactuar
 // con otros endpoints de horarios, como:
