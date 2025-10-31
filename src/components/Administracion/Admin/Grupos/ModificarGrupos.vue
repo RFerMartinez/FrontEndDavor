@@ -27,17 +27,44 @@ Añadir grupo
       />
     </div>
 
+    <Transition name="toast-fade">
+      <div v-if="mensajeExito" class="toast-exito">
+        <i class="fas fa-check-circle"></i>
+        <span>{{ mensajeExito }}</span>
+      </div>
+    </Transition>
     </div>
 </template>
 
 <script setup>
-// --- TU SCRIPT (SIN CAMBIOS) ---
 import { ref, onMounted } from 'vue'
 import Titulo from '../../Titulo.vue';
 import FilaModificarGrupo from './FilaModificarGrupo.vue'; 
 
 const grupos = ref([])
 const loading = ref(true)
+
+// ----- INICIO: AÑADIDO (Lógica del Toast) -----
+const mensajeExito = ref('');
+let timerExito = null;
+
+/**
+ * Muestra un mensaje de éxito sutil (toast) por 3 segundos.
+ * @param {string} mensaje El texto a mostrar.
+ */
+function mostrarMensajeExito(mensaje) {
+  mensajeExito.value = mensaje;
+  // Limpia el timer anterior si existía
+  if (timerExito) {
+    clearTimeout(timerExito);
+  }
+  // Crea un nuevo timer
+  timerExito = setTimeout(() => {
+    mensajeExito.value = '';
+  }, 3000); // Desaparece después de 3 segundos
+}
+// ----- FIN: AÑADIDO -----
+
 
 onMounted(async () => {
   loading.value = true
@@ -75,38 +102,40 @@ const manejarGuardarGrupo = async (grupoModificado) => {
   console.log('Recibido para guardar:', grupoModificado)
 
   try {
+    let mensaje = ''; // Mensaje por defecto
     if (grupoModificado._isNew) {
       console.log('Llamada a API para CREAR:', grupoModificado)
-      const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo) // Busca por flag
+      const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo)
       if (index !== -1) {
         delete grupoModificado._isNew
         grupos.value[index] = grupoModificado; 
       }
+      mensaje = 'Grupo añadido correctamente';
 
     } else {
       console.log('Llamada a API para ACTUALIZAR:', grupoModificado)
-      // Al actualizar, buscamos por el nroGrupo original que estaba en props, 
-      // por si el usuario cambió el nroGrupo en el input.
       const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
       
-      // Creamos una copia limpia sin el originalNroGrupo para guardar
       const grupoParaGuardar = { ...grupoModificado };
       delete grupoParaGuardar.originalNroGrupo;
 
       if (index !== -1) {
         grupos.value[index] = grupoParaGuardar;
       } else {
-         // Fallback por si no lo encuentra (ej. se guardó un nuevo grupo y cambió nro)
          const idx = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.nroGrupo);
          if (idx !== -1) grupos.value[idx] = grupoParaGuardar;
       }
+      mensaje = 'Grupo modificado correctamente';
     }
     
+    // ----- AÑADIDO: Mostrar Toast -----
+    mostrarMensajeExito(mensaje);
+
   } catch (error) {
     console.error("Error al guardar el grupo:", error)
+    // TODO: Aquí podrías llamar a mostrarMensajeExito con un color de error
   }
 }
-
 
 const manejarEliminarGrupo = (grupoParaEliminar) => {
   console.log('Recibido para eliminar:', grupoParaEliminar)
@@ -116,9 +145,14 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
     return;
   }
   
-  alert(`Simulación: Eliminar Grupo ${grupoParaEliminar.nroGrupo}. (Programar API y modal)`)
-  // grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
+  // ----- REEMPLAZO DE 'alert' -----
+  // TODO: Añadir modal de confirmación aquí
+  
+  // Simulación de éxito de borrado:
+  grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
+  mostrarMensajeExito('Grupo eliminado correctamente');
 }
+
 </script>
 
 <style scoped>
@@ -135,6 +169,8 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
   min-height: 80vh;
   overflow-y: auto;
   box-sizing: border-box;
+  /* Necesario para que el toast (si es absolute) se posicione bien */
+  position: relative; 
 }
 
 .encabezado {
@@ -157,7 +193,7 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
 
 .btn-anadir {
   padding: 0.8rem 1.5rem;
-  background-color: #dc3545; /* Rojo vibrante */
+  background-color: #dc3545; 
   color: white;
   border: none;
   border-radius: 8px; 
@@ -172,7 +208,7 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
 }
 
 .btn-anadir:hover {
-  background-color: #c82333; /* Rojo más oscuro al hover */
+  background-color: #c82333; 
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -192,7 +228,7 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border-left-color: #dc3545; /* Color del spinner (ROJO) */
+  border-left-color: #dc3545; 
   animation: spin 1s ease infinite;
 }
 
@@ -204,8 +240,40 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
 .lista-grupos {
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* Espacio entre cada "ficha" */
+  gap: 1rem; 
 }
+
+/* ----- INICIO: AÑADIDO (Estilos del Toast) ----- */
+.toast-exito {
+  position: fixed; /* Flota sobre todo */
+  top: 80px; /* Debajo de tu header principal */
+  right: 20px;
+  background-color: #28a745; /* Verde éxito */
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1000;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Animación para el toast */
+.toast-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+.toast-fade-leave-active {
+  transition: all 0.4s ease-in;
+}
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+/* ----- FIN: AÑADIDO ----- */
 
 
 /* Responsive */
@@ -224,6 +292,14 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
   }
   .btn-anadir {
     width: 100%;
+    justify-content: center;
+  }
+  /* Ajusta el toast en móviles */
+  .toast-exito {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    text-align: center;
     justify-content: center;
   }
 }
