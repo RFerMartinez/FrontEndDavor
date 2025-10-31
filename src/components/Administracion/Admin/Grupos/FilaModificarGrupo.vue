@@ -391,7 +391,6 @@ watchEffect(() => {
   background: #fdfdfd;
   font-family: 'Poppins', sans-serif;
   transition: border-color 0.2s, box-shadow 0.2s;
-  -webkit-appearance: none; 
 }
 
 .input-estilizado:focus {
@@ -518,7 +517,6 @@ watchEffect(() => {
   text-align: center;
   font-size: 0.9rem;
   box-sizing: border-box; 
-  -moz-appearance: textfield; 
 }
 .cupo-input::-webkit-outer-spin-button,
 .cupo-input::-webkit-inner-spin-button {
