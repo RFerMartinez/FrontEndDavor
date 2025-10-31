@@ -281,24 +281,26 @@ watch(() => props.horariosAlumno, (nuevosHorariosProp) => {
     } else if (props.modoEmbebido) { // Si estamos embebidos (IngresoPersona)
       let arrayEntrante = [];
       if (nuevosHorariosProp && typeof nuevosHorariosProp === 'object' && !Array.isArray(nuevosHorariosProp) && nuevosHorariosProp.hasOwnProperty('horarios')) {
-         arrayEntrante = nuevosHorariosProp.horarios || [];
+        arrayEntrante = nuevosHorariosProp.horarios || [];
       } else if (Array.isArray(nuevosHorariosProp)) {
-         arrayEntrante = nuevosHorariosProp;
+        arrayEntrante = nuevosHorariosProp;
       }
       
       if (arrayEntrante.length === 0) {
-         console.log("TablaHorarios Watch: Props reseteados, limpiando selección interna (modo embebido).");
-         horariosSeleccionados.value = [];
+        console.log("TablaHorarios Watch: Props reseteados, limpiando selección interna (modo embebido).");
+        horariosSeleccionados.value = [];
       }
     }
   }
 }, { deep: true });
 // --- FIN WATCH ---
 
+import { obtenerHorariosCompletos } from '@/api/services/dashboardService';
+
 const cargarDatos = async () => {
   try {
-    const response = await import('../../../public/data/grupos.json');
-    datosGrupos.value = response.default;
+    const response = await obtenerHorariosCompletos();
+    datosGrupos.value = response;
     datosListos.value = true; // <-- Marcar diccionario como listo
     console.log("TablaHorarios: datosGrupos cargados (diccionario listo).");
   } catch (error) {

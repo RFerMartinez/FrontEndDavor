@@ -112,7 +112,7 @@ const alumnoID = computed(() => props.alumnoSeleccionado)
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-import { obtenerAlumnoPorDni, obtenerHorariosPorDni } from '@/api/services/alumnoService'
+import { obtenerAlumnoPorDni, obtenerHorariosPorDni, actualizarHorariosAlumno } from '@/api/services/alumnoService'
 import { obtenerCuotasDeAlumno } from '@/api/services/cuotasService'
 const loading = ref(false)
 const alumno = ref(null)
@@ -152,8 +152,18 @@ onMounted(async () => {
 const volverAlumnos = () => { emit('volverAlumnos') }
 
 const manejarHorariosActualizados = async (nuevosHorarios) => {
-  console.log('Horarios actualizados:', nuevosHorarios)
-  horariosAlumno.value = nuevosHorarios;
+
+  // Llamar a API para poder modificar el horario de un Aumno
+  // DNI del alumno en: alumnoID.value["dni"]
+  // console.log('asdHorarios actualizados:', nuevosHorarios)
+  // horariosAlumno.value = nuevosHorarios;
+  try {
+    const res = await actualizarHorariosAlumno(alumnoID.value["dni"], nuevosHorarios)
+  } catch {
+    console.error("Error al modificar los datos")
+  }
+
+  // FIN DE LA LLAMADA A LA API
 
   const respuestaHorarios = await obtenerHorariosPorDni(alumnoID.value["dni"])
       horariosAlumno.value = respuestaHorarios

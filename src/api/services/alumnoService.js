@@ -1,7 +1,12 @@
 // src/api/services/alumnoService.js
 import apiClient from '../index'; // Importa la instancia de Axios configurada
 
-// Ya no necesitas API_URL ni getToken aquí
+/**
+ * Reemplaza (PUT) la lista completa de horarios de un alumno activo.
+ * Requiere token de staff (gestionado por el interceptor).
+ * @param {string} dni - El DNI del alumno a modificar.
+ * @param {Array} horarios - El nuevo array de horarios. Ej: [{ dia: "Lunes", nroGrupo: "1" }]
+ */
 
 /**
  * Obtiene la lista completa de alumnos.
@@ -48,5 +53,27 @@ export const obtenerHorariosPorDni = async (dni) => {
     } catch (error) {
         console.error(`Error al obtener los horarios del alumno ${dni}:`, error);
         return [];
+    }
+};
+
+export const actualizarHorariosAlumno = async (dni, horarios) => {
+    try {
+        // 1. Prepara el 'body' tal como lo especificaste: { "horarios": [...] }
+        const payload = {
+        horarios: horarios || [] // Asegura que sea un array, aunque esté vacío
+        };
+
+        // 2. Llama al endpoint PUT con la ruta relativa y el payload
+        const response = await apiClient.put(`/alumnos/${dni}/horarios`, payload);
+        
+        // 3. Devuelve la respuesta (probablemente los horarios actualizados o un mensaje de éxito)
+        return response.data;
+
+    } catch (error) {
+        // 4. Maneja el error
+        console.error(`Error al actualizar los horarios del alumno ${dni}:`, error.response?.data || error.message);
+        // Vuelve a lanzar el error para que el componente que llama (InfoAlumno.vue)
+        // sepa que la actualización falló y pueda mostrar un mensaje al usuario.
+        throw error;
     }
 };
