@@ -53,8 +53,16 @@
           :class="{ activo: vistaActiva === 'nuevoalumno' }"
           @click="cambiarVista('nuevoalumno')"
         >
-          <i class="fas fa-id-card icon"></i>
+          <i class="fas fa-user-plus icon"></i>
           Nuevo Alumno
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'modificarGrupos' }"
+          @click="cambiarVista('modificarGrupos')"
+        >
+          <i class="fas fa-calendar-alt icon"></i>
+          Modificar Grupos
         </button>
       </Sidebar>
 
@@ -109,8 +117,16 @@
           :class="{ activo: vistaActiva === 'nuevoalumno' }"
           @click="cambiarVista('nuevoalumno')"
         >
-          <i class="fas fa-id-card icon"></i>
+          <i class="fas fa-user-plus icon"></i>
           Nuevo Alumno
+        </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'modificarGrupos' }"
+          @click="cambiarVista('modificarGrupos')"
+        >
+          <i class="fas fa-calendar-alt icon"></i>
+          Modificar Grupos
         </button>
       </NavbarMobile>
 
@@ -173,6 +189,7 @@ import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
 import Trabajos_Metodologias from '@/components/Administracion/Admin/Trabajos_Metodologias.vue'
 import Dashboard from '@/components/Administracion/Admin/Dashboard.vue'
 import NuevoAlumno from '@/components/Administracion/Admin/NuevoAlumno.vue';
+import ModificarGrupos from '@/components/Administracion/Admin/Grupos/ModificarGrupos.vue';
 // *** ===================== NUEVO: Importar Personas e IngresoPersona ===================== ***
 // *** USA TUS RUTAS CORRECTAS ***
 import Personas from '@/components/Administracion/Admin/Personas.vue'
@@ -274,6 +291,7 @@ const vistaComponente = computed(() => {
     case 'personas': return Personas;
     case 'dashboard': return Dashboard; 
     case 'nuevoalumno': return NuevoAlumno;
+    case 'modificarGrupos': return ModificarGrupos;
     default: return Dashboard;
   }
 })
