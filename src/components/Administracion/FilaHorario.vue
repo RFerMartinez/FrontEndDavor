@@ -58,7 +58,7 @@ const estaSeleccionado = (dia) => {
 }
 
 const onSeleccionar = (dia, horario, seleccionado) => {
-  emit('seleccionar', { dia, horario }, seleccionado)
+  emit('seleccionar', { dia, horario }, seleccionado);
 }
 </script>
 

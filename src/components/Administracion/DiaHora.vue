@@ -20,7 +20,7 @@
       <div v-else class="modo-edicion">
         <div class="info-cupos">
           <span class="texto-cupos">Cupos:</span>
-          <span class="numero-cupos">{{ cuposDisponibles }}</span>
+          <span class="numero-cupos">{{ displayedCupos }}</span>
         </div>
         <div class="estado-celda" :class="estadoClase">
           <i class="icono-estado" :class="iconoClase"></i>
@@ -69,6 +69,17 @@ const manejarClick = () => {
     emit('seleccionar', props.dia, props.horario, !props.seleccionado)
   }
 }
+
+const displayedCupos = computed(() => {
+  // Si estamos en modo edición y la celda está seleccionada
+  if (props.modoEdicion && props.seleccionado) {
+    // Retornamos los cupos originales menos 1
+    // (La lógica en TablaHorarios ya previene seleccionar si cuposDisponibles es 0)
+    return props.cuposDisponibles - 1;
+  }
+  // En cualquier otro caso, mostramos el número original
+  return props.cuposDisponibles;
+})
 </script>
 
 <style scoped>

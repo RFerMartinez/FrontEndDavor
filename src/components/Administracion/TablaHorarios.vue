@@ -387,50 +387,56 @@ const toggleModoEdicion = () => {
 };
 // --- FIN toggleModoEdicion ---
 
+
 // --- MÉTODOS DE SELECCIÓN (sin cambios) ---
 // (Estos usan el estado interno {dia, horario})
 const manejarSeleccion = (horario, seleccionado) => {
-    if (!modoEdicion.value) return;
-    const dia = horario.dia;
-    const horarioStr = horario.horario;
-    const yaSeleccionado = estaSeleccionado(dia, horarioStr);
-    if (yaSeleccionado) {
-        horariosSeleccionados.value = horariosSeleccionados.value.filter(h => !(h.dia === dia && h.horario === horarioStr));
-    } else {
-        horariosSeleccionados.value = horariosSeleccionados.value.filter(h => h.dia !== dia);
-        if (horariosSeleccionados.value.length < limiteDias.value) {
-            horariosSeleccionados.value.push({ dia, horario: horarioStr });
-        }
+  if (!modoEdicion.value) return;
+  const dia = horario.dia;
+  const horarioStr = horario.horario;
+  const yaSeleccionado = estaSeleccionado(dia, horarioStr);
+  if (yaSeleccionado) {
+    horariosSeleccionados.value = horariosSeleccionados.value.filter(h => !(h.dia === dia && h.horario === horarioStr));
+  } else {
+    horariosSeleccionados.value = horariosSeleccionados.value.filter(h => h.dia !== dia);
+    if (horariosSeleccionados.value.length < limiteDias.value) {
+        horariosSeleccionados.value.push({ dia, horario: horarioStr });
     }
+  }
 };
 const manejarSeleccionMobile = (dia, horario) => {
-    if (!modoEdicion.value) return;
-    const horarioObjCompleto = horariosProcesados.value.find(h => h.horario === horario);
-    if (!horarioObjCompleto) return;
-    const cupos = obtenerCuposDia(dia, horarioObjCompleto);
-    const yaSeleccionado = estaSeleccionado(dia, horario);
-    if (cupos === 0 && !yaSeleccionado) return;
-    if (yaSeleccionado) {
-        horariosSeleccionados.value = horariosSeleccionados.value.filter(h => !(h.dia === dia && h.horario === horario));
-    } else {
-        horariosSeleccionados.value = horariosSeleccionados.value.filter(h => h.dia !== dia);
-        if (horariosSeleccionados.value.length < limiteDias.value) {
-            horariosSeleccionados.value.push({ dia, horario });
-        }
-    }
+  if (!modoEdicion.value) return;
+  const horarioObjCompleto = horariosProcesados.value.find(h => h.horario === horario);
+  if (!horarioObjCompleto) return;
+  const cupos = obtenerCuposDia(dia, horarioObjCompleto);
+  const yaSeleccionado = estaSeleccionado(dia, horario);
+  if (cupos === 0 && !yaSeleccionado) return;
+  if (yaSeleccionado) {
+      horariosSeleccionados.value = horariosSeleccionados.value.filter(h => !(h.dia === dia && h.horario === horario));
+  } else {
+      horariosSeleccionados.value = horariosSeleccionados.value.filter(h => h.dia !== dia);
+      if (horariosSeleccionados.value.length < limiteDias.value) {
+          horariosSeleccionados.value.push({ dia, horario });
+      }
+  }
 };
 const toggleDiaMobile = (dia) => { diaExpandido.value = diaExpandido.value === dia ? null : dia; };
+
 const obtenerCuposDia = (dia, horarioObj) => {
-    if (!horarioObj || !horarioObj.dias_asignados) return 0;
-    const diaInfo = horarioObj.dias_asignados.find(d => d.dia === dia);
-    return diaInfo ? (diaInfo.capacidadMax || 0) - (diaInfo.alumnos_inscritos || 0) : 0;
+  if (!horarioObj || !horarioObj.dias_asignados) return 0;
+  const diaInfo = horarioObj.dias_asignados.find(d => d.dia === dia);
+  return diaInfo ? (diaInfo.capacidadMax || 0) - (diaInfo.alumnos_inscritos || 0) : 0;
 };
+
+
 const obtenerTotalCuposDia = (dia) => {
-     return horariosProcesados.value.reduce((total, horario) => {
-        const diaInfo = horario.dias_asignados?.find(d => d.dia === dia);
-        return total + (diaInfo ? obtenerCuposDia(dia, horario) : 0);
-    }, 0);
+  return horariosProcesados.value.reduce((total, horario) => {
+    const diaInfo = horario.dias_asignados?.find(d => d.dia === dia);
+    return total + (diaInfo ? obtenerCuposDia(dia, horario) : 0);
+  }, 0);
 };
+
+
 const obtenerSeleccionadosDia = (dia) => { return horariosSeleccionados.value.filter(h => h.dia === dia); };
 const estaSeleccionado = (dia, horario) => {
     return horariosSeleccionados.value.some(h => h.dia === dia && h.horario === horario);

@@ -5,11 +5,6 @@
     </div>
 
     <nav class="menu">
-      <!-- <button class="menu-btn dashboard-btn" @click="cambiarVista('dashboard')">
-        <i class="fas fa-tachometer-alt icon"></i> <span>Dashboard</span>
-      </button> -->
-
-      <!-- <hr class="separator" /> -->
 
       <slot />
 
@@ -68,7 +63,7 @@ function cerrarSesion() {
 <style scoped>
 /* Estilos generales del Sidebar (ajustados) */
 .sidebar {
-  width: 260px; /* Un poco más angosto */
+  width: 250px; /* Un poco más angosto */
   height: 100vh;
   background: rgba(31, 41, 55, 0.8); /* Fondo gris oscuro semi-transparente */
   backdrop-filter: blur(15px); /* Efecto blur para el fondo */
@@ -87,7 +82,7 @@ function cerrarSesion() {
 /* Contenedor del logo */
 .logo-container {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .logo {
@@ -232,7 +227,7 @@ function cerrarSesion() {
   font-family: 'Inter', sans-serif;
   font-size: 0.95rem; 
   text-align: left;
-  padding: 0.8rem 1rem; 
+  padding: 0.6rem 1rem; 
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 6px; 
