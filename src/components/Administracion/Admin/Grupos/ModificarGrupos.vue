@@ -8,7 +8,7 @@
     <div class="acciones-globales">
       <button class="btn-anadir" @click="anadirNuevoGrupo">
         <i class="fas fa-plus-circle"></i> 
-Añadir grupo
+        Añadir grupo
       </button>
     </div>
 
@@ -65,20 +65,18 @@ function mostrarMensajeExito(mensaje) {
 }
 // ----- FIN: AÑADIDO -----
 
+import { obtenerHorariosCompletos, eliminarHorarioGrupo } from '@/api/services/horarioService';
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 onMounted(async () => {
   loading.value = true
-  
+  await sleep(500);
   try {
-    const response = await fetch('/data/grupos.json'); 
-    if (!response.ok) {
-      throw new Error(`Error al cargar el archivo: ${response.statusText}`);
-    }
-    const data = await response.json();
+    const data = await obtenerHorariosCompletos(); 
     grupos.value = data;
-
   } catch (error) {
-    console.error("Error al cargar 'grupos.json':", error);
+    console.error("Error al cargar los horarios desde la API:", error);
   } finally {
     loading.value = false;
   }
@@ -104,7 +102,7 @@ const manejarGuardarGrupo = async (grupoModificado) => {
   try {
     let mensaje = ''; // Mensaje por defecto
     if (grupoModificado._isNew) {
-      console.log('Llamada a API para CREAR:', grupoModificado)
+      console.log('Llamada a API para CREAR:', JSON.stringify(grupoModificado, null, 2))
       const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo)
       if (index !== -1) {
         delete grupoModificado._isNew
@@ -113,7 +111,7 @@ const manejarGuardarGrupo = async (grupoModificado) => {
       mensaje = 'Grupo añadido correctamente';
 
     } else {
-      console.log('Llamada a API para ACTUALIZAR:', grupoModificado)
+      console.log('Llamada a API para ACTUALIZAR:', JSON.stringify(grupoModificado, null, 2))
       const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
       
       const grupoParaGuardar = { ...grupoModificado };
@@ -122,8 +120,8 @@ const manejarGuardarGrupo = async (grupoModificado) => {
       if (index !== -1) {
         grupos.value[index] = grupoParaGuardar;
       } else {
-         const idx = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.nroGrupo);
-         if (idx !== -1) grupos.value[idx] = grupoParaGuardar;
+        const idx = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.nroGrupo);
+        if (idx !== -1) grupos.value[idx] = grupoParaGuardar;
       }
       mensaje = 'Grupo modificado correctamente';
     }
@@ -137,21 +135,70 @@ const manejarGuardarGrupo = async (grupoModificado) => {
   }
 }
 
-const manejarEliminarGrupo = (grupoParaEliminar) => {
-  console.log('Recibido para eliminar:', grupoParaEliminar)
+// const manejarEliminarGrupo = (grupoParaEliminar) => {
+//   console.log('Recibido para eliminar:', JSON.stringify(grupoParaEliminar, null, 2))
+//   alert(JSON.stringify(grupoParaEliminar, null, 2))
   
+//   if (grupoParaEliminar._isNew) {
+//     grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo)
+//     return;
+//   }
+  
+//   // ----- REEMPLAZO DE 'alert' -----
+//   // TODO: Añadir modal de confirmación aquí
+  
+//   // Simulación de éxito de borrado:
+//   grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
+//   mostrarMensajeExito('Grupo eliminado correctamente');
+// }
+
+
+const manejarEliminarGrupo = async (grupoParaEliminar) => {
+  console.log('Recibido para eliminar:', grupoParaEliminar.nroGrupo);
+
+  // Si es un grupo "nuevo" (creado en la UI, no en DB), solo lo borra localmente.
   if (grupoParaEliminar._isNew) {
-    grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo)
+    grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
     return;
   }
+
+  // ----- REEMPLAZO DE 'alert' y 'TODO' -----
+  // 1. Confirmación simple (puedes reemplazar esto por tu modal)
+  if (!window.confirm(`¿Estás seguro de que quieres eliminar el grupo ${grupoParaEliminar.horaInicio} - ${grupoParaEliminar.horaFin}? Esta acción no se puede deshacer.`)) {
+      return; // El usuario canceló
+  }
+
+  // 2. Llamada a la API (reemplaza la simulación)
+  try {
+    // (Opcional: puedes poner un estado de 'cargando' aquí si lo deseas)
+    
+    const exito = await eliminarHorarioGrupo(grupoParaEliminar.nroGrupo);
+
+    // 3. Si la API responde con éxito (true / 204)
+    if (exito) {
+      // Actualiza la lista local (elimina el grupo de la UI)
+      grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
+      mostrarMensajeExito('Grupo eliminado correctamente');
+    } else {
+      // Esto no debería ocurrir si la API lanza un error, pero es un fallback
+      alert('Hubo un problema, pero el servidor no reportó un error.');
+    }
+
+  } catch (error) {
+    // 4. Manejo de errores de la API (ej. 404, 400, 500)
+    console.error("Error al eliminar el grupo:", error);
+    const errorMsg = error.response?.data?.detail || 'Error desconocido al eliminar el grupo.';
+    
+    // Muestra el error de la API (puedes usar tu modal de error aquí)
+    alert(`Error: ${errorMsg}`); 
+    // O si tienes una función: mostrarMensajeError(errorMsg);
   
-  // ----- REEMPLAZO DE 'alert' -----
-  // TODO: Añadir modal de confirmación aquí
-  
-  // Simulación de éxito de borrado:
-  grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
-  mostrarMensajeExito('Grupo eliminado correctamente');
+  } finally {
+     // (Opcional: quitar el estado de 'cargando' si lo pusiste)
+  }
 }
+
+
 
 </script>
 
@@ -193,7 +240,7 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
 
 .btn-anadir {
   padding: 0.8rem 1.5rem;
-  background-color: #dc3545; 
+  background-color: #4CAF50; 
   color: white;
   border: none;
   border-radius: 8px; 
@@ -208,7 +255,7 @@ const manejarEliminarGrupo = (grupoParaEliminar) => {
 }
 
 .btn-anadir:hover {
-  background-color: #c82333; 
+  background-color: #388E3C; 
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
