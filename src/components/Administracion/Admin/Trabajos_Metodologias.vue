@@ -8,39 +8,27 @@
     <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBoton">
       <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
         <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
-      <i class="fas fa-plus"></i>
+          <i class="fas fa-plus"></i>
           Agregar Nueva Metodología
         </button>
       </div>
     </transition>
 
     <transition name="slide-down" @after-leave="transicionEnProgreso = false">
-      <AgregarModificar
-        v-if="mostrarFormulario"
-        v-model="nuevoTrabajo"
-        :es-edicion="trabajoEditando !== null"
-        :config="configFormulario"
-        @guardar="guardarTrabajo"
-        @cancelar="iniciarTransicionABoton"
-      />
+      <AgregarModificar v-if="mostrarFormulario" v-model="nuevoTrabajo" :es-edicion="trabajoEditando !== null"
+        :config="configFormulario" @guardar="guardarTrabajo" @cancelar="iniciarTransicionABoton" />
     </transition>
 
-    <Items
-      :items="trabajos"
-      :config="configLista"
-      empty-message="No hay metodologías cargadas"
-      empty-icon="fas fa-dumbbell"
-      @editar="editarTrabajo"
-      @eliminar="eliminarTrabajo"
-    />
+    <Items :items="trabajos" :config="configLista" empty-message="No hay metodologías cargadas"
+      empty-icon="fas fa-dumbbell" @editar="editarTrabajo" @eliminar="eliminarTrabajo" />
 
     <transition name="slide-in">
       <div v-if="mensajeConfirmacion" class="mensaje-confirmacion-global">
         <div class="contenido-mensaje-global">
-      <i class="fas fa-check-circle"></i>
+          <i class="fas fa-check-circle"></i>
           <span>{{ mensajeConfirmacion }}</span>
           <button class="btn-cerrar-mensaje-global" @click="mensajeConfirmacion = ''">
-          <i class="fas fa-times"></i>
+            <i class="fas fa-times"></i>
           </button>
         </div>
       </div>
@@ -54,6 +42,13 @@ import { ref, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
 import Items from './Items.vue';
 import Titulo from '../Titulo.vue';
+
+import {
+  obtenerTrabajos as obtenerTrabajosAPI,
+  eliminarTrabajo as eliminarTrabajoAPI,
+  crearTrabajo as crearTrabajoAPI,
+  actualizarTrabajo as actualizarTrabajoAPI
+} from '@/api/services/trabajoService';
 
 // Configuración (ahora incluye contexto)
 const configFormulario = {
@@ -78,26 +73,35 @@ const trabajoEditando = ref(null);
 const mensajeConfirmacion = ref('');
 const transicionEnProgreso = ref(false);
 
+
+const cargando = ref(true); // Para el estado de carga
+const errorCarga = ref(null); // Para manejar errores de la API
+
 const nuevoTrabajo = ref({
   nombre: '',
   descripcion: ''
 });
 
 const cargarTrabajos = async () => {
+  cargando.value = true;
+  errorCarga.value = null;
   try {
-    const metodologiasData = await import('../../../../public/data/metodologias.json');
-    trabajos.value = metodologiasData.default.map((item, index) => ({
-      id: index + 1,
-      nombre: item.nombre,
-      descripcion: item.descripcion || '' // Asegurar que descripción exista
+    const data = await obtenerTrabajosAPI();
+    if (!Array.isArray(data)) {
+      throw new Error("La API no devolvió un formato de trabajos válido.");
+    }
+    // Mapea la API a la UI (nombreTrabajo -> nombre)
+    trabajos.value = data.map((item, index) => ({
+      id: item.id || item.nombreTrabajo || index + 1, // ID para el v-for de Vue
+      nombre: item.nombreTrabajo, // 'nombre' que espera la UI
+      descripcion: item.descripcion || ''
     }));
-    console.log('Trabajos cargados:', trabajos.value);
+    console.log('Trabajos cargados desde la API:', trabajos.value);
   } catch (error) {
-    console.error('Error cargando trabajos:', error);
-    trabajos.value = [
-      { id: 1, nombre: "Musculación", descripcion: "Entrenamiento centrado en el desarrollo de la masa muscular y fuerza con cargas progresivas." },
-      { id: 2, nombre: "Funcional", descripcion: "Ejercicios que imitan movimientos de la vida diaria, mejorando la movilidad y estabilidad general." }
-    ];
+    console.error('Error cargando trabajos desde la API:', error);
+    errorCarga.value = "No se pudieron cargar las metodologías.";
+  } finally {
+    cargando.value = false;
   }
 };
 
@@ -132,39 +136,90 @@ const editarTrabajo = (trabajo) => {
   scrollArribaInmediato();
 };
 
-const guardarTrabajo = (datosRecibidos) => { // Recibe datos de AgregarModificar
-  if (!datosRecibidos.nombre) { // Solo validar nombre aquí
+const guardarTrabajo = async (datosRecibidos) => {
+  // 1. Validación (Sin cambios)
+  if (!datosRecibidos.nombre) {
     mensajeConfirmacion.value = 'Por favor completa el campo Nombre';
     setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
     return;
   }
-  
-  if (trabajoEditando.value) {
-    const index = trabajos.value.findIndex(t => t.id === trabajoEditando.value);
-    if (index !== -1) {
-      trabajos.value[index] = { ...datosRecibidos, id: trabajoEditando.value };
-      mensajeConfirmacion.value = 'Metodología actualizada correctamente';
-    }
-  } else {
-    // Validar si ya existe
-    if (trabajos.value.some(t => t.nombre.toLowerCase() === datosRecibidos.nombre.toLowerCase())) {
-        mensajeConfirmacion.value = `La metodología "${datosRecibidos.nombre}" ya existe.`;
-        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+
+  try {
+    let mensaje = '';
+
+    // 2. Prepara el body para la API (usando 'nombreTrabajo' como espera la API)
+    const datosParaAPI = {
+      nombreTrabajo: datosRecibidos.nombre,
+      descripcion: datosRecibidos.descripcion
+    };
+
+    if (trabajoEditando.value) {
+      // --- LÓGICA DE ACTUALIZACIÓN (PUT) ---
+      const index = trabajos.value.findIndex(t => t.id === trabajoEditando.value);
+      if (index === -1) throw new Error("No se encontró el trabajo original.");
+
+      const nombreOriginal = trabajos.value[index].nombre; // El 'jobName' (nombre actual)
+
+      await actualizarTrabajoAPI(nombreOriginal, datosParaAPI);
+      mensaje = 'Metodología actualizada correctamente';
+
+    } else {
+      // --- LÓGICA DE CREACIÓN (POST) ---
+      // Validación de duplicados (se mantiene)
+      if (trabajos.value.some(t => t.nombre.toLowerCase() === datosRecibidos.nombre.toLowerCase())) {
+        // ... (tu lógica de error de duplicado) ...
         return;
+      }
+
+      await crearTrabajoAPI(datosParaAPI);
+      mensaje = 'Metodología creada correctamente';
     }
-    const nuevoId = Math.max(...trabajos.value.map(t => t.id), 0) + 1;
-    trabajos.value.push({ id: nuevoId, ...datosRecibidos });
-    mensajeConfirmacion.value = 'Metodología creada correctamente';
+
+    // --- Lógica de éxito (común para ambos) ---
+    iniciarTransicionABoton(); // Cierra el formulario
+    mensajeConfirmacion.value = mensaje; // Muestra el toast
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+
+    // 3. ¡LA LÍNEA CLAVE! Refresca la lista desde la API.
+    await cargarTrabajos();
+
+  } catch (error) {
+    console.error("Error al guardar el trabajo:", error);
+    const errorMsg = error.response?.data?.detail || 'No se pudo guardar la metodología.';
+    alert(`Error: ${errorMsg}`);
   }
-  iniciarTransicionABoton();
-  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
 };
 
-const eliminarTrabajo = (id) => {
-  if (confirm('¿Estás seguro de que quieres eliminar esta metodología?')) {
-    trabajos.value = trabajos.value.filter(t => t.id !== id);
-    mensajeConfirmacion.value = 'Metodología eliminada correctamente';
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+const eliminarTrabajo = async (id) => {
+  // 1. Encontrar el trabajo para obtener su nombre (el ID de la API)
+  const trabajoAEliminar = trabajos.value.find(t => t.id === id);
+
+  if (!trabajoAEliminar) {
+    alert("Error: No se pudo encontrar el trabajo.");
+    return;
+  }
+
+  const nombreParaAPI = trabajoAEliminar.nombre;
+  alert(`ALERTA: ${nombreParaAPI}`)
+  // 2. Confirmar con el usuario
+  if (confirm(`¿Estás seguro de que quieres eliminar la metodología "${nombreParaAPI}"?`)) {
+    try {
+      // 3. Llamar a la API
+      await eliminarTrabajoAPI(nombreParaAPI);
+
+      // 4. Mostrar mensaje de éxito
+      mensajeConfirmacion.value = 'Metodología eliminada correctamente';
+      setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+
+      // 5. ¡LA LÍNEA CLAVE! Refresca la lista desde la API.
+      await cargarTrabajos();
+
+    } catch (error) {
+      // 6. Manejar errores de API
+      console.error("Error al eliminar el trabajo:", error);
+      const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la metodología.';
+      alert(`Error: ${errorMsg}`);
+    }
   }
 };
 
@@ -208,13 +263,16 @@ onMounted(cargarTrabajos);
 .fade-scale-enter-active {
   transition: all 0.2s ease-out;
 }
+
 .fade-scale-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .fade-scale-enter-from {
   opacity: 0;
   transform: scale(0.9);
 }
+
 .fade-scale-leave-to {
   opacity: 0;
   transform: scale(0.9);
@@ -223,13 +281,16 @@ onMounted(cargarTrabajos);
 .slide-down-enter-active {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
 .slide-down-leave-active {
   transition: all 0.25s cubic-bezier(0.55, 0.055, 0.675, 0.19);
 }
+
 .slide-down-enter-from {
   opacity: 0;
   transform: translateY(-15px);
 }
+
 .slide-down-leave-to {
   opacity: 0;
   transform: translateY(-8px);
@@ -239,13 +300,16 @@ onMounted(cargarTrabajos);
 .slide-in-enter-active {
   transition: all 0.25s ease-out;
 }
+
 .slide-in-leave-active {
   transition: all 0.2s ease-in;
 }
+
 .slide-in-enter-from {
   transform: translateX(100%);
   opacity: 0;
 }
+
 .slide-in-leave-to {
   transform: translateX(100%);
   opacity: 0;
@@ -257,7 +321,7 @@ onMounted(cargarTrabajos);
   .contenedor-trabajos {
     padding: 1.5rem;
   }
-  
+
   /* .mensaje-confirmacion (global) ya es responsive */
 }
 
@@ -265,7 +329,7 @@ onMounted(cargarTrabajos);
   .contenedor-trabajos {
     padding: 1rem;
   }
-  
+
   /* .btn-agregar (global) ya es responsive */
 }
 </style>

@@ -59,6 +59,11 @@ import AgregarModificar from './AgregarModificar.vue';
 import Items from './Items.vue';
 import Titulo from '../Titulo.vue';
 
+import {
+  obtenerSuscripciones,
+  eliminarSuscripcion as eliminarSuscripcionAPI
+} from '@/api/services/suscripcionesService';
+
 const configFormBase = {
   tituloSingular: 'Suscripción',
   layout: 'inline',
@@ -81,6 +86,9 @@ const transicionEnProgreso = ref(false);
 const datosFormulario = ref({ descripcion: '', precio: '' });
 const suscripcionNuevaGuardada = ref(null);
 
+const cargando = ref(true); // Para saber cuándo mostrar un spinner (si lo deseas)
+const errorCarga = ref(null); // Para almacenar un mensaje de error
+
 const configFormularioComputada = computed(() => {
   const esEdicion = suscripcionEditando.value !== null;
   return {
@@ -99,25 +107,75 @@ const parsePriceString = (priceString) => {
     return isNaN(number) ? NaN : number;
 };
 
+// const cargarSuscripciones = async () => {
+//   try {
+//     const preciosData = await import('../../../../public/data/precios.json');
+//     suscripciones.value = preciosData.default.map((item, index) => {
+//         const precioNum = parsePriceString(item.precio);
+//         if (isNaN(precioNum)) { console.warn(`Precio inválido en JSON para "${item.descripcion}": ${item.precio}`); }
+//         return { id: index + 1, descripcion: item.descripcion, precio: isNaN(precioNum) ? 0 : precioNum };
+//     });
+//     console.log('Suscripciones cargadas (precio como número):', suscripciones.value);
+//   } catch (error) {
+//     console.error('Error cargando suscripciones:', error);
+//     suscripciones.value = [
+//         { id: 1, descripcion: '1 Día a la semana', precio: 10000 },
+//         { id: 2, descripcion: '2 Días a la semana', precio: 15000 },
+//         { id: 3, descripcion: '3 Días a la semana', precio: 20000 },
+//         { id: 4, descripcion: 'Día Libre', precio: 3000 }
+//      ];
+//   }
+// };
+
+
 const cargarSuscripciones = async () => {
+  // 1. Establecer estado de carga
+  cargando.value = true;
+  errorCarga.value = null;
+  
   try {
-    const preciosData = await import('../../../../public/data/precios.json');
-    suscripciones.value = preciosData.default.map((item, index) => {
-        const precioNum = parsePriceString(item.precio);
-        if (isNaN(precioNum)) { console.warn(`Precio inválido en JSON para "${item.descripcion}": ${item.precio}`); }
-        return { id: index + 1, descripcion: item.descripcion, precio: isNaN(precioNum) ? 0 : precioNum };
+    // 2. Llamar al servicio de la API
+    const data = await obtenerSuscripciones();
+
+    // 3. Validar que la respuesta sea un array
+    if (!Array.isArray(data)) {
+      throw new Error("La respuesta de la API no es un array de suscripciones.");
+    }
+
+    // 4. Mapear la respuesta de la API a la estructura interna del componente
+    suscripciones.value = data.map((item, index) => {
+      
+      // Valida que el precio sea un número
+      const precioNum = (typeof item.precio === 'number' && !isNaN(item.precio)) 
+        ? item.precio 
+        : 0;
+      
+      // Valida que el nombre exista
+      const descripcionApi = item.nombreSuscripcion || 'Suscripción sin nombre';
+
+      // Crea el objeto que espera el componente (usando 'descripcion')
+      return { 
+        // Si la API no provee un ID único, usamos la descripción (si es única) o el índice
+        id: item.idSuscripcion || descripcionApi || index + 1, 
+        descripcion: descripcionApi, // <-- Aquí está el mapeo clave
+        precio: precioNum 
+      };
     });
-    console.log('Suscripciones cargadas (precio como número):', suscripciones.value);
+
+    console.log('Suscripciones cargadas (mapeadas) desde la API:', suscripciones.value);
+
   } catch (error) {
-    console.error('Error cargando suscripciones:', error);
-    suscripciones.value = [
-        { id: 1, descripcion: '1 Día a la semana', precio: 10000 },
-        { id: 2, descripcion: '2 Días a la semana', precio: 15000 },
-        { id: 3, descripcion: '3 Días a la semana', precio: 20000 },
-        { id: 4, descripcion: 'Día Libre', precio: 3000 }
-     ];
+    // 5. Manejar errores
+    console.error('Error cargando suscripciones desde la API:', error);
+    errorCarga.value = 'No se pudieron cargar las suscripciones.';
+    
+  } finally {
+    // 6. Finalizar la carga
+    cargando.value = false;
   }
 };
+
+
 
 const iniciarTransicionAFormulario = () => {
   datosFormulario.value = { descripcion: '', precio: '' };
@@ -195,13 +253,65 @@ const guardarSuscripcion = (datosRecibidos) => {
   setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
 };
 
-const eliminarSuscripcion = (id) => {
-    if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
-        console.log("Llamando a API para ELIMINAR suscripción con ID:", id);
-        suscripciones.value = suscripciones.value.filter(s => s.id !== id);
+// const eliminarSuscripcion = (id) => {
+//   if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
+//       console.log("Llamando a API para ELIMINAR suscripción con ID:", id);
+//       suscripciones.value = suscripciones.value.filter(s => s.id !== id);
+//       mensajeConfirmacion.value = 'Suscripción eliminada correctamente';
+//       setTimeout(() => {
+//         mensajeConfirmacion.value = ''
+//       }, 3000);
+//   }
+// };
+
+const eliminarSuscripcion = async (id) => {
+  alert(JSON.stringify(id, null, 2));
+  // 2a. Encontrar el objeto suscripción usando el ID
+  const suscripcionAEliminar = suscripciones.value.find(s => s.id === id);
+
+  if (!suscripcionAEliminar) {
+    console.error("No se encontró la suscripción a eliminar con ID:", id);
+    alert("Error: No se pudo encontrar la suscripción.");
+    return;
+  }
+
+  // 2b. Obtener el nombre que espera la API (que es la 'descripcion' en tu UI)
+  const nombreParaAPI = suscripcionAEliminar.descripcion;
+
+  if (confirm(`¿Estás seguro de que quieres eliminar la suscripción "${nombreParaAPI}"?`)) {
+    
+    // (Opcional: puedes activar un estado de carga específico para este ítem)
+
+    try {
+      console.log(`Llamando a API para ELIMINAR suscripción: ${nombreParaAPI}`);
+      
+      // 2c. Llamar a la API con el nombre/descripción
+      const exito = await eliminarSuscripcionAPI(nombreParaAPI);
+
+      // 2d. Si la API responde con éxito (true / 204)
+      if (exito) {
+        // Actualizar la UI (filtrar la lista local)
+        // suscripciones.value = suscripciones.value.filter(s => s.id !== id);
+        
+        // Mostrar mensaje de éxito
         mensajeConfirmacion.value = 'Suscripción eliminada correctamente';
-        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+        setTimeout(() => {
+          mensajeConfirmacion.value = '';
+        }, 3000);
+      } else {
+        console.warn("La API de eliminar no devolvió un estado de éxito esperado (ej: 204).");
+        alert("La suscripción no se pudo eliminar, respuesta inesperada del servidor.");
+      }
+
+    } catch (error) {
+      // 2e. Manejar errores si la API falla (ej: 404, 500)
+      console.error("Error al eliminar la suscripción:", error);
+      const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la suscripción.';
+      alert(`Error: ${errorMsg}`); // Muestra el error de la API
+    } finally {
+      // (Opcional: desactivar el estado de carga)
     }
+  }
 };
 
 onMounted(cargarSuscripciones);

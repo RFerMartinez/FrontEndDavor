@@ -2,7 +2,7 @@
   <div class="metodologia-card">
     <div class="metodologia-content">
       <div class="content-wrapper">
-        <h3>{{ metodo.nombre }}</h3>
+        <h3>{{ metodo.nombreTrabajo }}</h3>
         <button class="btn-info" @click="$emit('ver', metodo)">Más Info</button>
       </div>
     </div>

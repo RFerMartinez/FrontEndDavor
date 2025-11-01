@@ -19,7 +19,7 @@
     <transition name="modal-fade">
       <div v-if="modalVisible" class="modal-overlay" @click.self="cerrarModal">
         <div class="modal-content">
-          <h3>{{ modalData.nombre }}</h3>
+          <h3>{{ modalData.nombreTrabajo }}</h3>
           <p>{{ modalData.descripcion }}</p>
           <button @click="cerrarModal">Cerrar</button>
         </div>
@@ -48,18 +48,14 @@ import Footer from '../components/Inicio/Footer.vue'
 import FondoInicio from '@/components/Inicio/FondoInicio.vue'
 import Metodologia from '../components/Inicio/Metodologias.vue'
 import Precio from '../components/Inicio/Precio.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+
+import { obtenerTrabajos } from '@/api/services/trabajoService.js'
 
 // Metodologías
 const metodologias = ref([])
 const modalVisible = ref(false)
 const modalData = ref({})
-
-fetch('/data/metodologias.json')
-  .then(res => res.json())
-  .then(data => {
-    metodologias.value = data
-  })
 
 function abrirModal(metodo) {
   modalData.value = metodo
@@ -70,14 +66,16 @@ function cerrarModal() {
   modalVisible.value = false
 }
 
-// Precios
-const precios = ref([])
+onMounted(async () => {
+  try {
+    metodologias.value = await obtenerTrabajos();
+  } catch (error) {
+    console.error("Error al cargar metodologías desde la API:", error);
+    // Opcional: puedes poner datos de respaldo si falla la API
+    // metodologias.value = [{ nombre: "Error al cargar", descripcion: "Intente más tarde" }];
+  }
+});
 
-fetch('/data/precios.json')
-  .then(res => res.json())
-  .then(data => {
-    precios.value = data
-  })
 </script>
 
 <style scoped>
