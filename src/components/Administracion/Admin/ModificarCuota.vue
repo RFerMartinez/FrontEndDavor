@@ -102,8 +102,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-// Importa los listados (asegúrate que las rutas sean correctas)
+import { ref, computed } from 'vue';
 import ListadoSuscripciones from './ListadoSuscripciones.vue';
 import ListadoTrabajos from './ListadoTrabajos.vue';
 
@@ -116,7 +115,7 @@ const props = defineProps({
 
 const emit = defineEmits(['cancelar-modificacion', 'guardar-modificacion-cuota']);
 
-// Hacemos la copia profunda inmediatamente al crear el ref
+// Hacemos la copia profunda inmediatamente
 const cuotaEditada = ref(JSON.parse(JSON.stringify(props.cuotaOriginal)));
 const mostrarConfirmacion = ref(false);
 
@@ -136,31 +135,29 @@ const opcionesMeses = [
   { valor: 'December', nombre: 'Diciembre' }
 ];
 
+// --- CORREGIDO: Rango de años muy amplio para scroll ---
 const opcionesAnios = computed(() => {
-  const anioActual = new Date().getFullYear();
   const anios = [];
-  for (let i = anioActual - 2; i <= anioActual + 2; i++) {
+  // Muestra desde 2010 hasta 2050 (41 años), más reciente primero
+  for (let i = 2050; i >= 2010; i--) {
     anios.push(i);
   }
   return anios;
 });
+// --- FIN CORRECCIÓN ---
 
 
 // --- VALIDACIÓN ---
 const fechaVencimientoValida = computed(() => {
   if (!cuotaEditada.value?.fechaComienzo || !cuotaEditada.value?.vencimiento) {
-    return true; // No validar si falta alguna fecha
+    return true; 
   }
   return new Date(cuotaEditada.value.vencimiento) >= new Date(cuotaEditada.value.fechaComienzo);
 });
 
-// REEMPLAZA TU CÓDIGO CON ESTO:
-
 const formularioValido = computed(() => {
   if (!cuotaEditada.value) return false;
   
-  // Esta es la línea que define 'c'.
-  // Es una variable local para hacer el 'return' más limpio.
   const c = cuotaEditada.value;
   
   return c.monto > 0 &&
@@ -186,7 +183,6 @@ const intentarGuardar = () => {
 
 const confirmarGuardar = () => {
   mostrarConfirmacion.value = false;
-  // Emitir la cuota modificada
   emit('guardar-modificacion-cuota', cuotaEditada.value);
 };
 
@@ -268,7 +264,7 @@ const confirmarGuardar = () => {
   margin: 0.25rem 0 0 0;
 }
 
-/* Toggle Switch para 'Pagada' */
+/* --- ESTILOS RESTAURADOS PARA EL TOGGLE SWITCH --- */
 .form-group-toggle {
   display: flex;
   align-items: center;
@@ -327,6 +323,7 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(22px);
 }
+/* --- FIN DE ESTILOS RESTAURADOS --- */
 
 /* Botones */
 .botones-formulario {
@@ -336,6 +333,7 @@ input:checked + .slider:before {
   margin-top: 1rem;
   padding-top: 2rem;
   border-top: 1px solid #eee;
+  flex-wrap: wrap; /* Añadido para mejor responsive */
 }
 .btn-cancelar, .btn-guardar {
   padding: 0.8rem 1.5rem;
@@ -369,18 +367,46 @@ input:checked + .slider:before {
   cursor: not-allowed;
 }
 
-/* Modales (reusa los estilos que ya tienes, asegúrate que las clases coincidan) */
+/* Modales */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(0, 0, 0, 0.6);
   display: flex; justify-content: center; align-items: center;
   z-index: 1000;
 }
-
 .modal-fade-enter-active, .modal-fade-leave-active {
   transition: opacity 0.3s ease;
 }
 .modal-fade-enter-from, .modal-fade-leave-to {
   opacity: 0;
+}
+
+/* --- AÑADIDO: Media Queries para Responsive --- */
+@media (max-width: 480px) {
+  .formulario-cuota {
+    padding: 1rem;
+  }
+  .header-modificacion {
+    padding: 1.5rem;
+  }
+  .form-grid {
+    /* Forzar 1 columna en pantallas pequeñas */
+    grid-template-columns: 1fr;
+    gap: 1.5rem; /* Menos gap vertical */
+  }
+  .form-group-toggle {
+    /* Mejora la alineación del switch en móvil */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  .botones-formulario {
+    /* Apila los botones en móvil */
+    flex-direction: column;
+  }
+  .btn-cancelar, .btn-guardar {
+    width: 100%; /* Ocupan todo el ancho */
+    justify-content: center;
+  }
 }
 </style>

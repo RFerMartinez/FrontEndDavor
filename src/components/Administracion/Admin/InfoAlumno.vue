@@ -467,77 +467,76 @@ const guardarModificacionCuota = async (cuotaModificada) => {
 <style scoped>
 /* ESTILOS ORIGINALES COMPLETOS */
 .contenedor-info-alumno {
-  padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.85);
-  border-radius: 20px;
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  min-height: 80vh;
-  overflow-y: auto;
-  box-sizing: border-box;
-  position: relative;
+padding: 2rem;
+background-color: rgba(255, 255, 255, 0.85);
+border-radius: 20px;
+width: 100%;
+max-width: none;
+margin: 0;
+box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+min-height: 80vh;
+overflow-y: auto;
+box-sizing: border-box;
+position: relative;
 }
 
 .encabezado-info {
-  display: grid; /* <-- CAMBIADO A GRID */
-  grid-template-columns: 1fr auto 1fr; /* <-- Columnas: [Izquierda] [Centro (auto-ajustable)] [Derecha] */
-  align-items: center;
-  margin-bottom: 2rem;
-  flex-wrap: wrap; /* Mantenido por si acaso */
-  gap: 1rem;
+display: grid; 
+grid-template-columns: 1fr auto 1fr; 
+align-items: center;
+margin-bottom: 2rem;
+flex-wrap: wrap; 
+gap: 1rem;
 }
 .encabezado-info .btn-volver-global {
-  justify-self: start; 
+justify-self: start; 
 }
 
 .tarjeta-alumno {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+background: white;
+border-radius: 15px;
+box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+overflow: hidden;
 }
 .tarjeta-contenido {
-  padding: 2rem;
+padding: 2rem;
 }
 
 .separador-seccion {
-  height: 1px;
-  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
-  margin: 2rem 0;
+height: 1px;
+background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+margin: 2rem 0;
 }
 
 .seccion-info {
-  margin-bottom: 2.5rem;
-  padding: 1.5rem;
-  background: #fafafa;
-  border-radius: 10px;
-  border: 1px solid #f0f0f0;
+margin-bottom: 2.5rem;
+padding: 1.5rem;
+background: #fafafa;
+border-radius: 10px;
+border: 1px solid #f0f0f0;
 }
-/* Re-aplicamos estilo a h3 dentro de .seccion-info si DetallePersona no lo tiene */
 .seccion-info .titulo-seccion {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    font-size: 1.3rem;
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-    border-bottom: 2px solid #d32f2f;
-    padding-bottom: 0.5rem;
+display: flex;
+align-items: center;
+gap: 0.8rem;
+font-size: 1.3rem;
+color: #2c3e50;
+margin-bottom: 1.5rem;
+font-weight: 600;
+border-bottom: 2px solid #d32f2f;
+padding-bottom: 0.5rem;
 }
 .seccion-info .titulo-seccion i { color: #d32f2f; }
 
 
 .seccion-info:last-child {
-  margin-bottom: 0;
+margin-bottom: 0;
 }
 
 .sin-alumno {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #6c757d;
+text-align: center;
+padding: 4rem 2rem;
+color: #6c757d;
 }
 .sin-alumno i { margin-bottom: 1.5rem; color: #e9ecef; }
 .sin-alumno h3 { margin-bottom: 1rem; color: #495057; font-size: 1.5rem; }
@@ -550,208 +549,243 @@ const guardarModificacionCuota = async (cuotaModificada) => {
 .btn-suscripcion { background: #FF9800; color: white; }
 .btn-suscripcion:hover { background: #F57C00; transform: translateY(-2px); }
 .btn-estado-activo { 
-  background: #4CAF50; /* Verde */
-  color: white; 
+background: #4CAF50; /* Verde */
+color: white; 
 }
 .btn-estado-activo:hover { 
-  background: #388E3C; 
-  transform: translateY(-2px); 
+background: #388E3C; 
+transform: translateY(-2px); 
 }
 
-/* Botón de estado (rojo-naranja para desactivar) - Diferente a 'eliminar' */
 .btn-estado-inactivo { 
-  background: #FF7043; /* Naranja Intenso (Distinto del rojo F44336 de eliminar) */ 
-  color: white; 
+background: #FF7043; /* Naranja Intenso (Distinto del rojo F44336 de eliminar) */ 
+color: white; 
 }
 .btn-estado-inactivo:hover { 
-  background: #F4511E; /* Naranja más oscuro */ 
-  transform: translateY(-2px); 
+background: #F4511E; /* Naranja más oscuro */ 
+transform: translateY(-2px); 
 }
 .btn-eliminar { background: #F44336; color: white; }
 .btn-eliminar:hover { background: #D32F2F; transform: translateY(-2px); }
 
 /* ----- INICIO: Estilos para Modales (Confirmación y Éxito) ----- */
-            
-/* Estilo ADICIONAL para el header de advertencia (en modal de confirmación) */
 .modal-confirmacion {
-  border-top: 5px solid #E65100 !important;
+border-top: 5px solid #E65100 !important;
 }
 .modal-header-advertencia {
-  /* ELIMINAR O SOBRESCRIBIR: background: #FFF3E0; */ /* Fondo naranja muy claro */
-  /* ELIMINAR O SOBRESCRIBIR: color: #E65100; */ /* Naranja oscuro */
-  
-  /* Ajustes para un look más limpio y profesional */
-  flex-direction: column; /* Asegura que ícono y texto estén apilados */
-  align-items: center;    /* Centra el contenido */
-  padding-top: 1.5rem;    /* Reduce padding superior */
-  padding-bottom: 0.5rem; /* Reduce padding inferior */
-  border-bottom: none;    /* Elimina cualquier borde inferior heredado */
+flex-direction: column; 
+align-items: center; 
+padding-top: 1.5rem; 
+padding-bottom: 0.5rem; 
+border-bottom: none; 
 }
 
-/* Estilo para el ícono de advertencia */
 .modal-header-advertencia i {
-  color: #E65100; /* Naranja oscuro, manteniendo el color de advertencia */
-  font-size: 3.5rem; /* Aumenta tamaño del ícono */
-  margin-bottom: 0.8rem; /* Espacio debajo del ícono */
+color: #E65100; 
+font-size: 3.5rem; 
+margin-bottom: 0.8rem; 
 }
 
-/* Estilo para el título del modal de advertencia */
 .modal-header-advertencia h3 {
-  font-size: 1.6rem; /* Un poco más grande para el título */
-  font-weight: 600;
-  color: #333; /* Color de texto oscuro para mayor contraste */
-  margin: 0;
-  text-align: center;
+font-size: 1.6rem; 
+font-weight: 600;
+color: #333; 
+margin: 0;
+text-align: center;
 }
 
-/* --- Cuerpo del Modal de Confirmación --- */
-/* Asegura que el texto principal tenga un buen tamaño */
 .modal-body-exito p:not(.advertencia-modal) {
-  font-size: 1.05rem; /* Un poco más grande para el mensaje principal */
-  line-height: 1.5;
-  color: #444;
-  text-align: center; /* Centramos el texto para mejor estética */
+font-size: 1.05rem; 
+line-height: 1.5;
+color: #444;
+text-align: center; 
 }
 
-/* Estilo para el párrafo de advertencia DENTRO del modal */
 .advertencia-modal {
-  font-size: 0.95rem; /* Ligeramente más grande */
-  font-weight: 500;
-  color: #B71C1C; /* Rojo más oscuro para el texto de advertencia */
-  background-color: #FFEBEE; /* Fondo rojo claro */
-  padding: 1rem 1.2rem; /* Más padding para que respire */
-  border-radius: 10px; /* Bordes más suaves */
-  border: 1px solid #FFCDD2;
-  margin-top: 1.5rem; /* Más espacio arriba */
-  text-align: center; /* Centramos el texto */
-  max-width: 90%; /* Limita el ancho para que no ocupe todo */
-  margin-left: auto; /* Centra el bloque de advertencia */
-  margin-right: auto; /* Centra el bloque de advertencia */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Sutil sombra */
+font-size: 0.95rem; 
+font-weight: 500;
+color: #B71C1C; 
+background-color: #FFEBEE; 
+padding: 1rem 1.2rem; 
+border-radius: 10px; 
+border: 1px solid #FFCDD2;
+margin-top: 1.5rem; 
+text-align: center; 
+max-width: 90%; 
+margin-left: auto; 
+margin-right: auto; 
+box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
 }
 
-/* --- Pie de página del Modal (botones) --- */
 .modal-footer-exito {
-  /* Aseguramos la separación de los botones */
-  justify-content: center; /* Centra los botones */
-  gap: 1.2rem; /* Espacio entre los botones */
-  padding-top: 1.5rem; /* Más espacio arriba del footer */
-  padding-bottom: 1.5rem; /* Más espacio abajo del footer */
-  border-top: none; /* Quitamos la línea del borde superior */
-  background: none; /* Aseguramos que no haya fondo extra */
+justify-content: center; 
+gap: 1.2rem; 
+padding-top: 1.5rem; 
+padding-bottom: 1.5rem; 
+border-top: none; 
+background: none; 
 }
-
-
-/* Estilos para los DOS botones en el footer del modal de confirmación */
-/* Asumimos que .modal-footer-exito (global) ya tiene display:flex y gap */
 
 .btn-modal-cancelar, .btn-modal-confirmar {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  font-size: 1rem; /* Botones un poco más grandes */
-  padding: 0.8rem 1.8rem; /* Más padding para que se vean mejor */
-  border-radius: 30px; /* Botones más redondeados (estilo pildora) */
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out; /* Animación más suave */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra sutil para profundidad */
+font-family: 'Poppins', sans-serif;
+font-weight: 600;
+font-size: 1rem; 
+padding: 0.8rem 1.8rem; 
+border-radius: 30px; 
+border: none;
+cursor: pointer;
+transition: all 0.2s ease-in-out; 
+box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
 }
 
 .btn-modal-cancelar {
-  background: #EEEEEE; /* Gris más claro */
-  color: #555;
+background: #EEEEEE; 
+color: #555;
 }
 .btn-modal-cancelar:hover {
-  background: #D5D5D5;
-  transform: translateY(-1px); /* Efecto hover sutil */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+background: #D5D5D5;
+transform: translateY(-1px); 
+box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Botón de confirmar normal (para Activar) */
 .btn-confirmar-normal {
-  background-color: #4CAF50; /* Verde */
-  color: white;
+background-color: #4CAF50; 
+color: white;
 }
 .btn-confirmar-normal:hover {
-  background-color: #388E3C;
-  transform: translateY(-1px); /* Efecto hover sutil */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+background-color: #388E3C;
+transform: translateY(-1px); 
+box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Botón de confirmar peligro (para Desactivar) */
 .btn-confirmar-peligro {
-  background-color: #F44336; /* Rojo más intenso y estándar */
-  color: white;
+background-color: #F44336; 
+color: white;
 }
 .btn-confirmar-peligro:hover {
-  background-color: #D32F2F;
-  transform: translateY(-1px); /* Efecto hover sutil */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+background-color: #D32F2F;
+transform: translateY(-1px); 
+box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Ajustes responsivos para los botones si ya no tienes media queries en global para ellos */
 @media (max-width: 600px) {
-  .modal-footer-exito {
-    flex-direction: column; /* Apila los botones en pantallas pequeñas */
-    gap: 0.8rem; /* Menos espacio si están apilados */
-  }
-  .btn-modal-cancelar, .btn-modal-confirmar {
-    width: 100%; /* Ocupan todo el ancho */
-  }
+.modal-footer-exito {
+flex-direction: column; 
+gap: 0.8rem; 
+}
+.btn-modal-cancelar, .btn-modal-confirmar {
+width: 100%; 
+}
 }
 
 /* ----- FIN: Estilos para Modales ----- */
 
 @media (max-width: 1560px) 
 { 
-  .botones-accion { 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 1rem; } 
+.botones-accion { 
+grid-template-columns: repeat(2, 1fr); 
+gap: 1rem; } 
 }
+
+/* --- INICIO DE CAMBIOS RESPONSIVE --- */
 @media (max-width: 768px) 
 {
-  .contenedor-info-alumno { padding: 1.5rem; }
-  .encabezado-info {
-    display: flex; /* <-- Asegurar que sea flex */
-    flex-direction: column;
-    text-align: center;
-    align-items: stretch;
-    grid-template-columns: none; /* <-- Añadir esto para anular el grid */
-  }
-  .encabezado-info .btn-volver-global {
-    justify-content: center;
-    margin-bottom: 1rem;
-    justify-self: auto;
-  }
-  
-  .tarjeta-contenido { 
-    padding: 1.5rem; 
-  }
-  /* Los estilos responsive para .fila-tabla, .celda, etc. ahora deberían estar en DetallePersona.vue */
-  .separador-seccion { 
-    margin: 1.5rem 0; 
-  }
-  .seccion-info { 
-    padding: 1rem; 
-  }
-  .botones-accion { 
-    grid-template-columns: 1fr; 
-  }
-  .btn-accion { 
-    padding: 0.8rem 1rem; 
-    font-size: 0.9rem; 
-  }
-  .mensaje-confirmacion { 
-    top: 10px; 
-    right: 10px; 
-    left: 10px; 
-  }
+/* CORRECCIÓN: 
+  El padding principal (capa translúcida) se mantiene.
+*/
+.contenedor-info-alumno { 
+  padding: 1.5rem; 
+} 
+
+.encabezado-info {
+display: flex; 
+flex-direction: column;
+text-align: center;
+align-items: stretch;
+grid-template-columns: none; 
 }
+.encabezado-info .btn-volver-global {
+justify-content: center;
+margin-bottom: 1rem;
+justify-self: auto;
+}
+
+/* CORRECCIÓN: 
+  La tarjeta blanca SÍ mantiene su padding horizontal.
+*/
+.tarjeta-contenido { 
+padding: 1.5rem; 
+}
+
+.separador-seccion { 
+margin: 1.5rem 0; 
+}
+
+/* CORRECCIÓN: 
+  La sección de la tabla QUITA su padding horizontal
+  y su fondo para que la tabla se expanda.
+*/
+.seccion-info { 
+padding: 1rem 0; 
+border: none;
+background: none; 
+}
+
+/* CORRECCIÓN: 
+  Añadimos padding horizontal SÓLO al título de la sección,
+  para que coincida con el padding de .tarjeta-contenido
+*/
+.seccion-info .titulo-seccion {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.botones-accion { 
+grid-template-columns: 1fr; 
+}
+.btn-accion { 
+padding: 0.8rem 1rem; 
+font-size: 0.9rem; 
+}
+.mensaje-confirmacion { 
+top: 10px; 
+right: 10px; 
+left: 10px; 
+}
+}
+
 @media (max-width: 480px) {
-  .contenedor-info-alumno { padding: 1rem; }
-  .tarjeta-contenido { padding: 1rem; }
-  /* Los estilos responsive para .celda, .valor, etc. ahora deberían estar en DetallePersona.vue */
-  .separador-seccion { margin: 1rem 0; }
-  .seccion-info { padding: 0.8rem; }
+/* CORRECCIÓN: 
+  El padding principal se reduce, pero se mantiene.
+*/
+.contenedor-info-alumno { 
+  padding: 1rem; 
+} 
+
+/* CORRECCIÓN: 
+  La tarjeta blanca SÍ mantiene su padding horizontal.
+*/
+.tarjeta-contenido { 
+padding: 1rem; 
 }
+
+.separador-seccion { margin: 1rem 0; }
+
+/* CORRECCIÓN: 
+  La sección de la tabla QUITA su padding horizontal.
+*/
+.seccion-info { 
+padding: 0.8rem 0; 
+}
+
+/* CORRECCIÓN: 
+  Añadimos padding horizontal SÓLO al título de la sección,
+  para que coincida con el padding de .tarjeta-contenido
+*/
+.seccion-info .titulo-seccion {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+}
+/* --- FIN DE CAMBIOS RESPONSIVE --- */
 </style>

@@ -199,7 +199,12 @@ const manejarEliminarPersona = (persona) => {
 @media (max-width: 768px) {
   .contenedor-personas { padding: 1.5rem; }
   .filtros-busqueda { flex-direction: column; gap: 1rem; }
-  .busqueda-input-container { max-width: 100%; min-width: auto; }
+  .busqueda-input-container {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+    min-width: 300px;
+  }
   /* Estilos de paginación eliminados */
 }
 @media (max-width: 480px) {

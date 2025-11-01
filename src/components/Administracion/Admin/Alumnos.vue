@@ -470,7 +470,12 @@ const verAlumno = (alumno) => { emit('verAlumno', alumno); };
 @media (max-width: 768px) {
   .contenedor-alumnos { padding: 1.5rem; }
   .filtros-busqueda { flex-direction: column; gap: 1rem; }
-  .busqueda-input-container { max-width: 100%; min-width: auto; }
+  .busqueda-input-container {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+    min-width: 300px;
+  }
   .filtros-turno { width: 100%; justify-content: center; }
   .btn-turno { flex: 1; justify-content: center; }
   .controles-superiores { flex-direction: column; gap: 1rem; }
