@@ -86,8 +86,8 @@ import ListadoTrabajos from './ListadoTrabajos.vue';
 import ListadoNiveles from './ListadoNiveles.vue';
 
 const props = defineProps({
-  alumno: Object,
-  horarioAlumno: Array
+  alumno: Object,
+  horarioAlumno: Object // <-- CAMBIADO DE Array A Object
 });
 
 const emit = defineEmits(['guardar-cambios', 'cancelar']);
@@ -147,19 +147,18 @@ const formularioValido = computed(() => {
 
 
 const hayCambios = () => {
-  // Comparamos también si los horarios modificados son diferentes a los originales
-  // Usamos JSON.stringify para comparar arrays de objetos (simple pero efectivo aquí)
-  // Ordenamos para que el orden no afecte la comparación
-  const sortFn = (a, b) => a.dia.localeCompare(b.dia) || a.horario.localeCompare(b.horario);
-  const horariosModificadosSorted = JSON.stringify([...horariosModificados.value].sort(sortFn));
-  const horariosOriginalesSorted = JSON.stringify([...props.horarioAlumno].sort(sortFn));
+   // 1. CORREGIDO: El sort ahora es por 'nroGrupo'
+  const sortFn = (a, b) => a.dia.localeCompare(b.dia) || String(a.nroGrupo).localeCompare(String(b.nroGrupo));
+  
+  // 2. CORREGIDO: Accedemos al array '.horarios' dentro del objeto
+  //    Añadimos '|| []' como fallback por si 'horarios' es null o undefined
+  const horariosModificadosSorted = JSON.stringify([...(horariosModificados.value.horarios || [])].sort(sortFn));
+  const horariosOriginalesSorted = JSON.stringify([...(props.horarioAlumno.horarios || [])].sort(sortFn));
 
-  return datosModificados.value.suscripcion !== suscripcionOriginal.value ||
-         datosModificados.value.trabajoactual !== trabajoOriginal.value ||
-         datosModificados.value.nivel !== nivelOriginal.value ||
-         // Considera cambio si los horarios son diferentes solo si la suscripción NO cambió
-         // Si la suscripción SÍ cambió, el cambio principal es la suscripción, y los horarios deben revalidarse.
-         (!suscripcionCambiada.value && horariosModificadosSorted !== horariosOriginalesSorted);
+return datosModificados.value.suscripcion !== suscripcionOriginal.value ||
+        datosModificados.value.trabajoactual !== trabajoOriginal.value ||
+        datosModificados.value.nivel !== nivelOriginal.value ||
+        (!suscripcionCambiada.value && horariosModificadosSorted !== horariosOriginalesSorted);
 };
 
 
@@ -187,7 +186,7 @@ onMounted(() => {
   }
   if (props.horarioAlumno) {
       // Inicializar horariosModificados con los originales
-      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
+      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno || { horarios: [] }));
   }
   // Estado inicial es válido
   horariosConfirmadosDespuesDeCambio.value = true;
@@ -200,13 +199,13 @@ watch(() => datosModificados.value.suscripcion, (nuevaSuscripcion, viejaSuscripc
     console.log('Suscripción cambiada -> Reseteando horarios y requiriendo confirmación.');
     horariosConfirmadosDespuesDeCambio.value = false;
     // VACIAR los horarios para forzar nueva selección en TablaHorarios
-    horariosModificados.value = [];
+    horariosModificados.value = { horarios: [] };
   } else if (nuevaSuscripcion === suscripcionOriginal.value && viejaSuscripcion !== undefined) {
       // Si vuelve a la original, también requiere confirmar (podría haber tocado horarios antes)
       // y reseteamos a los horarios originales de la prop para empezar desde ahí.
       console.log('Suscripción volvió a la original -> Reseteando a horarios originales y requiriendo confirmación.')
       horariosConfirmadosDespuesDeCambio.value = false;
-      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno)); // Volver a los originales
+      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno || { horarios: [] })); // <-- CORREGIDO (con fallback) Volver a los originales
   }
 });
 // --- FIN WATCH ---
@@ -249,7 +248,7 @@ const confirmarGuardar = () => {
 const guardarCambios = () => { /* ... sin cambios ... */
   mostrarConfirmacion.value = false;
   try {
-    const horariosAEnviar = datosModificados.value.suscripcion === 'Día Libre' ? [] : horariosModificados.value;
+    const horariosAEnviar = datosModificados.value.suscripcion === 'Día Libre' ? [] : (horariosModificados.value.horarios || []);
     const datosEnviar = {
       alumno: {
         suscripcion: datosModificados.value.suscripcion,

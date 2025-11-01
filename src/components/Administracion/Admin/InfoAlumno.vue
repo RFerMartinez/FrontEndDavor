@@ -344,13 +344,15 @@ const manejarGuardarDatos = async (datosActualizados) => {
 
 
 const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
-  alumno.value = { ...alumno.value, ...datosActualizados.alumno };
-  if (datosActualizados.horarios) {
+    alumno.value = { ...alumno.value, ...datosActualizados.alumno };
+    if (datosActualizados.horarios) {
     horariosAlumno.value = datosActualizados.horarios;
   }
   mostrandoModificacion.value = null;
-  mensajeConfirmacion.value = 'La suscripción, trabajo y nivel se actualizaron correctamente';
-  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+
+  // Corrección: Usa el nuevo modal en lugar del banner
+   mensajeModalExito.value = 'La suscripción, trabajo y nivel se actualizaron correctamente';
+  mostrarModalExito.value = true;
 }
 </script>
 
