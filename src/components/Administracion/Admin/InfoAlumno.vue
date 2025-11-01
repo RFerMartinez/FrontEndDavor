@@ -46,7 +46,22 @@
             <i class="fas fa-history"></i>
             Historial de Cuotas
           </h3>
-          <TablaCuota :modo="'infoAlumno'" :cuotas="cuotas" :cargando="loading" />
+          <template v-if="!mostrandoModificadorCuota">
+            <TablaCuota 
+              :modo="'infoAlumno'" 
+              :cuotas="cuotas" 
+              :cargando="loading"
+              @solicitud-modificar-cuota="manejarSolicitudModificar"
+              @solicitud-eliminar-cuota="manejarSolicitudEliminar"
+            />
+          </template>
+          <template v-else>
+            <ModificarCuota
+              :cuota-original="cuotaParaModificar"
+              @cancelar-modificacion="cancelarModificacionCuota"
+              @guardar-modificacion-cuota="guardarModificacionCuota"
+            />
+          </template>
         </div>
 
         <div class="seccion-botones">
@@ -148,7 +163,13 @@ import ModificarDatosAlumno from './ModificarDatosAlumno.vue'
 import ModificarSusTrabAlumno from './ModificarSusTrabAlumno.vue'
 import DetallePersona from './DetallePersona.vue'; // <-- Importado
 import Titulo from '../Titulo.vue';
+import ModificarCuota from './ModificarCuota.vue'; // <-- AÑADE ESTA LÍNEA (ajusta la ruta si es necesario)
 
+// ... (debajo de 'const cuotas = ref([])')
+const cuotaParaModificar = ref(null); // <-- AÑADE ESTA LÍNEA
+
+// ... (debajo de 'const alumnoID = computed(...)')
+const mostrandoModificadorCuota = computed(() => cuotaParaModificar.value !== null); // <-- AÑADE ESTA LÍNEA
 const props = defineProps({
   alumnoSeleccionado: Object
 })
@@ -354,6 +375,93 @@ const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
    mensajeModalExito.value = 'La suscripción, trabajo y nivel se actualizaron correctamente';
   mostrarModalExito.value = true;
 }
+
+
+// ----- INICIO: Manejo de Modificación/Eliminación de Cuotas -----
+
+/**
+ * (Handler para "Eliminar")
+ * Se activa cuando FilaCuota -> TablaCuota emiten 'solicitud-eliminar-cuota'.
+ */
+const manejarSolicitudEliminar = (cuota) => {
+  console.log('Solicitud para ELIMINAR cuota:', cuota.idCuota);
+  
+  // TODO: Implementar un modal de confirmación aquí
+  
+  if (confirm(`¿Estás seguro que deseas eliminar la cuota #${cuota.idCuota} del mes ${cuota.mes}?`)) {
+    // ---------------------------------------------------
+    // TODO: AQUÍ IRÍA LA LLAMADA A LA API PARA ELIMINAR
+    //
+    // Ejemplo:
+    // try {
+    //   await api.eliminarCuota(cuota.idCuota);
+    //   mostrarModalExito('Cuota eliminada correctamente');
+    //   await cargarDatosCompletosAlumno(); // Recargar cuotas
+    // } catch (error) {
+    //   console.error(error);
+    //   alert('Error al eliminar la cuota');
+    // }
+    // ---------------------------------------------------
+    
+    // Simulación de éxito:
+    alert(`Simulación: Eliminar cuota ID ${cuota.idCuota}`);
+  }
+};
+
+/**
+ * (Handler para "Modificar")
+ * Se activa cuando FilaCuota -> TablaCuota emiten 'solicitud-modificar-cuota'.
+ * Oculta la tabla y muestra el formulario de edición.
+ */
+const manejarSolicitudModificar = (cuota) => {
+  console.log('Solicitud para MODIFICAR cuota InfoAlumno:', cuota);
+  cuotaParaModificar.value = cuota;
+};
+
+/**
+ * Se activa cuando ModificarCuota emite 'cancelar-modificacion'.
+ * Oculta el formulario y muestra la tabla.
+ */
+const cancelarModificacionCuota = () => {
+  cuotaParaModificar.value = null;
+};
+
+/**
+ * (Handler para "Guardar")
+ * Se activa cuando ModificarCuota emite 'guardar-modificacion-cuota'.
+ */
+const guardarModificacionCuota = async (cuotaModificada) => {
+  console.log('Guardando cuota modificada:', cuotaModificada);
+  
+  // ---------------------------------------------------
+  // TODO: AQUÍ VA LA ESTRUCTURA MODIFICADA Y LA LLAMADA API
+  //
+  // 'cuotaModificada' ES EL PAYLOAD QUE NECESITAS ENVIAR A LA API
+  //
+  // Ejemplo:
+  // try {
+  //   await api.actualizarCuota(cuotaModificada.idCuota, cuotaModificada);
+  //   
+  //   // Éxito:
+  //   cuotaParaModificar.value = null; // Cierra el formulario
+  //   await cargarDatosCompletosAlumno(); // Recarga los datos
+  //   mostrarModalExito('Cuota actualizada con éxito');
+  //
+  // } catch (error) {
+  //   console.error('Error al guardar cuota:', error);
+  //   alert('Error al guardar la cuota.');
+  // }
+  // ---------------------------------------------------
+  
+  // Simulación de éxito:
+  alert('Simulación: Cuota guardada');
+  cuotaParaModificar.value = null;
+  await cargarDatosCompletosAlumno(); // Recargar
+};
+
+// ----- FIN: Manejo de Cuotas -----
+
+
 </script>
 
 <style scoped>

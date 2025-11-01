@@ -30,6 +30,8 @@
               :cuota="cuota"
               :is-mobile="isMobile"
               :modo="modo"
+              @modificar="onModificarCuota"
+              @eliminar="onEliminarCuota"
             />
           </tbody>
         </table>
@@ -41,6 +43,8 @@
             :cuota="cuota"
             :is-mobile="isMobile"
             :modo="modo"
+            @modificar="onModificarCuota"
+            @eliminar="onEliminarCuota"
           />
         </div>
       </template>
@@ -86,7 +90,16 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import FilaCuota from './FilaCuota.vue';
+const emit = defineEmits(['solicitud-modificar-cuota', 'solicitud-eliminar-cuota']);
 
+const onModificarCuota = (cuota) => {
+  console.log('Modificar cuota TablaCuota:', cuota);
+  emit('solicitud-modificar-cuota', cuota);
+}
+const onEliminarCuota = (cuota) => {
+  console.log('Eliminar cuota TablaCuota:', cuota);
+  emit('solicitud-eliminar-cuota', cuota);
+}
 const props = defineProps({
   cuotas: {
       type: Array,
