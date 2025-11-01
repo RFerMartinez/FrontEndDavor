@@ -171,269 +171,269 @@ onUnmounted(() => {
 
 <style scoped>
 .contenedor-reclamos {
-  padding: 2rem;
-  background-color: rgba(255, 255, 255, 0.85);
-  border-radius: 20px;
-  width: 100%;
-  max-width: 1100px;
-  margin: auto;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-  min-height: 80vh;
-  overflow-y: auto;
-  box-sizing: border-box;
+padding: 2rem;
+background-color: rgba(255, 255, 255, 0.85);
+border-radius: 20px;
+width: 100%;
+/*max-width: 1100px;  <-- ELIMINADO */
+/*margin: auto;         <-- ELIMINADO */
+box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+min-height: 70vh; /* <-- AÑADIDO (para que no sea tan corto) */
+overflow-y: auto;
+box-sizing: border-box;
 }
 
 
 .controles-superiores {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 1.5rem;
+gap: 1rem;
+flex-wrap: wrap;
 }
 
 .btn-nuevo {
-  background: linear-gradient(135deg, #42b983 0%, #3aa876 100%);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
-  cursor: pointer;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(66, 185, 131, 0.3);
+background: linear-gradient(135deg, #42b983 0%, #3aa876 100%);
+color: white;
+border: none;
+padding: 0.8rem 1.5rem;
+border-radius: 25px;
+cursor: pointer;
+font-family: 'Poppins', sans-serif;
+font-weight: 500;
+display: flex;
+align-items: center;
+gap: 0.5rem;
+transition: all 0.3s ease;
+box-shadow: 0 4px 12px rgba(66, 185, 131, 0.3);
 }
 
 .btn-nuevo:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(66, 185, 131, 0.4);
+transform: translateY(-2px);
+box-shadow: 0 6px 16px rgba(66, 185, 131, 0.4);
 }
 
 .contador-reclamos {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: rgba(248, 249, 250, 0.8);
-  border-radius: 12px;
-  padding: 0.6rem 1rem;
-  border: 1px solid #e9ecef;
+display: flex;
+flex-direction: column;
+align-items: center;
+background: rgba(248, 249, 250, 0.8);
+border-radius: 12px;
+padding: 0.6rem 1rem;
+border: 1px solid #e9ecef;
 }
 
 .contador-reclamos .numero {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #2c3e50;
-  font-family: 'Poppins', sans-serif;
+font-size: 1.2rem;
+font-weight: 600;
+color: #2c3e50;
+font-family: 'Poppins', sans-serif;
 }
 
 .contador-reclamos .texto {
-  font-size: 0.7rem;
-  color: #6c757d;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+font-size: 0.7rem;
+color: #6c757d;
+font-weight: 500;
+text-transform: uppercase;
+letter-spacing: 0.3px;
 }
 
 .componente-separado {
-  margin-bottom: 1.5rem;
+margin-bottom: 1.5rem;
 }
 
 .con-espacio-superior {
-  margin-top: 1rem;
+margin-top: 1rem;
 }
 
 /* Paginación inferior */
 .paginacion-inferior {
-  margin-top: 2rem;
-  padding: 1.2rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 15px;
-  border: 1px solid #dee2e6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+margin-top: 2rem;
+padding: 1.2rem;
+background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+border-radius: 15px;
+border: 1px solid #dee2e6;
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 .paginacion-controles {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
+display: flex;
+align-items: center;
+gap: 0.8rem;
 }
 
 .btn-paginacion {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #e91e63;
-  background: white;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  color: #e91e63;
-  font-size: 0.9rem;
+width: 40px;
+height: 40px;
+border: 2px solid #e91e63;
+background: white;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+color: #e91e63;
+font-size: 0.9rem;
 }
 
 .btn-paginacion:hover:not(:disabled) {
-  background: #e91e63;
-  color: white;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+background: #e91e63;
+color: white;
+transform: scale(1.05);
+box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
 }
 
 .btn-paginacion:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  border-color: #ccc;
-  color: #ccc;
+opacity: 0.4;
+cursor: not-allowed;
+border-color: #ccc;
+color: #ccc;
 }
 
 .numeros-pagina {
-  display: flex;
-  gap: 0.4rem;
-  align-items: center;
+display: flex;
+gap: 0.4rem;
+align-items: center;
 }
 
 .numero-pagina {
-  width: 35px;
-  height: 35px;
-  border: 2px solid #dee2e6;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 500;
-  color: #6c757d;
-  font-size: 0.85rem;
+width: 35px;
+height: 35px;
+border: 2px solid #dee2e6;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+transition: all 0.3s ease;
+font-family: 'Poppins', sans-serif;
+font-weight: 500;
+color: #6c757d;
+font-size: 0.85rem;
 }
 
 .numero-pagina:hover {
-  border-color: #e91e63;
-  color: #e91e63;
-  transform: scale(1.05);
+border-color: #e91e63;
+color: #e91e63;
+transform: scale(1.05);
 }
 
 .numero-pagina.activa {
-  background: #e91e63;
-  border-color: #e91e63;
-  color: white;
-  transform: scale(1.1);
+background: #e91e63;
+border-color: #e91e63;
+color: white;
+transform: scale(1.1);
 }
 
 /* Ajustes responsivos */
 @media (max-width: 768px) {
-  .contenedor-reclamos {
-    padding: 1.5rem;
-  }
-  
-  .titulo {
-    font-size: 1.8rem;
-    margin-bottom: 1.2rem;
-  }
-  
-  .controles-superiores {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .btn-nuevo {
-    width: 100%;
-    justify-content: center;
-    padding: 0.7rem 1.2rem;
-  }
-  
-  .contador-reclamos {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.8rem;
-  }
-  
-  .contador-reclamos .numero {
-    font-size: 1.1rem;
-  }
-  
-  .contador-reclamos .texto {
-    font-size: 0.65rem;
-  }
-  
-  .paginacion-inferior {
-    margin-top: 1.5rem;
-    padding: 1rem;
-  }
-  
-  .btn-paginacion {
-    width: 35px;
-    height: 35px;
-    font-size: 0.8rem;
-  }
-  
-  .numero-pagina {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-  }
+.contenedor-reclamos {
+padding: 1.5rem;
+}
+
+.titulo {
+font-size: 1.8rem;
+margin-bottom: 1.2rem;
+}
+
+.controles-superiores {
+flex-direction: column;
+gap: 1rem;
+}
+
+.btn-nuevo {
+width: 100%;
+justify-content: center;
+padding: 0.7rem 1.2rem;
+}
+
+.contador-reclamos {
+width: 100%;
+flex-direction: row;
+justify-content: center;
+gap: 0.5rem;
+padding: 0.5rem 0.8rem;
+}
+
+.contador-reclamos .numero {
+font-size: 1.1rem;
+}
+
+.contador-reclamos .texto {
+font-size: 0.65rem;
+}
+
+.paginacion-inferior {
+margin-top: 1.5rem;
+padding: 1rem;
+}
+
+.btn-paginacion {
+width: 35px;
+height: 35px;
+font-size: 0.8rem;
+}
+
+.numero-pagina {
+width: 30px;
+height: 30px;
+font-size: 0.8rem;
+}
 }
 
 @media (max-width: 480px) {
-  .contenedor-reclamos {
-    padding: 1rem;
-  }
-  
-  .titulo {
-    font-size: 1.6rem;
-  }
-  
-  .btn-nuevo {
-    padding: 0.6rem 1rem;
-    font-size: 0.9rem;
-  }
-  
-  .contador-reclamos {
-    padding: 0.4rem 0.6rem;
-  }
-  
-  .contador-reclamos .numero {
-    font-size: 1rem;
-  }
-  
-  .contador-reclamos .texto {
-    font-size: 0.6rem;
-  }
-  
-  .paginacion-inferior {
-    margin-top: 1.2rem;
-    padding: 0.8rem;
-  }
-  
-  .paginacion-controles {
-    gap: 0.6rem;
-  }
-  
-  .btn-paginacion {
-    width: 32px;
-    height: 32px;
-    font-size: 0.75rem;
-  }
-  
-  .numero-pagina {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-  
-  .numeros-pagina {
-    gap: 0.3rem;
-  }
+.contenedor-reclamos {
+padding: 1rem;
+}
+
+.titulo {
+font-size: 1.6rem;
+}
+
+.btn-nuevo {
+padding: 0.6rem 1rem;
+font-size: 0.9rem;
+}
+
+.contador-reclamos {
+padding: 0.4rem 0.6rem;
+}
+
+.contador-reclamos .numero {
+font-size: 1rem;
+}
+
+.contador-reclamos .texto {
+font-size: 0.6rem;
+}
+
+.paginacion-inferior {
+margin-top: 1.2rem;
+padding: 0.8rem;
+}
+
+.paginacion-controles {
+gap: 0.6rem;
+}
+
+.btn-paginacion {
+width: 32px;
+height: 32px;
+font-size: 0.75rem;
+}
+
+.numero-pagina {
+width: 28px;
+height: 28px;
+font-size: 0.75rem;
+}
+
+.numeros-pagina {
+gap: 0.3rem;
+}
 }
 </style>

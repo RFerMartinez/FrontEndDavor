@@ -498,22 +498,33 @@ border-radius: 15px;
 box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 overflow: hidden;
 }
+
+/* --- CORRECCIÓN --- */
+/* Quitamos el padding de la tarjeta principal */
 .tarjeta-contenido {
-padding: 2rem;
+/* padding: 2rem; */ /* <- Eliminado */
+padding: 0; /* <- Añadido */
 }
 
 .separador-seccion {
 height: 1px;
 background: linear-gradient(to right, transparent, #e0e0e0, transparent);
-margin: 2rem 0;
+/* Añadimos margen horizontal para que no toque los bordes */
+margin: 2rem 2rem; 
 }
 
+/* --- CORRECCIÓN --- */
+/* Añadimos padding a las secciones internas */
 .seccion-info {
 margin-bottom: 2.5rem;
-padding: 1.5rem;
+padding: 1.5rem 2rem; /* Añadido padding horizontal */
 background: #fafafa;
 border-radius: 10px;
 border: 1px solid #f0f0f0;
+/* Las tablas ahora están dentro de la sección blanca, 
+   así que ajustamos el margen para que no se peguen */
+margin-left: 2rem;
+margin-right: 2rem;
 }
 .seccion-info .titulo-seccion {
 display: flex;
@@ -541,7 +552,14 @@ color: #6c757d;
 .sin-alumno i { margin-bottom: 1.5rem; color: #e9ecef; }
 .sin-alumno h3 { margin-bottom: 1rem; color: #495057; font-size: 1.5rem; }
 .sin-alumno p { margin-bottom: 2rem; font-size: 1rem; }
-.seccion-botones { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e0e0e0; }
+
+/* --- CORRECCIÓN --- */
+/* Añadimos padding a la sección de botones */
+.seccion-botones { 
+margin-top: 3rem; 
+padding: 2rem; /* Añadido padding */
+border-top: 2px solid #e0e0e0; 
+}
 .botones-accion { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
 .btn-accion { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 1.5rem; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
 .btn-modificar { background: #2196F3; color: white; }
@@ -690,11 +708,8 @@ gap: 1rem; }
 /* --- INICIO DE CAMBIOS RESPONSIVE --- */
 @media (max-width: 768px) 
 {
-/* CORRECCIÓN: 
-  El padding principal (capa translúcida) se mantiene.
-*/
 .contenedor-info-alumno { 
-  padding: 1.5rem; 
+padding: 1.5rem; 
 } 
 
 .encabezado-info {
@@ -729,6 +744,9 @@ margin: 1.5rem 0;
 padding: 1rem 0; 
 border: none;
 background: none; 
+/* CORRECCIÓN: Quitamos márgenes laterales */
+margin-left: 0;
+margin-right: 0;
 }
 
 /* CORRECCIÓN: 
@@ -736,8 +754,15 @@ background: none;
   para que coincida con el padding de .tarjeta-contenido
 */
 .seccion-info .titulo-seccion {
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+padding-left: 1.5rem;
+padding-right: 1.5rem;
+}
+
+/* CORRECCIÓN: 
+  Añadimos padding a la sección de botones en móvil
+*/
+.seccion-botones {
+  padding: 2rem 1.5rem 0 1.5rem;
 }
 
 .botones-accion { 
@@ -755,36 +780,30 @@ left: 10px;
 }
 
 @media (max-width: 480px) {
-/* CORRECCIÓN: 
-  El padding principal se reduce, pero se mantiene.
-*/
 .contenedor-info-alumno { 
-  padding: 1rem; 
+padding: 1rem; 
 } 
 
-/* CORRECCIÓN: 
-  La tarjeta blanca SÍ mantiene su padding horizontal.
-*/
 .tarjeta-contenido { 
 padding: 1rem; 
 }
 
 .separador-seccion { margin: 1rem 0; }
 
-/* CORRECCIÓN: 
-  La sección de la tabla QUITA su padding horizontal.
-*/
 .seccion-info { 
 padding: 0.8rem 0; 
 }
 
-/* CORRECCIÓN: 
-  Añadimos padding horizontal SÓLO al título de la sección,
-  para que coincida con el padding de .tarjeta-contenido
-*/
 .seccion-info .titulo-seccion {
-  padding-left: 1rem;
-  padding-right: 1rem;
+padding-left: 1rem;
+padding-right: 1rem;
+}
+
+/* CORRECCIÓN: 
+  Añadimos padding a la sección de botones en móvil
+*/
+.seccion-botones {
+  padding: 2rem 1rem 0 1rem;
 }
 }
 /* --- FIN DE CAMBIOS RESPONSIVE --- */

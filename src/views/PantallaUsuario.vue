@@ -3,13 +3,34 @@
     <div class="dashboard">
       <Sidebar
         v-if="!isMobile"
-        :nombre="usuario.nombre"
+        v-model:isCollapsed="isSidebarCollapsed" :nombre="usuario.nombre"
         :apellido="usuario.apellido"
         @logout="pedirConfirmacionLogout"
       >
-        <button class="menu-btn" :class="{ activo: vistaActiva === 'informacion' }" @click="vistaActiva = 'informacion'"> Información Personal </button>
-        <button class="menu-btn" :class="{ activo: vistaActiva === 'cuotas' }" @click="vistaActiva = 'cuotas'"> Cuotas </button>
-        <button class="menu-btn" :class="{ activo: vistaActiva === 'reclamos' }" @click="vistaActiva = 'reclamos'"> Reclamos </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'informacion' }" @click="vistaActiva = 'informacion'"> 
+          <span class="texto-btn">
+            <i class="fas fa-user icon"></i>
+            Información Personal
+          </span>
+        </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'horarios' }" @click="vistaActiva = 'horarios'">
+          <span class="texto-btn">
+            <i class="fas fa-calendar-alt icon"></i>
+            Mis Horarios
+          </span>
+        </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'cuotas' }" @click="vistaActiva = 'cuotas'">
+          <span class="texto-btn">
+            <i class="fas fa-address-book icon"></i>
+            Cuotas
+          </span>
+        </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'reclamos' }" @click="vistaActiva = 'reclamos'">
+          <span class="texto-btn">
+            <i class="fas fa-exclamation-circle icon"></i>
+            Reclamos
+          </span>
+        </button>
       </Sidebar>
 
       <NavbarMobile
@@ -18,12 +39,27 @@
         :apellido="usuario.apellido"
         @logout="pedirConfirmacionLogout"
       >
-        <button class="menu-btn" :class="{ activo: vistaActiva === 'informacion' }" @click="cambiarVista('informacion')"> Información Personal </button>
-        <button class="menu-btn" :class="{ activo: vistaActiva === 'cuotas' }" @click="cambiarVista('cuotas')"> Cuotas </button>
-        <button class="menu-btn" :class="{ activo: vistaActiva === 'reclamos' }" @click="cambiarVista('reclamos')"> Reclamos </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'informacion' }" @click="cambiarVista('informacion')">
+            <i class="fas fa-user icon"></i>
+            Información Personal 
+          </button>
+          <button class="menu-btn" :class="{ activo: vistaActiva === 'horarios' }" @click="vistaActiva = 'horarios'">
+          <span class="texto-btn">
+            <i class="fas fa-calendar-alt icon"></i>
+            Mis Horarios
+          </span>
+        </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'cuotas' }" @click="cambiarVista('cuotas')">
+           <i class="fas fa-address-book icon"></i>
+           Cuotas
+        </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'reclamos' }" @click="cambiarVista('reclamos')">
+          <i class="fas fa-exclamation-circle icon"></i>
+          Reclamos
+        </button>
       </NavbarMobile>
 
-      <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
+      <div class="contenido" :class="{ 'contenido-mobile': isMobile, 'sidebar-collapsed': isSidebarCollapsed && !isMobile }">
         <Transition name="fade" mode="out-in">
           <component :is="vistaComponente" :key="vistaActiva" />
         </Transition>
@@ -56,22 +92,22 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { logout } from '@/api/services/authService'; // Asegúrate que la ruta sea correcta
+import { logout } from '@/api/services/authService'; 
 
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import Background from '@/components/Administracion/Background.vue'; // Ajusta rutas si es necesario
+import Background from '@/components/Administracion/Background.vue'; 
 import Sidebar from '@/components/Administracion/Sidebar.vue';
 import NavbarMobile from '@/components/Administracion/NavBarMobile.vue';
 import InformacionPersonal from '@/components/Administracion/Usuario/InformacionPersonal.vue';
 import Cuotas from '@/components/Administracion/Usuario/Cuotas.vue';
 import Reclamos from '@/components/Administracion/Usuario/Reclamos.vue';
-// Importa getUser si necesitas cargar datos reales del usuario aquí
+import Horarios from '@/components/Administracion/Usuario/MisHorarios.vue';
 import { getUser } from '@/api/storage/userStorage';
 
 
 const router = useRouter();
 
-// --- NUEVO: Estado y funciones del modal ---
+// --- Estado del modal de Logout ---
 const mostrarConfirmacionLogout = ref(false);
 
 const pedirConfirmacionLogout = () => {
@@ -80,20 +116,20 @@ const pedirConfirmacionLogout = () => {
 
 const confirmarLogoutModal = () => {
   mostrarConfirmacionLogout.value = false;
-  logout(); // Llama a la función de logout que limpia el localStorage
-  router.push('/'); // Redirige al login
+  logout(); 
+  router.push('/'); 
 };
 
 const cancelarLogoutModal = () => {
   mostrarConfirmacionLogout.value = false;
 };
-// --- FIN NUEVO ---
+// --- Fin Modal Logout ---
 
-// La función cerrarSesion original ya no es necesaria como handler directo
-// const cerrarSesion = () => { ... } // <- Se elimina o renombra si se usaba en otro lado
+// --- AÑADIDO: Estado de la Sidebar ---
+const isSidebarCollapsed = ref(false);
 
 // Datos del usuario (mejor cargarlos si es posible)
-const usuario = ref({ nombre: 'Usuario', apellido: '' }); // Valores por defecto
+const usuario = ref({ nombre: 'Usuario', apellido: '' }); 
 
 onMounted(() => {
   const user = getUser();
@@ -103,13 +139,12 @@ onMounted(() => {
   }
   checkIsMobile();
   window.addEventListener('resize', checkIsMobile);
-   // NUEVO: Escuchar tecla Escape para cerrar modal
-   window.addEventListener('keydown', handleEscapeKey);
+  window.addEventListener('keydown', handleEscapeKey);
 });
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkIsMobile);
-  window.removeEventListener('keydown', handleEscapeKey); // Limpiar listener
+  window.removeEventListener('keydown', handleEscapeKey); 
 });
 
 // Función para cerrar modal con Escape
@@ -130,6 +165,7 @@ const vistaComponente = computed(() => {
     case 'informacion': return InformacionPersonal;
     case 'cuotas': return Cuotas;
     case 'reclamos': return Reclamos;
+    case 'horarios': return Horarios;
     default: return InformacionPersonal;
   }
 });
@@ -137,19 +173,64 @@ const vistaComponente = computed(() => {
 </script>
 
 <style scoped>
-/* Estilos existentes de PantallaUsuario (sin cambios) */
-.dashboard { display: flex; min-height: 100vh; width: 100%; }
-.contenido { margin-left: 280px; /* Ajustado para coincidir con ancho de Sidebar */ padding: 2rem; flex: 1; overflow-y: auto; min-height: 100vh; width: calc(100% - 280px); display: flex; flex-direction: column; }
-.contenido-mobile { margin-left: 0; padding-top: 5rem; width: 100%; }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-@media (min-width: 1200px) { .contenido { padding: 2rem 3rem; } }
-@media (max-width: 768px) { .contenido { margin-left: 0; /* Asegurar que no haya margen en móvil */ padding: 1rem; width: 100%; } .contenido-mobile { padding: 1rem; padding-top: 5rem; /* Ajusta según altura de tu NavbarMobile */ } }
+/* Estilos existentes de PantallaUsuario */
+.dashboard { 
+  display: flex; 
+  min-height: 100vh; 
+  width: 100%; 
+}
+
+/* CORREGIDO: Ancho de 250px y transición */
+.contenido { 
+  margin-left: 250px; 
+  padding: 2rem; 
+  flex: 1; 
+  overflow-y: auto; 
+  min-height: 100vh; 
+  width: calc(100% - 250px); 
+  display: flex; 
+  flex-direction: column;
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
+
+/* AÑADIDO: Estilo para contenido colapsado */
+.contenido.sidebar-collapsed {
+  margin-left: 70px; /* Ancho colapsado de Sidebar.vue */
+  width: calc(100% - 70px);
+}
+
+.contenido-mobile { 
+  margin-left: 0; 
+  padding-top: 5rem; 
+  width: 100%; 
+}
+.fade-enter-active, .fade-leave-active { 
+  transition: opacity 0.4s ease; 
+}
+.fade-enter-from, .fade-leave-to { 
+  opacity: 0; 
+}
+@media (min-width: 1200px) { 
+  .contenido { 
+    padding: 2rem 3rem; 
+  } 
+}
+@media (max-width: 768px) { 
+  .contenido { 
+    margin-left: 0; 
+    padding: 1rem; 
+    width: 100%; 
+  } 
+  .contenido-mobile { 
+    padding: 1rem; 
+    padding-top: 5rem; 
+  } 
+}
 
 
-/* V V V NUEVOS ESTILOS PARA MODAL (Copiados y adaptados de Sidebar) V V V */
+/* Estilos del Modal (Sin cambios) */
 .modal-overlay {
-  position: fixed; /* Fixed para cubrir toda la pantalla */
+  position: fixed; 
   top: 0;
   left: 0;
   right: 0;
@@ -158,7 +239,7 @@ const vistaComponente = computed(() => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1050; /* Muy alto para estar sobre todo */
+  z-index: 1050; 
   backdrop-filter: blur(5px);
 }
 
@@ -174,23 +255,75 @@ const vistaComponente = computed(() => {
   flex-direction: column;
   text-align: center;
 }
-.modal-logout .modal-header i { color: #f44336; }
-.modal-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
-.modal-header i { font-size: 2rem; }
-.modal-header h3 { margin: 0; color: #2c3e50; font-size: 1.4rem; }
-.modal-body { margin-bottom: 2rem; }
-.modal-body p { margin: 0; font-size: 1.1rem; color: #495057; }
-.modal-footer { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-.btn-modal { padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1rem; }
-.btn-cancelar-modal { background: #6c757d; color: white; order: 2; }
-.btn-cancelar-modal:hover { background: #5a6268; }
-.btn-confirmar-logout-modal { background: #f44336; color: white; order: 1; }
-.btn-confirmar-logout-modal:hover { background: #d32f2f; }
-@keyframes modalAppear { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-@media (max-width: 768px) {
-  .modal-confirmacion { padding: 1.5rem; margin: 1rem; }
-  .modal-footer { flex-direction: column-reverse; }
+.modal-logout .modal-header i { 
+  color: #f44336; 
 }
-/* ^ ^ ^ FIN NUEVOS ESTILOS ^ ^ ^ */
-
+.modal-header { 
+  display: flex; 
+  align-items: center; 
+  gap: 1rem; 
+  margin-bottom: 1rem; 
+  justify-content: center; 
+}
+.modal-header i { 
+  font-size: 2rem; 
+}
+.modal-header h3 { 
+  margin: 0; 
+  color: #2c3e50; 
+  font-size: 1.4rem; 
+}
+.modal-body { 
+  margin-bottom: 2rem; 
+}
+.modal-body p { 
+  margin: 0; 
+  font-size: 1.1rem; 
+  color: #495057; 
+}
+.modal-footer { 
+  display: flex; 
+  gap: 1rem; 
+  justify-content: center; 
+  flex-wrap: wrap; 
+}
+.btn-modal { 
+  padding: 0.8rem 1.5rem; 
+  border: none; 
+  border-radius: 8px; 
+  font-family: 'Poppins', sans-serif; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+  font-size: 1rem; 
+}
+.btn-cancelar-modal { 
+  background: #6c757d; 
+  color: white; 
+  order: 2; 
+}
+.btn-cancelar-modal:hover { 
+  background: #5a6268; 
+}
+.btn-confirmar-logout-modal { 
+  background: #f44336; 
+  color: white; 
+  order: 1; 
+}
+.btn-confirmar-logout-modal:hover { 
+  background: #d32f2f; 
+}
+@keyframes modalAppear { 
+  from { opacity: 0; transform: scale(0.8); } 
+  to { opacity: 1; transform: scale(1); } 
+}
+@media (max-width: 768px) {
+  .modal-confirmacion { 
+    padding: 1.5rem; 
+    margin: 1rem; 
+  }
+  .modal-footer { 
+    flex-direction: column-reverse; 
+  }
+}
 </style>

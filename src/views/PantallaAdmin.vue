@@ -3,6 +3,7 @@
     <div class="dashboard">
       <Sidebar
         v-if="!isMobile"
+        v-model:isCollapsed="isSidebarCollapsed"
         :nombre="usuario.nombre"
         :apellido="usuario.apellido"
         @logout="pedirConfirmacionLogout"
@@ -130,7 +131,7 @@
         </button>
       </NavbarMobile>
 
-      <div class="contenido" :class="{ 'contenido-mobile': isMobile }">
+      <div class="contenido" :class="{ 'contenido-mobile': isMobile, 'sidebar-collapsed': isSidebarCollapsed && !isMobile }">
         <Transition name="fade" mode="out-in">
           <component
             :is="vistaComponente"
@@ -196,6 +197,7 @@ import Personas from '@/components/Administracion/Admin/Personas.vue'
 import IngresoPersona from '@/components/Administracion/Admin/IngresoPersona.vue'
 // *****************************************************************************************
 
+const isSidebarCollapsed = ref(false);
 
 const router = useRouter(); // Obtén la instancia del router
 
@@ -416,4 +418,18 @@ const irADashboard= () => {
   .modal-footer { flex-direction: column-reverse; }
 }
 /* ^ ^ ^ FIN NUEVOS ESTILOS ^ ^ ^ */
+.contenido.sidebar-collapsed {
+  /* El ancho original era 250px, el colapsado es 70px.
+    Ajusta '70px' si cambiaste el ancho en Sidebar.vue
+  */
+  margin-left: 70px;
+  width: calc(100% - 70px);
+}
+
+/* Añadimos una transición suave para que el contenido 
+  se "deslice" junto con la sidebar.
+*/
+.contenido {
+  transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+}
 </style>

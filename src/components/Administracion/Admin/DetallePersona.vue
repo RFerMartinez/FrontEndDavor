@@ -173,8 +173,10 @@ const props = defineProps({
 /* Estilos existentes */
 .seccion-tabla {
   margin-bottom: 2rem;
-  /* NUEVO: Añadido padding top para separar del header */
   padding-top: 2rem;
+  /* --- AÑADIDO: El "ligero espacio en blanco" --- */
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 /* PRIMER TITULO-SECCION no necesita margen superior */
