@@ -201,7 +201,6 @@ const guardarCambios = () => {
       grupoActualizado._isNew = true;
       delete grupoActualizado.originalNroGrupo; 
   }
-
   emit('guardar-grupo', grupoActualizado)
   modoEdicion.value = false
 }
