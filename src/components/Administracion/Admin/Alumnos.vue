@@ -117,7 +117,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 onMounted(async () => {
   loading.value = true;
-  await sleep(2000) // Simulación de carga
+  // await sleep(700) // Simulación de carga
   try {
     const respuesta = await obtenerTodosLosAlumnos();
     alumnos.value = respuesta.sort((a, b) =>

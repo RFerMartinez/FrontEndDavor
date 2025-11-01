@@ -77,7 +77,7 @@
               
               <div class="campo">
                 <label for="calle" class="etiqueta-campo">Calle:</label>
-                <input type="text" id="calle" v-model="datosModificados.Calle" class="input-campo" required>
+                <input type="text" id="calle" v-model="datosModificados.calle" class="input-campo" required>
               </div>
               <div class="campo">
                 <label for="numero" class="etiqueta-campo">Número:</label>
@@ -180,7 +180,7 @@ onMounted(() => {
 })
 
 const hayCambios = () => {
-  const campos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'sexo', 'provincia', 'localidad', 'Calle', 'nro']
+  const campos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'sexo', 'provincia', 'localidad', 'calle', 'nro']
   
   for (const campo of campos) {
     const originalExists = Object.prototype.hasOwnProperty.call(datosOriginales.value, campo);
@@ -210,7 +210,7 @@ const confirmarGuardar = () => {
 }
 
 const validarFormulario = () => {
-  const camposRequeridos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'sexo', 'provincia', 'localidad', 'Calle', 'nro']
+  const camposRequeridos = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'sexo', 'provincia', 'localidad', 'calle', 'nro']
   
   for (const campo of camposRequeridos) {
     if (!Object.prototype.hasOwnProperty.call(datosModificados.value, campo) || 
@@ -232,7 +232,7 @@ const validarFormulario = () => {
 }
 
 const guardarCambios = () => {
-  mostrarConfirmacion.value = false
+  // mostrarConfirmacion.value = false
   
   try {
     console.log('Guardando cambios:', datosModificados.value)
@@ -242,6 +242,8 @@ const guardarCambios = () => {
   } catch (error) {
     console.error('Error al guardar cambios:', error)
     alert('Error al guardar los cambios. Por favor, intenta nuevamente.')
+  } finally {
+    // console.log("datos modificados:", JSON.stringify(datosModificados.value, null, 2))
   }
 }
 

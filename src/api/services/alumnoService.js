@@ -77,3 +77,16 @@ export const actualizarHorariosAlumno = async (dni, horarios) => {
         throw error;
     }
 };
+
+export const actualizarPerfilAlumno = async (dni, datosModificados) => {
+    try {
+        const payload = datosModificados || {};
+
+        const response = await apiClient.put(`/alumnos/${dni}`, payload);
+
+        return response.data;
+    } catch (error) {
+        console.error(`Error al actualizar el perfil del Alumno ${dni}:`, error.response?.data || error.message);
+        throw error;
+    }
+}

@@ -163,38 +163,54 @@ const alumnoID = computed(() => props.alumnoSeleccionado)
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-import { obtenerAlumnoPorDni, obtenerHorariosPorDni } from '@/api/services/alumnoService'
+import {
+  obtenerAlumnoPorDni,
+  obtenerHorariosPorDni,
+  actualizarHorariosAlumno,
+  actualizarPerfilAlumno
+} from '@/api/services/alumnoService'
+
 import { obtenerCuotasDeAlumno } from '@/api/services/cuotasService'
 const loading = ref(false)
 const alumno = ref(null)
 const horariosAlumno = ref([])
 const cuotas = ref([])
 
-
-
-onMounted(async () => {
+async function cargarDatosCompletosAlumno() {
+  // 1. Inicia el estado de carga
   loading.value = true
-
-  // console.log('Cargando información del alumno con ID:', alumnoID.value["dni"])
-
-  await sleep(2000)
-
+  // Opcional: Simula un retraso (quizás para UI)
+  await sleep(700) 
   try {
-    if (alumnoID.value && alumnoID.value["dni"]) {
-      const respuestaAlumno = await obtenerAlumnoPorDni(alumnoID.value["dni"])
+    const dni = alumnoID.value?.dni // Acceso seguro usando optional chaining
+    // 2. Verifica si tenemos un DNI válido antes de hacer las llamadas
+    if (dni) {
+      // 3. Ejecuta todas las peticiones
+      // (Puedes ejecutarlas en paralelo si no dependen entre sí)
+      const respuestaAlumno = await obtenerAlumnoPorDni(dni)
       alumno.value = respuestaAlumno
 
-      const respuestaHorarios = await obtenerHorariosPorDni(alumnoID.value["dni"])
+      const respuestaHorarios = await obtenerHorariosPorDni(dni)
       horariosAlumno.value = respuestaHorarios
 
-      const respuestaCuotas = await obtenerCuotasDeAlumno(alumnoID.value["dni"])
+      const respuestaCuotas = await obtenerCuotasDeAlumno(dni)
       cuotas.value = respuestaCuotas
+      
+    } else {
+      console.warn('No se proporcionó un DNI para cargar los datos.');
     }
   } catch (error) {
+    // 4. Manejo centralizado de errores
     console.error('Error al cargar la información del alumno:', error)
   } finally {
+    // 5. Finaliza el estado de carga (siempre)
     loading.value = false
   }
+}
+
+onMounted(async () => {
+  await cargarDatosCompletosAlumno()
+  // alert(JSON.stringify(alumno.value, null, 2));
 })
 
 
@@ -203,11 +219,33 @@ onMounted(async () => {
 const volverAlumnos = () => { emit('volverAlumnos') }
 
 const manejarHorariosActualizados = async (nuevosHorarios) => {
-  console.log('Horarios actualizados:', nuevosHorarios)
-  horariosAlumno.value = nuevosHorarios;
-
-  const respuestaHorarios = await obtenerHorariosPorDni(alumnoID.value["dni"])
-      horariosAlumno.value = respuestaHorarios
+  try {
+    await actualizarHorariosAlumno(alumnoID.value["dni"], nuevosHorarios["horarios"]);
+    // 3. MANEJO DE ÉXITO (Profesional)
+    console.log(`Horarios actualizados exitosamente para ${alumnoID.value["dni"]}`);
+    // (Opcional: mostrar mensaje de éxito en la UI)
+    // mensajeConfirmacion.value = "Horarios guardados con éxito.";
+    // setTimeout(() => mensajeConfirmacion.value = '', 3000);
+  } catch (error) {
+    // 4. MANEJO DE ERRORES (Profesional)
+    console.error("Error al modificar los datos:", error);
+    // Muestra un mensaje de error claro al usuario
+    alert(`Error al guardar: ${error.response?.data?.detail || 'No se pudieron actualizar los horarios. Verifique la capacidad.'}`);
+  } finally {
+    // Una vez finalizada la actualización, refresca los horarios
+    console.log(`Refrescando horarios para ${alumnoID.value["dni"]}...`);
+    
+    try {
+      // --- Tu lógica de API (Obtener horarios) ---
+      const respuestaHorarios = await obtenerHorariosPorDni(alumnoID.value["dni"]);
+      horariosAlumno.value = respuestaHorarios;
+    } catch (fetchError) {
+        console.error("Error al refrescar los horarios:", fetchError);
+        alert("Se intentó guardar, pero hubo un error al recargar la vista. Por favor, verifique.");
+    }
+    // (Opcional: finalizar estado de carga)
+    // actualizando.value = false;
+  }
 }
 
 const modificarDatos = () => { mostrandoModificacion.value = 'datos' }
@@ -273,12 +311,38 @@ const handleContinuarExito = () => {
 //manejador para eliminar al alumno
 const eliminarAlumno = () => { console.log('Eliminar alumno') }
 
-const manejarGuardarDatos = (datosActualizados) => {
-  alumno.value = { ...alumno.value, ...datosActualizados };
+
+// await cargarDatosCompletosAlumno();
+
+const manejarGuardarDatos = async (datosActualizados) => {
+  try {
+    const dni = alumnoID.value["dni"];
+
+    const payload = {
+      nombre: datosActualizados["nombre"],
+      apellido: datosActualizados["apellido"],
+      sexo: datosActualizados["sexo"],
+      email: datosActualizados["email"],
+      telefono: datosActualizados["telefono"],
+      nomProvincia: datosActualizados["provincia"],
+      nomLocalidad: datosActualizados["localidad"],
+      calle: datosActualizados["calle"],
+      numero: datosActualizados["nro"]
+    };
+
+    await actualizarPerfilAlumno(dni, payload);
+  } catch (error) {
+    console.error("error", error);
+  } finally {
+    await cargarDatosCompletosAlumno();
+  }
+
   mostrandoModificacion.value = null;
-  mensajeConfirmacion.value = 'Los datos del alumno se actualizaron correctamente';
-  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+  mostrarModalExito.value = true;
+  setTimeout(() => { mensajeModalExito.value = 'Los datos del alumno se actualizaron correctamente' }, 3000);
 }
+
+
 const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
   alumno.value = { ...alumno.value, ...datosActualizados.alumno };
   if (datosActualizados.horarios) {

@@ -60,7 +60,7 @@
         </div>
         <div class="fila-tabla">
           <div class="celda etiqueta">Calle:</div>
-          <div class="celda valor">{{ datos.Calle || 'No especificada' }}</div>
+          <div class="celda valor">{{ datos.calle || 'No especificada' }}</div>
           <div class="celda etiqueta">Número:</div>
           <div class="celda valor">{{ datos.nro || 'S/N' }}</div>
         </div>
