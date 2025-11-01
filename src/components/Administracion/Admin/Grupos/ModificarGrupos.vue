@@ -65,7 +65,12 @@ function mostrarMensajeExito(mensaje) {
 }
 // ----- FIN: AÑADIDO -----
 
-import { obtenerHorariosCompletos, eliminarHorarioGrupo } from '@/api/services/horarioService';
+import {
+  obtenerHorariosCompletos,
+  eliminarHorarioGrupo,
+  crearHorarioGrupo,
+  actualizarHorarioGrupo
+} from '@/api/services/horarioService';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -96,73 +101,108 @@ const anadirNuevoGrupo = () => {
   grupos.value.push(nuevoGrupo)
 }
 
-const manejarGuardarGrupo = async (grupoModificado) => {
-  console.log('Recibido para guardar:', grupoModificado)
+// const manejarGuardarGrupo = async (grupoModificado) => {
+//   console.log('Recibido para guardar:', grupoModificado)
 
-  try {
-    let mensaje = ''; // Mensaje por defecto
-    if (grupoModificado._isNew) {
-      console.log('Llamada a API para CREAR:', JSON.stringify(grupoModificado, null, 2))
-      const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo)
-      if (index !== -1) {
-        delete grupoModificado._isNew
-        grupos.value[index] = grupoModificado; 
-      }
-      mensaje = 'Grupo añadido correctamente';
+//   try {
+//     let mensaje = ''; // Mensaje por defecto
+//     if (grupoModificado._isNew) {
+//       console.log('Llamada a API para CREAR:', JSON.stringify(grupoModificado, null, 2))
+//       const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo)
+//       if (index !== -1) {
+//         delete grupoModificado._isNew
+//         grupos.value[index] = grupoModificado; 
+//       }
+//       mensaje = 'Grupo añadido correctamente';
 
-    } else {
-      console.log('Llamada a API para ACTUALIZAR:', JSON.stringify(grupoModificado, null, 2))
-      const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
+//     } else {
+//       console.log('Llamada a API para ACTUALIZAR:', JSON.stringify(grupoModificado, null, 2))
+//       alert("MODIFICANDO/n", SON.stringify(grupoModificado, null, 2))
+//       const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
       
-      const grupoParaGuardar = { ...grupoModificado };
-      delete grupoParaGuardar.originalNroGrupo;
+//       const grupoParaGuardar = { ...grupoModificado };
+//       delete grupoParaGuardar.originalNroGrupo;
 
-      if (index !== -1) {
-        grupos.value[index] = grupoParaGuardar;
-      } else {
-        const idx = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.nroGrupo);
-        if (idx !== -1) grupos.value[idx] = grupoParaGuardar;
-      }
-      mensaje = 'Grupo modificado correctamente';
-    }
+//       if (index !== -1) {
+//         grupos.value[index] = grupoParaGuardar;
+//       } else {
+//         const idx = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.nroGrupo);
+//         if (idx !== -1) grupos.value[idx] = grupoParaGuardar;
+//       }
+//       mensaje = 'Grupo modificado correctamente';
+//     }
     
-    // ----- AÑADIDO: Mostrar Toast -----
-    mostrarMensajeExito(mensaje);
+//     // ----- AÑADIDO: Mostrar Toast -----
+//     mostrarMensajeExito(mensaje);
 
-  } catch (error) {
-    console.error("Error al guardar el grupo:", error)
-    // TODO: Aquí podrías llamar a mostrarMensajeExito con un color de error
-  }
-}
-
-// const manejarEliminarGrupo = (grupoParaEliminar) => {
-//   console.log('Recibido para eliminar:', JSON.stringify(grupoParaEliminar, null, 2))
-//   alert(JSON.stringify(grupoParaEliminar, null, 2))
-  
-//   if (grupoParaEliminar._isNew) {
-//     grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo)
-//     return;
+//   } catch (error) {
+//     console.error("Error al guardar el grupo:", error)
+//     // TODO: Aquí podrías llamar a mostrarMensajeExito con un color de error
 //   }
-  
-//   // ----- REEMPLAZO DE 'alert' -----
-//   // TODO: Añadir modal de confirmación aquí
-  
-//   // Simulación de éxito de borrado:
-//   grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
-//   mostrarMensajeExito('Grupo eliminado correctamente');
 // }
 
 
+
+const manejarGuardarGrupo = async (grupoModificado) => {
+  console.log('Recibido para guardar:', grupoModificado);
+  // (loadingGuardar.value = true;)
+
+  try {
+    let mensaje = '';
+
+    // --- LÓGICA DE CREAR (CREATE) ---
+    if (grupoModificado._isNew) {
+      const grupoParaCrear = { ...grupoModificado };
+      delete grupoParaCrear._isNew; 
+      delete grupoParaCrear.originalNroGrupo; // Quitar por si acaso
+
+      const grupoCreado = await crearHorarioGrupo(grupoParaCrear);
+
+      const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo);
+      if (index !== -1) {
+        grupos.value[index] = grupoCreado; 
+      }
+      mensaje = 'Grupo añadido correctamente';
+
+    // --- LÓGICA DE ACTUALIZAR (MODIFICADA) ---
+    } else {
+      // 1. NO borramos 'originalNroGrupo' del objeto
+      const grupoParaGuardar = { ...grupoModificado };
+
+      // 2. Llamamos a la API con UN solo argumento
+      const grupoActualizado = await actualizarHorarioGrupo(grupoParaGuardar);
+
+      const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
+      if (index !== -1) {
+        grupos.value[index] = grupoActualizado;
+      }
+      mensaje = 'Grupo modificado correctamente';
+    }
+
+  mostrarMensajeExito(mensaje);
+
+  } catch (error) {
+  // mensaje que indica el error (Acá se muestra con modal)
+  console.error("Error al guardar el grupo:", error);
+
+    const errorMsg = error.response?.data?.detail || 'No se pudo guardar el grupo.';
+    alert(`Error: ${errorMsg}`); 
+  } finally {
+    // (loadingGuardar.value = false;)
+  }
+}
+
+
+
+// === PI PARA ELIMINAR UN GRUPO ===
 const manejarEliminarGrupo = async (grupoParaEliminar) => {
   console.log('Recibido para eliminar:', grupoParaEliminar.nroGrupo);
 
-  // Si es un grupo "nuevo" (creado en la UI, no en DB), solo lo borra localmente.
   if (grupoParaEliminar._isNew) {
     grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
     return;
   }
 
-  // ----- REEMPLAZO DE 'alert' y 'TODO' -----
   // 1. Confirmación simple (puedes reemplazar esto por tu modal)
   if (!window.confirm(`¿Estás seguro de que quieres eliminar el grupo ${grupoParaEliminar.horaInicio} - ${grupoParaEliminar.horaFin}? Esta acción no se puede deshacer.`)) {
       return; // El usuario canceló
@@ -171,7 +211,6 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
   // 2. Llamada a la API (reemplaza la simulación)
   try {
     // (Opcional: puedes poner un estado de 'cargando' aquí si lo deseas)
-    
     const exito = await eliminarHorarioGrupo(grupoParaEliminar.nroGrupo);
 
     // 3. Si la API responde con éxito (true / 204)

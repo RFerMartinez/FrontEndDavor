@@ -56,14 +56,21 @@ const props = defineProps({
     }
 });
 
+const DIAS_GRILLA = [
+    'Lunes', 
+    'Martes', 
+    'Miércoles', 
+    'Jueves', 
+    'Viernes', 
+    'Sábado',
+    'Domingo'
+];
+
 // Extraer días y horarios únicos
 const uniqueDays = computed(() => {
-    if (!props.occupancyData || props.occupancyData.length === 0) return [];
-    // Asume que todos los grupos tienen los mismos días en el mismo orden
-    const daysOrder = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-    const daysInData = props.occupancyData[0]?.dias_asignados?.map(d => d.dia) || [];
-    // Ordena los días según daysOrder
-    return daysInData.sort((a, b) => daysOrder.indexOf(a) - daysOrder.indexOf(b));
+    // Ya no leemos de props.occupancyData[0]
+    // Simplemente devolvemos la lista constante de días.
+    return DIAS_GRILLA;
 });
 
 const uniqueHorarios = computed(() => {
@@ -155,7 +162,15 @@ const formatHorario = (horarioInicio) => {
 
 // Obtener nombre corto del día
 const getShortDayName = (dia) => {
-    const map = { 'Lunes': 'Lun', 'Martes': 'Mar', 'Miércoles': 'Mié', 'Jueves': 'Jue', 'Viernes': 'Vie', 'Sábado': 'Sáb', 'Domingo': 'Dom' };
+    const map = {
+        'Lunes': 'Lun',
+        'Martes': 'Mar',
+        'Miércoles': 'Mié',
+        'Jueves': 'Jue',
+        'Viernes': 'Vie',
+        'Sábado': 'Sáb', 
+        'Domingo': 'Dom'
+    };
     return map[dia] || dia;
 }
 
@@ -191,11 +206,7 @@ const getShortDayName = (dia) => {
 
 .occupancy-grid {
     display: grid;
-    /* 👇 CORRECCIÓN AQUÍ 👇 */
-    /* Define 1 columna fija para la hora + N columnas (1fr) para los días */
-    /* Necesitamos pasar el número de días desde el script o calcularlo */
-    /* Usaremos una variable CSS --grid-columns que definiremos en el script */
-    grid-template-columns: 140px repeat(var(--grid-columns, 6), 1fr); /* 6 es un fallback */
+    grid-template-columns: 140px repeat(var(--grid-columns, 7), 1fr);
     gap: 5px;
     min-width: 700px;
 }
@@ -407,7 +418,7 @@ const getShortDayName = (dia) => {
 @media (max-width: 992px) {
     .occupancy-grid {
         /* Ajusta la primera columna y las de los días */
-        grid-template-columns: 120px repeat(var(--grid-columns, 6), 1fr);
+        grid-template-columns: 120px repeat(var(--grid-columns, 7), 1fr);
         min-width: 0;
     }
 
@@ -424,7 +435,7 @@ const getShortDayName = (dia) => {
 @media (max-width: 768px) {
     .occupancy-grid {
          /* Ajusta la primera columna y las de los días */
-        grid-template-columns: 100px repeat(var(--grid-columns, 6), 1fr);
+        grid-template-columns: 100px repeat(var(--grid-columns, 7), 1fr);
         gap: 4px;
     }
 
@@ -454,7 +465,7 @@ const getShortDayName = (dia) => {
 @media (max-width: 480px) {
     .occupancy-grid {
         /* Ajusta la primera columna y las de los días */
-        grid-template-columns: 80px repeat(var(--grid-columns, 6), 1fr);
+        grid-template-columns: 80px repeat(var(--grid-columns, 7), 1fr);
         gap: 3px;
     }
 
