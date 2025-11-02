@@ -11,28 +11,32 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import DetallePersona from '../Admin/DetallePersona.vue';
 
+import { obtenerDataCurrentUser } from '@/api/services/alumnoService';
+
 // Estructura fija del alumno
-const alumno = ref({
-  "dni": "45104930",
-  "nombre": "Davor",
-  "apellido": "Cristoff",
-  "sexo": "M",
-  "email": "davorcristoff04@gmail.com",
-  "telefono": "3731573465",
-  "activo": true,
-  "cuotasPendientes": 3,
-  "turno": "Tarde",
-  "suscripcion": "3 días a la semana",
-  "trabajoactual": "Musculación",
-  "nivel": "3",
-  "provincia": "Chaco",
-  "localidad": "Resistencia",
-  "Calle": "Republica Checa", 
-  "nro": "305"
-});
+const alumno = ref({});
+const cargando = ref(true);
+const errorCarga = ref(null);
+
+// Cargar precios desde JSON al montar
+const cargarPrecios = async () => {
+  cargando.value = true;
+  errorCarga.value = null;
+  try {
+    const res = await obtenerDataCurrentUser();
+    alumno.value = res
+  } catch (error) {
+    console.error('Error cargando precios.json:', error);
+    errorCarga.value = 'No se pudieron cargar las suscripciones.';
+  } finally {
+    cargando.value = false;
+  }
+};
+
+onMounted(cargarPrecios);
 
 </script>
 

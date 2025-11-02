@@ -316,7 +316,7 @@ function cerrarSesion() {
   font-family: 'Inter', sans-serif;
   font-size: 0.95rem; 
   text-align: left;
-  padding: 0.6rem 1rem; 
+  padding: 0.5rem 1rem; 
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 6px; 

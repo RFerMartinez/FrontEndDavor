@@ -90,3 +90,23 @@ export const actualizarPerfilAlumno = async (dni, datosModificados) => {
         throw error;
     }
 }
+
+export const obtenerDataCurrentUser = async () => {
+    try {
+        const response = await apiClient.get('/alumnos/mi-perfil');
+        return response.data;
+    } catch (error) {
+        console.error("Error obteniendo datos del alumno:", error.response?.data || error.message);
+        return null;
+    }
+}
+
+export const obtenerHorarioCurrentUser = async () => {
+    try {
+        const response = await apiClient.get('/alumnos/mi-horario');
+        return response.data;
+    } catch (error) {
+        console.error("Error obteniendo los horarios del alumno:", error.response?.data || error.message);
+        return null;
+    }
+}

@@ -12,27 +12,34 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Titulo from '../Titulo.vue';
 import TablaHorarios from '../TablaHorarios.vue'; // <-- 3. Importar TablaHorarios
 
+import { obtenerHorarioCurrentUser } from '@/api/services/alumnoService';
+
 // 4. Nueva estructura de horarios añadida
-const horario = ref({
-  "horarios": [
-    {
-      "dia": "Lunes",
-      "nroGrupo": "4 "
-    },
-    {
-      "dia": "Miércoles",
-      "nroGrupo": "3 "
-    },
-    {
-      "dia": "Viernes",
-      "nroGrupo": "4 "
-    }
-  ]
-});
+const horario = ref({});
+const cargando = ref(true);
+const errorCarga = ref(null);
+
+// Cargar precios desde JSON al montar
+const cargarHorarios = async () => {
+  cargando.value = true;
+  errorCarga.value = null;
+  try {
+    const res = await obtenerHorarioCurrentUser();
+    horario.value = res;
+  } catch (error) {
+    console.error('Error cargando horarios:', error);
+    errorCarga.value = 'No se pudieron cargar las horarios.';
+  } finally {
+    cargando.value = false;
+  }
+};
+
+onMounted(cargarHorarios);
+
 </script>
 
 <style scoped>

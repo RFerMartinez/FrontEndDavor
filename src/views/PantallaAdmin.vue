@@ -16,7 +16,7 @@
           <i class="fas fa-tachometer-alt icon"></i>
           Estadísticas
         </button>
-        <hr class="separator" />
+        <hr class="separator" style="margin: 0.5rem 0;"/>
         <button
           class="menu-btn"
           :class="{ activo: vistaActiva === 'alumnos' }"
