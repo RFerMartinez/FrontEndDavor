@@ -238,7 +238,7 @@ const guardarSuscripcion = async (datosRecibidos) => {
         return; // Salir aquí, esto es una validación, no un error de API
       }
       
-      const descripcionFormateada = `${diasNum} ${diasNum === 1 ? 'Día' : 'Días'} a la semana`;
+      const descripcionFormateada = `${diasNum} ${diasNum === 1 ? 'día' : 'días'} a la semana`;
       
       // Comprobación de duplicados (insensible a mayúsculas para ser más robusto)
       if (suscripciones.value.some(s => s.descripcion.toLowerCase() === descripcionFormateada.toLowerCase())) {
