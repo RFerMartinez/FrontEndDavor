@@ -34,7 +34,7 @@
             </p>
             <div class="contenedor-tabla-horarios" @click.stop>
               <TablaHorarios
-                :horarios-alumno="horariosModificados"
+                :horarios-alumno="props.horarioAlumno"
                 :suscripcion="datosModificados.suscripcion"
                 :modo-embebido="true"
                 @horarios-actualizados="actualizarHorarios"
@@ -175,7 +175,9 @@ onMounted(() => {
       nivelOriginal.value = props.alumno.nivel || '';
   }
   if (props.horarioAlumno) {
-      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
+      // horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
+      horariosModificados == props.horarioAlumno;
+      console.log("asdadasad", horariosModificados.value)
   } else {
       horariosModificados.value = { horarios: [] };
   }
