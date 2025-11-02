@@ -1,6 +1,6 @@
 <template>
   <div class="precio-item">
-    <span class="descripcion">{{ precio.descripcion }}</span>
+    <span class="descripcion">{{ precio.nombreSuscripcion }}</span>
     <span class="valor">{{ formatCurrency(precio.precio) }}</span>
   </div>
 </template>

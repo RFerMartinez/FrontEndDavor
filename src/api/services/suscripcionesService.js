@@ -71,3 +71,34 @@ export const crearSuscripcion = async (datosSuscripcion) => {
     }
 };
 
+/**
+ * Actualiza el precio de una suscripción existente.
+ * @param {string} nombreSuscripcion - El nombre *actual* de la suscripción (para la URL).
+ * @param {number} nuevoPrecio - El nuevo valor del precio.
+ * @returns {object} - El objeto de la suscripción actualizada (devuelto por la API).
+ * @throws {Error} - Lanza un error si la API falla.
+ */
+export const actualizarPrecioSuscripcion = async (nombreSuscripcion, nuevoPrecio) => {
+    try {
+        // 1. Codifica el nombre para que sea seguro en la URL
+        const encodedName = encodeURIComponent(nombreSuscripcion);
+        
+        // 2. Prepara el payload/body tal como lo pide la API
+        const payload = {
+            precio: nuevoPrecio
+        };
+
+        // 3. Llama al endpoint PATCH con la URL y el payload
+        const response = await apiClient.patch(`/suscripciones/${encodedName}`, payload);
+        
+        // 4. Devuelve el objeto actualizado
+        return response.data;
+
+    } catch (error) {
+        // 5. Maneja el error
+        console.error(`Error al actualizar el precio de la suscripción "${nombreSuscripcion}":`, error.response?.data || error.message);
+        // Lanza el error para que el componente (Suscripciones.vue) lo maneje
+        throw error; 
+    }
+};
+

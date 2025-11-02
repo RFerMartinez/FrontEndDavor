@@ -61,7 +61,9 @@ import Titulo from '../Titulo.vue';
 
 import {
   obtenerSuscripciones,
-  eliminarSuscripcion as eliminarSuscripcionAPI
+  eliminarSuscripcion as eliminarSuscripcionAPI,
+  crearSuscripcion,
+  actualizarPrecioSuscripcion
 } from '@/api/services/suscripcionesService';
 
 const configFormBase = {
@@ -106,26 +108,6 @@ const parsePriceString = (priceString) => {
     const number = parseFloat(cleanedString);
     return isNaN(number) ? NaN : number;
 };
-
-// const cargarSuscripciones = async () => {
-//   try {
-//     const preciosData = await import('../../../../public/data/precios.json');
-//     suscripciones.value = preciosData.default.map((item, index) => {
-//         const precioNum = parsePriceString(item.precio);
-//         if (isNaN(precioNum)) { console.warn(`Precio inválido en JSON para "${item.descripcion}": ${item.precio}`); }
-//         return { id: index + 1, descripcion: item.descripcion, precio: isNaN(precioNum) ? 0 : precioNum };
-//     });
-//     console.log('Suscripciones cargadas (precio como número):', suscripciones.value);
-//   } catch (error) {
-//     console.error('Error cargando suscripciones:', error);
-//     suscripciones.value = [
-//         { id: 1, descripcion: '1 Día a la semana', precio: 10000 },
-//         { id: 2, descripcion: '2 Días a la semana', precio: 15000 },
-//         { id: 3, descripcion: '3 Días a la semana', precio: 20000 },
-//         { id: 4, descripcion: 'Día Libre', precio: 3000 }
-//      ];
-//   }
-// };
 
 
 const cargarSuscripciones = async () => {
@@ -176,7 +158,6 @@ const cargarSuscripciones = async () => {
 };
 
 
-
 const iniciarTransicionAFormulario = () => {
   datosFormulario.value = { descripcion: '', precio: '' };
   suscripcionEditando.value = null;
@@ -203,7 +184,8 @@ const editarSuscripcion = (suscripcion) => {
   mostrarFormulario.value = true;
 };
 
-const guardarSuscripcion = (datosRecibidos) => {
+const guardarSuscripcion = async (datosRecibidos) => {
+  // --- 1. Validaciones (Sin cambios) ---
   const claveCampo1 = configFormularioComputada.value.campo1.key;
   const claveCampo2 = configFormularioComputada.value.campo2.key;
   const valorCampo1 = datosRecibidos[claveCampo1];
@@ -217,40 +199,88 @@ const guardarSuscripcion = (datosRecibidos) => {
   }
   const precioNum = parseFloat(valorCampo2);
   if (isNaN(precioNum) || precioNum < 0) {
-      mensajeConfirmacion.value = 'El precio debe ser un número válido mayor o igual a 0.';
-      setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
-      return;
+    mensajeConfirmacion.value = 'El precio debe ser un número válido mayor o igual a 0.';
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    return;
   }
 
-  if (suscripcionEditando.value !== null) {
-    const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value);
-    if (index !== -1) {
-      suscripciones.value[index].precio = precioNum;
-      console.log("Llamando a API para ACTUALIZAR suscripción:", suscripciones.value[index]);
-      mensajeConfirmacion.value = 'Precio de suscripción actualizado';
-    }
-  } else {
-    const diasNum = parseInt(valorCampo1);
-     if (isNaN(diasNum) || diasNum <= 0) {
+  // --- 2. Lógica de API ---
+  try {
+    let mensaje = '';
+
+    if (suscripcionEditando.value !== null) {
+      // --- MODO ACTUALIZACIÓN (PUT/PATCH) ---
+      
+      const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value);
+      if (index === -1) {
+        throw new Error("No se pudo encontrar la suscripción para actualizar.");
+      }
+      
+      // Este es el nombre que la API usa como ID en la URL
+      const nombreSuscripcion = suscripciones.value[index].descripcion;
+
+      console.log(`Llamando a API para ACTUALIZAR: ${nombreSuscripcion} con precio: ${precioNum}`);
+      
+      // ¡CORRECCIÓN! 
+      // Llamamos al servicio de PATCH con el nombre de la suscripción y el NUEVO precio del formulario.
+      await actualizarPrecioSuscripcion(nombreSuscripcion, precioNum);
+      
+      mensaje = 'Precio de suscripción actualizado';
+
+    } else {
+      // --- MODO CREACIÓN (POST) ---
+      
+      // Validaciones de días y duplicados (Sin cambios)
+      const diasNum = parseInt(valorCampo1);
+      if (isNaN(diasNum) || diasNum <= 0) {
         mensajeConfirmacion.value = 'La cantidad de días debe ser un número entero mayor a 0.';
         setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
-        return;
-    }
-    const descripcionFormateada = `${diasNum} ${diasNum === 1 ? 'Día' : 'Días'} a la semana`;
-    if (suscripciones.value.some(s => s.descripcion === descripcionFormateada)) {
+        return; // Salir aquí, esto es una validación, no un error de API
+      }
+      
+      const descripcionFormateada = `${diasNum} ${diasNum === 1 ? 'Día' : 'Días'} a la semana`;
+      
+      // Comprobación de duplicados (insensible a mayúsculas para ser más robusto)
+      if (suscripciones.value.some(s => s.descripcion.toLowerCase() === descripcionFormateada.toLowerCase())) {
         mensajeConfirmacion.value = `La suscripción "${descripcionFormateada}" ya existe.`;
         setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
-        return;
+        return; // Salir aquí, validación
+      }
+      
+      // Prepara el body para la API (como espera el servicio)
+      const nuevaSub = { 
+        nombreSuscripcion: descripcionFormateada, 
+        precio: precioNum 
+      };
+      
+      // ¡Llamada a la API de Crear!
+      console.log("Llamando a API para CREAR suscripción:", nuevaSub);
+      await crearSuscripcion(nuevaSub);
+      
+      mensaje = 'Suscripción creada correctamente';
     }
-    const nuevoId = Math.max(...suscripciones.value.map(s => s.id), 0) + 1;
-    const nuevaSub = { id: nuevoId, descripcion: descripcionFormateada, precio: precioNum };
-    suscripcionNuevaGuardada.value = { ...nuevaSub };
-    suscripciones.value.push(nuevaSub);
-    console.log("Llamando a API para CREAR suscripción:", nuevaSub);
-    mensajeConfirmacion.value = 'Suscripción creada correctamente';
+
+    // --- 3. Acciones de Éxito (Si el try no falló) ---
+    iniciarTransicionABoton(); // Cierra el formulario
+    mensajeConfirmacion.value = mensaje; // Muestra el toast de éxito
+    await cargarSuscripciones(); // Recarga la lista desde la API
+    
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+
+  } catch (error) {
+    // --- 4. Manejo de Errores de API ---
+    console.error("Error al guardar la suscripción:", error);
+    // Extrae el mensaje de error específico de la API si está disponible
+    const errorMsg = error.response?.data?.detail || 'No se pudo completar la operación.';
+    
+    // Muestra el error en el toast (o un alert si prefieres)
+    mensajeConfirmacion.value = `Error: ${errorMsg}`;
+    
+    // Damos más tiempo para leer el error
+    setTimeout(() => { mensajeConfirmacion.value = '' }, 5000); 
   }
-  iniciarTransicionABoton();
-  setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+  
+  // Se movió la lógica de "éxito" (cerrar form, recargar) DENTRO del try
 };
 
 // const eliminarSuscripcion = (id) => {
@@ -309,6 +339,7 @@ const eliminarSuscripcion = async (id) => {
       const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la suscripción.';
       alert(`Error: ${errorMsg}`); // Muestra el error de la API
     } finally {
+      await cargarSuscripciones()
       // (Opcional: desactivar el estado de carga)
     }
   }

@@ -51,11 +51,13 @@ import Precio from '../components/Inicio/Precio.vue'
 import { ref, onMounted } from 'vue'
 
 import { obtenerTrabajos } from '@/api/services/trabajoService.js'
+import { obtenerSuscripciones } from '@/api/services/suscripcionesService'
 
 // Metodologías
 const metodologias = ref([])
 const modalVisible = ref(false)
 const modalData = ref({})
+const precios = ref([])
 
 function abrirModal(metodo) {
   modalData.value = metodo
@@ -73,6 +75,11 @@ onMounted(async () => {
     console.error("Error al cargar metodologías desde la API:", error);
     // Opcional: puedes poner datos de respaldo si falla la API
     // metodologias.value = [{ nombre: "Error al cargar", descripcion: "Intente más tarde" }];
+  }
+  try {
+    precios.value = await obtenerSuscripciones();
+  } catch (error) {
+    console.error("Error al cargar suscripciones desde la API:", error);
   }
 });
 
