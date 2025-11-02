@@ -217,8 +217,8 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
 
   } catch (error) {
     // --- Reemplaza Alert por Modal de Error ---
-    console.error("Error al eliminar el grupo:", error);
-    const errorMsg = error.response?.data?.detail || 'Error desconocido al eliminar el grupo.';
+    // console.log("Error al eliminar el grupo:", JSON.stringify(error.response, null, 2));
+    const errorMsg = error.response?.data?.error || 'Error desconocido al eliminar el grupo.';
     
     mensajeModalError.value = errorMsg;
     mostrarModalError.value = true;

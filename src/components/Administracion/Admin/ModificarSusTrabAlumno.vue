@@ -176,8 +176,8 @@ onMounted(() => {
   }
   if (props.horarioAlumno) {
       // horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
-      horariosModificados == props.horarioAlumno;
-      console.log("asdadasad", horariosModificados.value)
+      horariosModificados.value == props.horarioAlumno;
+      console.log("asdadasad", props.horarioAlumno)
   } else {
       horariosModificados.value = { horarios: [] };
   }
