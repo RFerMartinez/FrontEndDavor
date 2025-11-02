@@ -3,15 +3,15 @@
     <div v-if="cargando" class="mensaje-estado">Cargando suscripciones...</div>
     <div v-else-if="errorCarga" class="mensaje-estado error">{{ errorCarga }}</div>
 
-    <div v-else v-for="precio in precios" :key="precio.descripcion"
+    <div v-else v-for="precio in precios" :key="precio.nombreSuscripcion"
          class="opcion-suscripcion"
-         :class="{ 'seleccionada': modelValue === precio.descripcion }"
-         @click="seleccionar(precio.descripcion)">
+         :class="{ 'seleccionada': modelValue === precio.nombreSuscripcion }"
+         @click="seleccionar(precio.nombreSuscripcion)">
       <div class="opcion-contenido">
-        <h4 class="opcion-titulo">{{ precio.descripcion }}</h4>
+        <h4 class="opcion-titulo">{{ precio.nombreSuscripcion }}</h4>
         <p class="opcion-precio">{{ formatCurrency(precio.precio) }}</p>
       </div>
-      <i class="fas fa-check opcion-check" v-if="modelValue === precio.descripcion"></i>
+      <i class="fas fa-check opcion-check" v-if="modelValue === precio.nombreSuscripcion"></i>
     </div>
   </div>
 </template>
@@ -19,6 +19,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { formatCurrency } from '@/utils/formatters';
+
+import { obtenerSuscripciones } from '@/api/services/suscripcionesService';
 
 const props = defineProps({
   modelValue: String // Para usar con v-model (recibe la descripción seleccionada)
@@ -35,23 +37,11 @@ const cargarPrecios = async () => {
   cargando.value = true;
   errorCarga.value = null;
   try {
-    // *** ¡ASEGÚRATE QUE ESTA RUTA SEA CORRECTA! ***
-    const preciosData = await import('../../../../public/data/precios.json');
-    if (preciosData && Array.isArray(preciosData.default)) {
-      precios.value = preciosData.default;
-    } else {
-      throw new Error('Formato de precios.json inválido');
-    }
+    const res = await obtenerSuscripciones();
+    precios.value = res
   } catch (error) {
     console.error('Error cargando precios.json:', error);
     errorCarga.value = 'No se pudieron cargar las suscripciones.';
-    // Datos de respaldo por si falla la carga
-    precios.value = [
-      { "descripcion": "5 Días a la semana", "precio": "$30.000" },
-      { "descripcion": "3 Días a la semana", "precio": "$20.000" },
-      { "descripcion": "2 Días a la semana", "precio": "$15.000" },
-      { "descripcion": "Día Libre", "precio": "$3.000" }
-    ];
   } finally {
     cargando.value = false;
   }

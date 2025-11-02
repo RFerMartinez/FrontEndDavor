@@ -3,20 +3,22 @@
     <div v-if="cargando" class="mensaje-estado">Cargando metodologías...</div>
     <div v-else-if="errorCarga" class="mensaje-estado error">{{ errorCarga }}</div>
 
-    <div v-else v-for="metodologia in metodologias" :key="metodologia.nombre"
+    <div v-else v-for="metodologia in metodologias" :key="metodologia.nombreTrabajo"
          class="opcion-trabajo"
-         :class="{ 'seleccionada': modelValue === metodologia.nombre }"
-         @click="seleccionar(metodologia.nombre)">
+         :class="{ 'seleccionada': modelValue === metodologia.nombreTrabajo }"
+         @click="seleccionar(metodologia.nombreTrabajo)">
       <div class="opcion-contenido">
-        <h4 class="opcion-titulo">{{ metodologia.nombre }}</h4>
+        <h4 class="opcion-titulo">{{ metodologia.nombreTrabajo }}</h4>
         </div>
-      <i class="fas fa-check opcion-check" v-if="modelValue === metodologia.nombre"></i>
+      <i class="fas fa-check opcion-check" v-if="modelValue === metodologia.nombreTrabajo"></i>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+
+import { obtenerTrabajos } from '@/api/services/trabajoService';
 
 const props = defineProps({
   modelValue: String // Para usar con v-model (recibe el nombre seleccionado)
@@ -34,24 +36,11 @@ const cargarMetodologias = async () => {
   errorCarga.value = null;
   try {
     // *** ¡ASEGÚRATE QUE ESTA RUTA SEA CORRECTA! ***
-    const metodologiasData = await import('../../../../public/data/metodologias.json');
-    if (metodologiasData && Array.isArray(metodologiasData.default)) {
-      metodologias.value = metodologiasData.default;
-    } else {
-      throw new Error('Formato de metodologias.json inválido');
-    }
+    const res = await obtenerTrabajos();
+    metodologias.value = res;
   } catch (error) {
     console.error('Error cargando metodologias.json:', error);
     errorCarga.value = 'No se pudieron cargar las metodologías.';
-    // Datos de respaldo
-    metodologias.value = [
-      { "nombre": "Musculación" },
-      { "nombre": "Funcional" },
-      { "nombre": "Mantenimiento" },
-      { "nombre": "Rehabilitación" },
-      { "nombre": "Aeróbico" },
-      { "nombre": "Preparación física para deportes" }
-    ];
   } finally {
     cargando.value = false;
   }
