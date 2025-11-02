@@ -119,44 +119,7 @@
         </div>
       </div>
     </div>
-
-    <div v-if="mostrarExito" class="modal-overlay">
-      <div class="modal-exito">
-        <div class="modal-header">
-          <i class="fas fa-check-circle"></i>
-          <h3>¡Éxito!</h3>
-        </div>
-        <div class="modal-body">
-          <p>Datos Actualizados Correctamente</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-modal btn-aceptar-modal" @click="cerrarExito">
-            Aceptar
-          </button>
-        </div>
-      </div>
     </div>
-
-    <div v-if="mostrarSinCambios" class="modal-overlay">
-      <div class="modal-sin-cambios">
-        <div class="modal-header">
-          <i class="fas fa-info-circle"></i>
-          <h3>Sin Cambios</h3>
-        </div>
-        <div class="modal-body">
-          <p>No modificó ningún campo. ¿Qué desea hacer?</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-modal btn-volver-modal" @click="volverAEditar">
-            Volver a Editar
-          </button>
-          <button class="btn-modal btn-cancelar-modal" @click="cancelarSinCambios">
-            Cancelar y Volver
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -171,8 +134,6 @@ const emit = defineEmits(['guardar-cambios', 'cancelar'])
 const datosModificados = ref({})
 const datosOriginales = ref({})
 const mostrarConfirmacion = ref(false)
-const mostrarExito = ref(false)
-const mostrarSinCambios = ref(false)
 
 onMounted(() => {
   datosOriginales.value = { ...props.alumno }
@@ -202,7 +163,7 @@ const confirmarGuardar = () => {
   }
   
   if (!hayCambios()) {
-    mostrarSinCambios.value = true
+    emit('cancelar')
     return
   }
   
@@ -232,18 +193,15 @@ const validarFormulario = () => {
 }
 
 const guardarCambios = () => {
-  // mostrarConfirmacion.value = false
+  mostrarConfirmacion.value = false
   
   try {
     console.log('Guardando cambios:', datosModificados.value)
     emit('guardar-cambios', datosModificados.value)
-    mostrarExito.value = true
     
   } catch (error) {
     console.error('Error al guardar cambios:', error)
     alert('Error al guardar los cambios. Por favor, intenta nuevamente.')
-  } finally {
-    // console.log("datos modificados:", JSON.stringify(datosModificados.value, null, 2))
   }
 }
 
@@ -251,22 +209,10 @@ const cancelarGuardar = () => {
   mostrarConfirmacion.value = false
 }
 
-const cerrarExito = () => {
-  mostrarExito.value = false
-}
-
-const volverAEditar = () => {
-  mostrarSinCambios.value = false
-}
-
-const cancelarSinCambios = () => {
-  mostrarSinCambios.value = false
-  emit('cancelar')
-}
-
 const cancelar = () => {
   emit('cancelar')
 }
+
 </script>
 
 <style scoped>
@@ -425,139 +371,7 @@ const cancelar = () => {
   transform: translateY(-1px);
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-/* V V V ESTILOS MODAL MODIFICADOS V V V */
-.modal-confirmacion, .modal-exito, .modal-sin-cambios {
-  background: white;
-  border-radius: 15px;
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: modalAppear 0.3s ease;
-  /* Nuevos estilos para centrar */
-  display: flex;
-  flex-direction: column;
-  text-align: center; 
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  justify-content: center; /* Centra icono y título */
-}
-/* ^ ^ ^ ESTILOS MODAL MODIFICADOS ^ ^ ^ */
-
-.modal-header i {
-  font-size: 2rem;
-}
-
-.modal-confirmacion .modal-header i {
-  color: #ff9800;
-}
-
-.modal-exito .modal-header i {
-  color: #4caf50;
-}
-
-.modal-sin-cambios .modal-header i {
-  color: #2196F3;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #2c3e50;
-}
-
-.modal-body {
-  margin-bottom: 2rem;
-}
-
-.modal-body p {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #495057;
-}
-
-/* V V V ESTILOS MODAL MODIFICADOS V V V */
-.modal-footer {
-  display: flex;
-  gap: 1rem;
-  justify-content: center; /* Centra los botones */
-  flex-wrap: wrap; /* Permite que los botones pasen a la siguiente línea si no caben */
-}
-/* ^ ^ ^ ESTILOS MODAL MODIFICADOS ^ ^ ^ */
-
-.btn-modal {
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-family: 'Poppins', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-cancelar-modal {
-  background: #f44336;
-  color: white;
-}
-
-.btn-cancelar-modal:hover {
-  background: #d32f2f;
-}
-
-.btn-confirmar-modal {
-  background: #4caf50;
-  color: white;
-}
-
-.btn-confirmar-modal:hover {
-  background: #388e3c;
-}
-
-.btn-aceptar-modal {
-  background: #2196F3;
-  color: white;
-}
-
-.btn-aceptar-modal:hover {
-  background: #1976D2;
-}
-
-.btn-volver-modal {
-  background: #2196F3;
-  color: white;
-}
-
-.btn-volver-modal:hover {
-  background: #1976D2;
-}
-
-@keyframes modalAppear {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+/* ----- ESTILOS DE MODAL ELIMINADOS DE AQUÍ ----- */
 
 @media (max-width: 768px) {
   .contenedor-modificar-datos {
@@ -572,15 +386,6 @@ const cancelar = () => {
   
   .botones-formulario {
     flex-direction: column;
-  }
-  
-  .modal-footer {
-    flex-direction: column; /* Apila botones en pantallas chicas */
-  }
-  
-  .modal-confirmacion, .modal-exito, .modal-sin-cambios {
-    padding: 1.5rem;
-    margin: 1rem;
   }
 }
 </style>

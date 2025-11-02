@@ -59,14 +59,14 @@
       </div>
       
       <div class="form-group-toggle">
-         <label for="pagada">Estado de la Cuota:</label>
-         <div class="toggle-switch">
-           <input type="checkbox" id="pagada" v-model="cuotaEditada.pagada" />
-           <label for="pagada" class="slider"></label>
-         </div>
-         <span :class="cuotaEditada.pagada ? 'pagada' : 'pendiente'">
-           {{ cuotaEditada.pagada ? 'Pagada' : 'Pendiente' }}
-         </span>
+        <label for="pagada">Estado de la Cuota:</label>
+        <div class="toggle-switch">
+          <input type="checkbox" id="pagada" v-model="cuotaEditada.pagada" />
+          <label for="pagada" class="slider"></label>
+        </div>
+        <span :class="cuotaEditada.pagada ? 'pagada' : 'pendiente'">
+          {{ cuotaEditada.pagada ? 'Pagada' : 'Pendiente' }}
+        </span>
       </div>
 
       <div class="botones-formulario">
@@ -82,23 +82,25 @@
 
     <Transition name="modal-fade">
       <div v-if="mostrarConfirmacion" class="modal-overlay">
-        <div class="modal-exito modal-confirmacion">
-          <div class="modal-header-exito modal-header-advertencia">
+        <div class="modal-confirmacion"> <div class="modal-header">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Confirmar Cambios</h3>
           </div>
-          <div class="modal-body-exito">
+          <div class="modal-body">
             <p>¿Estás seguro que deseas guardar los cambios en esta cuota?</p>
           </div>
-          <div class="modal-footer-exito">
-            <button class="btn-modal-cancelar" @click="mostrarConfirmacion = false">Cancelar</button>
-            <button class="btn-modal-confirmar btn-confirmar-normal" @click="confirmarGuardar">Confirmar</button>
+          <div class="modal-footer">
+            <button class="btn-modal btn-cancelar-modal" @click="mostrarConfirmacion = false">
+              Cancelar
+            </button>
+            <button class="btn-modal btn-confirmar-modal" @click="confirmarGuardar">
+              Sí, Confirmar
+            </button>
           </div>
         </div>
       </div>
     </Transition>
-
-  </div>
+    </div>
 </template>
 
 <script setup>
@@ -115,7 +117,6 @@ const props = defineProps({
 
 const emit = defineEmits(['cancelar-modificacion', 'guardar-modificacion-cuota']);
 
-// Hacemos la copia profunda inmediatamente
 const cuotaEditada = ref(JSON.parse(JSON.stringify(props.cuotaOriginal)));
 const mostrarConfirmacion = ref(false);
 
@@ -135,17 +136,13 @@ const opcionesMeses = [
   { valor: 'December', nombre: 'Diciembre' }
 ];
 
-// --- CORREGIDO: Rango de años muy amplio para scroll ---
 const opcionesAnios = computed(() => {
   const anios = [];
-  // Muestra desde 2010 hasta 2050 (41 años), más reciente primero
   for (let i = 2050; i >= 2010; i--) {
     anios.push(i);
   }
   return anios;
 });
-// --- FIN CORRECCIÓN ---
-
 
 // --- VALIDACIÓN ---
 const fechaVencimientoValida = computed(() => {
@@ -157,21 +154,20 @@ const fechaVencimientoValida = computed(() => {
 
 const formularioValido = computed(() => {
   if (!cuotaEditada.value) return false;
-  
   const c = cuotaEditada.value;
   
   return c.monto > 0 &&
-         c.mes &&
-         c.anio &&
-         c.fechaComienzo &&
-         c.vencimiento &&
-         c.trabajo &&
-         c.suscripcion &&
-         fechaVencimientoValida.value;
+        c.mes &&
+        c.anio &&
+        c.fechaComienzo &&
+        c.vencimiento &&
+        c.trabajo &&
+        c.suscripcion &&
+        fechaVencimientoValida.value;
 });
 // --- FIN VALIDACIÓN ---
 
-// --- MANEJO DE BOTONES ---
+// --- MANEJO DE BOTONES (Lógica ya era correcta) ---
 const cancelar = () => {
   emit('cancelar-modificacion');
 };
@@ -182,6 +178,19 @@ const intentarGuardar = () => {
 };
 
 const confirmarGuardar = () => {
+  // --- TODO: AQUÍ IRÁ LA LLAMADA A LA API ---
+  // try {
+  //   await api.actualizarCuota(cuotaEditada.value.idCuota, cuotaEditada.value);
+  //   mostrarConfirmacion.value = false;
+  //   emit('guardar-modificacion-cuota', cuotaEditada.value);
+  // } catch (error) {
+  //   console.error(error);
+  //   alert('Error al guardar la cuota');
+  //   mostrarConfirmacion.value = false;
+  // }
+  // --- FIN TODO ---
+  
+  // Simulación (sin API):
   mostrarConfirmacion.value = false;
   emit('guardar-modificacion-cuota', cuotaEditada.value);
 };
@@ -333,7 +342,7 @@ input:checked + .slider:before {
   margin-top: 1rem;
   padding-top: 2rem;
   border-top: 1px solid #eee;
-  flex-wrap: wrap; /* Añadido para mejor responsive */
+  flex-wrap: wrap; 
 }
 .btn-cancelar, .btn-guardar {
   padding: 0.8rem 1.5rem;
@@ -367,20 +376,6 @@ input:checked + .slider:before {
   cursor: not-allowed;
 }
 
-/* Modales */
-.modal-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex; justify-content: center; align-items: center;
-  z-index: 1000;
-}
-.modal-fade-enter-active, .modal-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.modal-fade-enter-from, .modal-fade-leave-to {
-  opacity: 0;
-}
-
 /* --- AÑADIDO: Media Queries para Responsive --- */
 @media (max-width: 480px) {
   .formulario-cuota {
@@ -390,22 +385,19 @@ input:checked + .slider:before {
     padding: 1.5rem;
   }
   .form-grid {
-    /* Forzar 1 columna en pantallas pequeñas */
     grid-template-columns: 1fr;
-    gap: 1.5rem; /* Menos gap vertical */
+    gap: 1.5rem; 
   }
   .form-group-toggle {
-    /* Mejora la alineación del switch en móvil */
     flex-direction: column;
     align-items: flex-start;
     gap: 0.8rem;
   }
   .botones-formulario {
-    /* Apila los botones en móvil */
     flex-direction: column;
   }
   .btn-cancelar, .btn-guardar {
-    width: 100%; /* Ocupan todo el ancho */
+    width: 100%; 
     justify-content: center;
   }
 }

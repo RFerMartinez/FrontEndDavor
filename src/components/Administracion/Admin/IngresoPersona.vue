@@ -63,7 +63,7 @@
                 />
               </div>
             </div>
-            </div>
+          </div>
 
           <div class="seccion-botones">
             <div class="botones-accion">
@@ -81,23 +81,50 @@
               </button>
             </div>
             <p v-if="mostrarMensajeValidacion" class="mensaje-validacion">
-                <i class="fas fa-exclamation-triangle"></i> Por favor, completa Suscripción, Trabajo, Nivel y Horarios (si aplica).
+              <i class="fas fa-exclamation-triangle"></i> Por favor, completa Suscripción, Trabajo, Nivel y Horarios (si aplica).
             </p>
           </div>
         </div>
       </div>
 
       <div v-else class="sin-persona">
-         <i class="fas fa-exclamation-triangle fa-3x"></i>
-         <h3>No se encontró información de la persona</h3>
-         <p>Por favor, vuelve a la lista de personas</p>
-         <button class="btn-volver-centrado" @click="volverPersonas">
-           <i class="fas fa-arrow-left"></i>
-           Volver a Personas
-         </button>
+        <i class="fas fa-exclamation-triangle fa-3x"></i>
+        <h3>No se encontró información de la persona</h3>
+        <p>Por favor, vuelve a la lista de personas</p>
+        <button class="btn-volver-centrado" @click="volverPersonas">
+          <i class="fas fa-arrow-left"></i>
+          Volver a Personas
+        </button>
       </div>
       
     </template>
+
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalConfirmacion" class="modal-overlay">
+        <div class="modal-confirmacion"> <div class="modal-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Confirmar Ingreso</h3>
+          </div>
+          <div class="modal-body">
+            <p v-if="persona">
+              ¿Estás seguro que desea realizar el ingreso de 
+              <strong>{{ persona.nombre }} {{ persona.apellido }}</strong>?
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.95rem; color: #495057;">
+              Esta pasará a ser alumno, ocupará los cupos de los horarios asignados y se le generará la cuota pertinente.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-modal btn-cancelar-modal" @click="cancelarIngreso">
+              Cancelar
+            </button>
+            <button class="btn-modal btn-confirmar-modal" @click="realizarIngreso">
+              Sí, Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
     <Transition name="modal-fade">
       <div v-if="mostrarModalExito" class="modal-overlay">
         <div class="modal-exito">
@@ -109,7 +136,7 @@
             <p>
               <b v-if="persona">{{ persona.nombre }} {{ persona.apellido }}</b>
               <b v-else>El alumno</b>
-               ha sido ingresado correctamente.
+              ha sido ingresado correctamente.
             </p>
             <p>Ya se encuentra activo y se generó la cuota correspondiente.</p>
           </div>
@@ -121,10 +148,11 @@
         </div>
       </div>
     </Transition>
-    </div> </template>
+    </div> 
+</template>
     
 <script setup>
-import { ref, computed, defineProps, defineEmits, onMounted, watch } from 'vue'; // <--- Añadido watch
+import { ref, computed, defineProps, defineEmits, onMounted, watch } from 'vue';
 import ListadoSuscripciones from './ListadoSuscripciones.vue';
 import ListadoTrabajos from './ListadoTrabajos.vue';
 import ListadoNiveles from './ListadoNiveles.vue';
@@ -139,7 +167,6 @@ const personaID = computed(() => props.personaSeleccionada)
 
 const persona = ref({});
 
-
 const emit = defineEmits(['volverPersonas', 'ingresoConfirmado']);
 
 // Refs para los datos NUEVOS de ingreso
@@ -153,10 +180,11 @@ import { obtenerPersonaPorDni, activarAlumno } from '@/api/services/personaServi
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const loading = ref(false);
 
-// V V V AÑADIR ESTO V V V
+// --- MODIFICADO ---
 const mostrarModalExito = ref(false);
+const mostrarModalConfirmacion = ref(false); // <-- AÑADIDO
 const datosParaEmitir = ref(null);
-// ^ ^ ^ FIN AÑADIDO ^ ^ ^
+// --- FIN MODIFICADO ---
 
 onMounted(async () => {
   loading.value = true
@@ -181,153 +209,132 @@ const formularioIngresoValido = computed(() => {
   let tieneHorariosValidos = true;
 
   if (tieneSuscripcion && nuevaSuscripcion.value !== 'Día Libre') {
-    // La validación ahora depende de que nuevosHorarios tenga elementos *después*
-    // de que se selecciona la suscripción (gracias al watch que limpia)
     tieneHorariosValidos = nuevosHorarios.value && nuevosHorarios.value.length > 0;
   }
   return tieneSuscripcion && tieneTrabajo && tieneNivel && tieneHorariosValidos;
 });
-// --- FIN VALIDACIÓN ---
 
-// --- NUEVO WATCH PARA RESETEAR HORARIOS ---
+// --- WATCH (sin cambios) ---
 watch(nuevaSuscripcion, (newValue, oldValue) => {
-  // Si la suscripción cambia (y no es la carga inicial donde oldValue es undefined)
-  // y la nueva suscripción NO es 'Día Libre' (para la cual no necesitamos horarios)
   if (oldValue !== undefined && newValue !== oldValue) {
     console.log(`Suscripción cambiada de "${oldValue}" a "${newValue}". Reseteando horarios seleccionados.`);
-    nuevosHorarios.value = []; // Limpiar horarios previos
-    mostrarMensajeValidacion.value = false; // Ocultar mensaje de validación previo
-    // El usuario deberá volver a seleccionar horarios en TablaHorarios
+    nuevosHorarios.value = [];
+    mostrarMensajeValidacion.value = false;
   } else if (newValue === 'Día Libre') {
-      // Si cambia a Día Libre, también limpiamos y ocultamos mensaje
       nuevosHorarios.value = [];
       mostrarMensajeValidacion.value = false;
   }
 });
-// --- FIN NUEVO WATCH ---
-
 
 const volverPersonas = () => { emit('volverPersonas'); };
 
 const actualizarHorarios = (datosEmitidos) => {
-  // ✅ CORRECCIÓN: Extrae el array 'horarios' del objeto recibido
   const horariosArray = datosEmitidos?.horarios || []; 
-
-  nuevosHorarios.value = horariosArray; // Asigna solo el array a nuevosHorarios
-
+  nuevosHorarios.value = horariosArray;
   console.log("IngresoPersona: Horarios actualizados (array extraído):", nuevosHorarios.value);
-
   if (formularioIngresoValido.value) {
     mostrarMensajeValidacion.value = false;
   }
 };
 
 
-const confirmarIngreso = async () => {
+// --- FUNCIÓN (1) - Se llama al hacer clic en el BOTÓN "Confirmar Ingreso" ---
+const confirmarIngreso = () => {
+  // 1. Valida el formulario
   if (!formularioIngresoValido.value) {
-    console.error("Formulario de ingreso inválido. Datos actuales:", {
-      suscripcion: nuevaSuscripcion.value,
-      trabajo: nuevoTrabajo.value,
-      nivel: nuevoNivel.value,
-      horarios: nuevosHorarios.value
-    });
+    console.error("Formulario de ingreso inválido.");
     mostrarMensajeValidacion.value = true;
     return;
   }
+  
+  // 2. Si es válido, muestra el modal de confirmación
   mostrarMensajeValidacion.value = false;
+  mostrarModalConfirmacion.value = true;
+};
 
-  // --- 2. PREPARA los datos para la API ---
+// --- FUNCIÓN (2) - Se llama al hacer clic en "Cancelar" DENTRO DEL MODAL ---
+const cancelarIngreso = () => {
+  mostrarModalConfirmacion.value = false;
+};
+
+// --- FUNCIÓN (3) - Se llama al hacer clic en "Sí, Confirmar" DENTRO DEL MODAL ---
+// (Esta contiene toda la lógica de API que antes estaba en 'confirmarIngreso')
+const realizarIngreso = async () => {
+  // 1. Oculta el modal de confirmación
+  mostrarModalConfirmacion.value = false;
+
+  // 2. Prepara los datos para la API
   const datosParaAPI = {
     dni: persona.value.dni, 
-    sexo: persona.value.sexo || 'M', // O usa el valor real si lo tienes
+    sexo: persona.value.sexo || 'M',
     nombreTrabajo: nuevoTrabajo.value,
     nombreSuscripcion: nuevaSuscripcion.value,
     nivel: nuevoNivel.value || null, 
-    deporte: persona.value.deporte || null, // Si tienes este campo
-    // Verifica que el formato de horarios sea [{ nroGrupo, dia }]
-    // horarios: nuevaSuscripcion.value === 'Día Libre' ? [] : (nuevosHorarios.value || []),
+    deporte: persona.value.deporte || null,
     horarios: nuevaSuscripcion.value === 'Día Libre' 
-      ? [] // Si es Día Libre, envía array vacío
-      : (nuevosHorarios.value || []).map(item => ({ // Si no, mapea el array
-          nroGrupo: item.nroGrupo, // Toma el nroGrupo del item original
-          dia: item.dia            // Toma el dia del item original
+      ? []
+      : (nuevosHorarios.value || []).map(item => ({
+          nroGrupo: item.nroGrupo,
+          dia: item.dia
         }))
   };
-// --- 3. AGREGA el bloque try...catch para llamar a la API ---
+
+  // 3. Llama a la API
   try {
-      // (Opcional: Muestra indicador de carga)
-      // cargandoActivacion.value = true; 
+    console.log("Enviando datos a la API para activar:", datosParaAPI);
+    const alumnoActivado = await activarAlumno(datosParaAPI);
+    console.log('Alumno activado con éxito por la API:', alumnoActivado);
+    
+    // 4. Si la API tuvo éxito, prepara los datos para el modal de ÉXITO
+    const datosCompletosIngreso = {
+      ...persona.value,
+      suscripcion: nuevaSuscripcion.value,
+      trabajoactual: nuevoTrabajo.value,
+      nivel: nuevoNivel.value,
+      horarios: datosParaAPI.horarios,
+      activo: true,
+      cuotasPendientes: 0,
+      turno: '',
+    };
 
-      console.log("Enviando datos a la API para activar:", datosParaAPI);
-      const alumnoActivado = await activarAlumno(datosParaAPI);
-      console.log('Alumno activado con éxito por la API:', alumnoActivado);
-      
-      // --- 4. SI LA API TUVO ÉXITO, CONTINÚA CON TU LÓGICA ORIGINAL ---
-
-      // Construye el objeto que quieres emitir (puedes usar datos de alumnoActivado si prefieres)
-      const datosCompletosIngreso = {
-        ...persona.value, // Datos originales de la persona
-        suscripcion: nuevaSuscripcion.value,
-        trabajoactual: nuevoTrabajo.value, // ¿Seguro que es 'trabajoactual' y no 'nombreTrabajo'?
-        nivel: nuevoNivel.value,
-        horarios: datosParaAPI.horarios, // Usamos los horarios ya formateados
-        activo: true, // La activación lo pone activo
-        cuotasPendientes: 0,
-        turno: '', // Mantenemos tu lógica de turno
-      };
-
-      // Determinar turno (tu lógica original)
-      if (datosCompletosIngreso.horarios && datosCompletosIngreso.horarios.length > 0) {
-          // IMPORTANTE: Verifica que 'nuevosHorarios.value' contenga objetos con una propiedad 'horario' que sea un string "HH:MM-HH:MM"
-          // Si 'nuevosHorarios.value' tiene [{ nroGrupo, dia }], esta lógica de turno fallará.
-          const primerHorario = datosCompletosIngreso.horarios[0]?.horario; // Ajusta esto si la estructura cambió
-          if (primerHorario && typeof primerHorario === 'string') {
-              try {
-                  const horaInicioStr = primerHorario.split(':')[0];
-                  const horaInicio = parseInt(horaInicioStr);
-                  if (!isNaN(horaInicio)) {
-                      datosCompletosIngreso.turno = horaInicio < 14 ? 'Mañana' : 'Tarde';
-                  } else { console.warn("No se pudo parsear hora:", primerHorario); }
-              } catch (e) { console.error("Error procesando horario:", primerHorario, e); }
-          }
+    // (Lógica de turno - Sin cambios)
+    if (datosCompletosIngreso.horarios && datosCompletosIngreso.horarios.length > 0) {
+      const primerHorario = datosCompletosIngreso.horarios[0]?.horario;
+      if (primerHorario && typeof primerHorario === 'string') {
+          try {
+              const horaInicioStr = primerHorario.split(':')[0];
+              const horaInicio = parseInt(horaInicioStr);
+              if (!isNaN(horaInicio)) {
+                  datosCompletosIngreso.turno = horaInicio < 14 ? 'Mañana' : 'Tarde';
+              } else { console.warn("No se pudo parsear hora:", primerHorario); }
+          } catch (e) { console.error("Error procesando horario:", primerHorario, e); }
       }
+    }
 
-      console.log("Confirmando ingreso con datos completos (después de API):", datosCompletosIngreso);
-      // Guardamos los datos y mostramos el modal en lugar de emitir
-      datosParaEmitir.value = datosCompletosIngreso;
-      mostrarModalExito.value = true;
-      
-      // (Opcional: Muestra mensaje de éxito)
-
+    console.log("Confirmando ingreso con datos completos (después de API):", datosCompletosIngreso);
+    // Guarda los datos y muestra el modal de ÉXITO
+    datosParaEmitir.value = datosCompletosIngreso;
+    mostrarModalExito.value = true;
+    
   } catch (error) {
-      // --- 5. SI LA API FALLA, MUESTRA UN ERROR ---
-      console.error('Fallo al activar alumno en la API:', error);
-      alert(`Error al activar: ${error.response?.data?.detail || error.message}`);
-      // IMPORTANTE: NO emitimos 'ingresoConfirmado' si la API falla
+    // 5. Si la API falla, muestra un error
+    console.error('Fallo al activar alumno en la API:', error);
+    alert(`Error al activar: ${error.response?.data?.detail || error.message}`);
   } finally {
-      // (Opcional: Oculta indicador de carga)
-      // cargandoActivacion.value = false;
+    // (Cargando, etc.)
   }
 };
 
-//Funcion para mostrar el modal de ingreso confirmado
+// --- FUNCIÓN (4) - Se llama desde el modal de ÉXITO ---
 function handleContinuar() {
   if (datosParaEmitir.value) {
-    // 1. Emite el evento de éxito con los datos
     emit('ingresoConfirmado');
   }
-
-  // 2. Oculta el modal
   mostrarModalExito.value = false;
 }
 </script>
 
 <style scoped>
-/* --- ESTILOS CORREGIDOS --- */
-/* Todos los estilos comunes (.contenedor-vista-admin, .tarjeta-formulario, 
-   .seccion-formulario, .titulo-seccion-formulario, .btn-accion, etc.)
-   fueron movidos al CSS GLOBAL. */
-
 /* Solo quedan los estilos ÚNICOS de este componente: */
 
 .sin-persona { 
@@ -370,6 +377,6 @@ function handleContinuar() {
   transform: translateY(-1px); 
 }
 
-/* Todos los @media queries fueron movidos al CSS global 
-   porque solo afectaban a los estilos compartidos. */
+/* El resto de los estilos (botones, layout, etc.)
+   vienen del CSS Global. */
 </style>

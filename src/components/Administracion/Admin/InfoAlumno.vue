@@ -324,8 +324,10 @@ const ejecutarCambioEstado = () => {
 }
 
 // 3. Se llama desde el modal de éxito (igual que en IngresoPersona)
-const handleContinuarExito = () => {
+const handleContinuarExito = async () => {
   mostrarModalExito.value = false;
+  
+  await cargarDatosCompletosAlumno();
 }
 // ----- FIN: Manejo de activar o descativar alumno -----
 
@@ -352,16 +354,19 @@ const manejarGuardarDatos = async (datosActualizados) => {
     };
 
     await actualizarPerfilAlumno(dni, payload);
+    
   } catch (error) {
     console.error("error", error);
-  } finally {
-    await cargarDatosCompletosAlumno();
-  }
+    // Aquí podrías mostrar un modal de ERROR si quisieras
+  } 
+  // El bloque 'finally' se ha eliminado.
 
+  // Ocultamos el formulario y mostramos el modal de éxito INMEDIATAMENTE
   mostrandoModificacion.value = null;
+  mensajeModalExito.value = 'Los datos del alumno se actualizaron correctamente';
   mostrarModalExito.value = true;
-  setTimeout(() => { mensajeModalExito.value = 'Los datos del alumno se actualizaron correctamente' }, 3000);
 }
+
 
 
 const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {

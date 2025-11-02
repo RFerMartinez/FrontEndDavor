@@ -166,7 +166,7 @@
               
             </div>
             <p v-if="mostrarMensajeValidacion" class="mensaje-validacion full-width">
-                <i class="fas fa-exclamation-triangle"></i> Por favor, corrige los errores marcados en el formulario.
+              <i class="fas fa-exclamation-triangle"></i> Por favor, corrige los errores marcados en el formulario.
             </p>
           </div>
 
@@ -174,6 +174,32 @@
       </div>
     </template>
     
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalConfirmacion" class="modal-overlay">
+        <div class="modal-confirmacion"> <div class="modal-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Confirmar Ingreso</h3>
+          </div>
+          <div class="modal-body">
+            <p>
+              ¿Estás seguro que desea realizar el ingreso de 
+              <strong>{{ alumnoDatos.nombre }} {{ alumnoDatos.apellido }}</strong>?
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.95rem; color: #495057;">
+              Esta pasará a ser alumno, ocupará los cupos de los horarios asignados y se le generará la cuota pertinente.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-modal btn-cancelar-modal" @click="cancelarConfirmacion">
+              Cancelar
+            </button>
+            <button class="btn-modal btn-confirmar-modal" @click="realizarIngreso">
+              Sí, Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
     <Transition name="modal-fade">
       <div v-if="mostrarModalExito" class="modal-overlay">
         <div class="modal-exito">
@@ -206,8 +232,9 @@ import Titulo from '../Titulo.vue';
 
 const emit = defineEmits(['cancelarIngreso','nuevoIngresoConfirmado']);
 
-// --- NUEVO: Refs para el Modal ---
+// --- Refs para Modales (MODIFICADO) ---
 const mostrarModalExito = ref(false);
+const mostrarModalConfirmacion = ref(false); // <-- AÑADIDO
 
 // --- Datos del Alumno ---
 const alumnoDatos = ref({
@@ -249,11 +276,8 @@ const nuevoNivel = ref('');
 const nuevosHorarios = ref([]);
 const mostrarMensajeValidacion = ref(false);
 
-// --- Validación Instantánea ---
+// --- Validación Instantánea (Sin cambios) ---
 const errores = ref({});
-
-// (Aquí va toda tu lógica de validación: validarCampo, los watch, etc.)
-// ... (Copio la lógica de validación de tu script anterior)
 const validarCampo = (campo, valor) => {
   if (!valor || (Array.isArray(valor) && valor.length === 0)) {
     return `Falta completar el campo: ${campo}.`;
@@ -270,9 +294,8 @@ const validarCampo = (campo, valor) => {
       return `El campo ${campo} solo acepta números.`;
     }
   }
-  return null; // Válido
+  return null;
 };
-
 watch(() => alumnoDatos.value.dni, (val) => { errores.value.dni = validarCampo('DNI', val); });
 watch(() => alumnoDatos.value.nombre, (val) => { errores.value.nombre = validarCampo('Nombre', val); });
 watch(() => alumnoDatos.value.apellido, (val) => { errores.value.apellido = validarCampo('Apellido', val); });
@@ -289,12 +312,10 @@ watch(nuevaSuscripcion, (val) => {
 });
 watch(nuevoTrabajo, (val) => { errores.value.trabajo = validarCampo('Trabajo', val); });
 watch(nuevoNivel, (val) => { errores.value.nivel = validarCampo('Nivel', val); });
-
 const actualizarHorarios = (datosEmitidos) => {
   nuevosHorarios.value = datosEmitidos?.horarios || []; 
   validarHorarios();
 };
-
 const validarHorarios = () => {
   if (nuevaSuscripcion.value && nuevaSuscripcion.value !== 'Día Libre') {
     if (nuevosHorarios.value.length === 0) {
@@ -305,8 +326,6 @@ const validarHorarios = () => {
   delete errores.value.horarios;
   return true;
 };
-
-// --- Computeds de Validación (sin cambios) ---
 const checkFormularioCompleto = () => {
   for (const key in alumnoDatos.value) {
     if (validarCampo(key, alumnoDatos.value[key])) return false;
@@ -323,6 +342,7 @@ const formularioCompletoValido = computed(() => {
   return checkFormularioCompleto();
 });
 const mensajeBotonDeshabilitado = computed(() => {
+  // (Lógica del tooltip sin cambios)
   if (formularioCompletoValido.value) return '';
   let camposInvalidos = [];
   let camposFaltantes = [];
@@ -348,11 +368,10 @@ const mensajeBotonDeshabilitado = computed(() => {
     return 'Faltan completar campos obligatorios.';
   }
   if (camposFaltantes.length === 1) {
-     return camposFaltantes[0].errorMsg;
+    return camposFaltantes[0].errorMsg;
   }
   return 'Por favor, revise el formulario.';
 });
-
 const validarFormularioParaEnvio = () => {
   let esValido = true;
   Object.keys(alumnoDatos.value).forEach(key => {
@@ -369,10 +388,14 @@ const validarFormularioParaEnvio = () => {
   if (!validarHorarios()) esValido = false;
   return esValido;
 };
+// --- FIN VALIDACIÓN ---
+
+
 const cancelarIngreso = () => {
-    emit('cancelarIngreso'); 
+  emit('cancelarIngreso'); 
 };
-// --- MODIFICADO: confirmarNuevoIngreso ---
+
+// --- (1) Se llama al hacer clic en el BOTÓN "Confirmar Ingreso" ---
 const confirmarNuevoIngreso = () => {
   const esValido = validarFormularioParaEnvio();
 
@@ -381,14 +404,68 @@ const confirmarNuevoIngreso = () => {
     mostrarMensajeValidacion.value = true;
     return;
   }
+  // Si es válido, muestra el modal de confirmación
   mostrarMensajeValidacion.value = false;
-  mostrarModalExito.value = true;
+  mostrarModalConfirmacion.value = true; // <-- MODIFICADO
 };
 
-// --- NUEVO: handleContinuar ---
+// --- (2) Se llama al hacer clic en "Cancelar" DENTRO DEL MODAL ---
+const cancelarConfirmacion = () => {
+  mostrarModalConfirmacion.value = false;
+};
+
+// --- (3) Se llama al hacer clic en "Sí, Confirmar" DENTRO DEL MODAL ---
+const realizarIngreso = async () => {
+  mostrarModalConfirmacion.value = false;
+
+  // --- TODO: AQUÍ VA EL LLAMADO A LA API ---
+  // 1. Construye el payload
+  const payload = {
+    datosPersonales: alumnoDatos.value,
+    suscripcion: nuevaSuscripcion.value,
+    trabajo: nuevoTrabajo.value,
+    nivel: nuevoNivel.value,
+    horarios: nuevaSuscripcion.value === 'Día Libre' 
+      ? [] 
+      : (nuevosHorarios.value || []).map(item => ({ 
+          nroGrupo: item.nroGrupo,
+          dia: item.dia
+        }))
+  };
+
+  try {
+    // Muestra que estás trabajando (opcional)
+    // loading.value = true; 
+
+    console.log("Enviando payload a la API (SIMULACIÓN):", payload);
+    
+    // --- SIMULACIÓN DE LLAMADA A API ---
+    // REEMPLAZA ESTO con tu llamada real:
+    // const respuesta = await api.crearNuevoAlumno(payload);
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simula 1.5s de espera
+    // --- FIN SIMULACIÓN ---
+    
+    // Si la API tiene éxito:
+    console.log("Alumno registrado con éxito (simulación)");
+    mostrarModalExito.value = true;
+
+  } catch (error) {
+    // Si la API falla:
+    console.error("Error al registrar al alumno:", error);
+    alert(`Error al registrar: ${error.response?.data?.detail || error.message || 'Error desconocido'}`);
+  } finally {
+    // Oculta el loading (opcional)
+    // loading.value = false;
+  }
+};
+// --- FIN TODO ---
+
+// --- (4) Se llama desde el modal de ÉXITO ---
 function handleContinuar() {
   emit('nuevoIngresoConfirmado'); 
   mostrarModalExito.value = false;
+  // Opcional: podrías querer resetear el formulario aquí
+  // resetForm();
 }
 
 </script>
@@ -483,13 +560,12 @@ function handleContinuar() {
     margin-top: 1.2rem;
   }
   .tooltip-wrapper[data-tooltip]:not([data-tooltip=""])::after {
-     bottom: auto;
-     top: 110%;
-     left: 50%;
-     width: 90%;
-     min-width: 250px;
+      bottom: auto;
+      top: 110%;
+      left: 50%;
+      width: 90%;
+      min-width: 250px;
   }
 }
-
 
 </style>

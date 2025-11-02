@@ -568,6 +568,7 @@ html {
   .separador-seccion { margin: 1rem 0; }
   .form-control { padding: 0.7rem; }
 }
+
 /* --- V V V NUEVO: ESTILOS PARA MODAL DE ÉXITO V V V --- */
 
 .modal-fade-enter-active,
@@ -667,3 +668,153 @@ html {
 }
 
 /* ^ ^ ^ FIN ESTILOS MODAL ^ ^ ^ */
+/* ================================================= */
+/* === ESTILOS GLOBALES PARA MODALES (CONFIRMACIÓN) === */
+/* ================================================= */
+
+.modal-confirmacion, .modal-sin-cambios {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: modalAppear 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  text-align: center; 
+}
+
+/*
+ * NOTA: .modal-overlay ya está definido globalmente 
+ * para el modal de éxito, así que lo reutilizamos.
+*/
+
+.modal-header {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;   
+  gap: 1rem;             
+  margin-bottom: 1rem;
+}
+
+.modal-header i {
+  font-size: 3rem;       
+}
+
+.modal-confirmacion .modal-header i {
+  color: #ff9800; /* Naranja */
+}
+
+.modal-sin-cambios .modal-header i {
+  color: #2196F3; /* Azul */
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.6rem; 
+  font-weight: 600;  
+}
+
+.modal-body {
+  margin-bottom: 2rem;
+}
+
+.modal-body p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #495057;
+  line-height: 1.5; 
+}
+
+/* --- ESTA ES LA REGLA CORREGIDA --- */
+/*
+  Hacemos la regla más específica para que SIEMPRE
+  gane y centre los botones en todos los componentes.
+*/
+.contenedor-vista-admin .modal-footer,
+.contenedor-modificar-datos .modal-footer,
+.contenedor-modificar-sustrab .modal-footer,
+.modal-footer { /* <-- Dejamos la regla simple también como fallback */
+  display: flex;
+  gap: 1rem;
+  justify-content: center; /* <-- La clave del centrado */
+  flex-wrap: wrap; 
+}
+/* --- FIN DE LA REGLA CORREGIDA --- */
+
+
+/* ... (El resto de los estilos de .btn-modal, etc., quedan igual) ... */
+.btn-modal {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancelar-modal {
+  background: #f44336;
+  color: white;
+}
+
+.btn-cancelar-modal:hover {
+  background: #d32f2f;
+}
+
+.btn-confirmar-modal {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-confirmar-modal:hover {
+  background: #388e3c;
+}
+
+.btn-aceptar-modal {
+  background: #2196F3;
+  color: white;
+}
+
+.btn-aceptar-modal:hover {
+  background: #1976D2;
+}
+
+.btn-volver-modal {
+  background: #2196F3;
+  color: white;
+}
+
+.btn-volver-modal:hover {
+  background: #1976D2;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive para estos modales */
+@media (max-width: 768px) {
+  .modal-confirmacion, .modal-sin-cambios {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  /* Hacemos esta regla específica también */
+  .contenedor-vista-admin .modal-footer,
+  .contenedor-modificar-datos .modal-footer,
+  .contenedor-modificar-sustrab .modal-footer,
+  .modal-footer {
+    flex-direction: column;
+  }
+}
