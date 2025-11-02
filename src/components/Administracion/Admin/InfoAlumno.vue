@@ -368,17 +368,29 @@ const manejarGuardarDatos = async (datosActualizados) => {
 }
 
 
-
+const DatosModificadosAlumno = ref(null)
 const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
-    alumno.value = { ...alumno.value, ...datosActualizados.alumno };
+    DatosModificadosAlumno.value = datosActualizados.alumno;
+    
     if (datosActualizados.horarios) {
-    horariosAlumno.value = datosActualizados.horarios;
-  }
-  mostrandoModificacion.value = null;
+        
+        // --- AQUÍ ESTÁ LA CORRECCIÓN ---
+        // No reemplaces el objeto 'horariosAlumno', 
+        // actualiza su propiedad interna 'horarios'.
+        horariosAlumno.value.horarios = JSON.parse(JSON.stringify(datosActualizados.horarios, null, 2));
+        // --- FIN DE LA CORRECCIÓN ---
 
-  // Corrección: Usa el nuevo modal en lugar del banner
-   mensajeModalExito.value = 'La suscripción, trabajo y nivel se actualizaron correctamente';
-  mostrarModalExito.value = true;
+        console.log('InfoAlumno DatosModificados:',JSON.stringify(datosActualizados, null, 2));
+        console.log('AlumnoModificado:', JSON.stringify(DatosModificadosAlumno, null, 2));
+        
+        // Ahora este console.log mostrará el objeto { horarios: [...] }
+        console.log('HorariosModificados', horariosAlumno); 
+    }
+    
+    // El resto de tu lógica para el modal está bien
+    mostrandoModificacion.value = null;
+    mensajeModalExito.value = 'La suscripción, trabajo y nivel se actualizaron correctamente';
+    mostrarModalExito.value = true;
 }
 
 
@@ -436,7 +448,6 @@ const cancelarModificacionCuota = () => {
  * Se activa cuando ModificarCuota emite 'guardar-modificacion-cuota'.
  */
 const guardarModificacionCuota = async (cuotaModificada) => {
-  console.log('Guardando cuota modificada:', cuotaModificada);
   
   // ---------------------------------------------------
   // TODO: AQUÍ VA LA ESTRUCTURA MODIFICADA Y LA LLAMADA API
@@ -448,9 +459,10 @@ const guardarModificacionCuota = async (cuotaModificada) => {
   //   await api.actualizarCuota(cuotaModificada.idCuota, cuotaModificada);
   //   
   //   // Éxito:
-  //   cuotaParaModificar.value = null; // Cierra el formulario
-  //   await cargarDatosCompletosAlumno(); // Recarga los datos
-  //   mostrarModalExito('Cuota actualizada con éxito');
+  //   cuotaParaModificar.value = null;
+      mostrandoModificacion.value = null;
+      mensajeModalExito.value = 'La cuota se modifico correctamente';
+      mostrarModalExito.value = true;
   //
   // } catch (error) {
   //   console.error('Error al guardar cuota:', error);
@@ -459,9 +471,6 @@ const guardarModificacionCuota = async (cuotaModificada) => {
   // ---------------------------------------------------
   
   // Simulación de éxito:
-  alert('Simulación: Cuota guardada');
-  cuotaParaModificar.value = null;
-  await cargarDatosCompletosAlumno(); // Recargar
 };
 
 // ----- FIN: Manejo de Cuotas -----

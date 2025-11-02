@@ -17,7 +17,7 @@
       <span>Cargando grupos...</span>
     </div>
 
-    <div v-else class="lista-grupos">
+    <div v-else class="lista-grupos" ref="listaGruposRef">
       <FilaModificarGrupo
         v-for="grupo in grupos"
         :key="grupo.nroGrupo"
@@ -27,43 +27,58 @@
       />
     </div>
 
-    <Transition name="toast-fade">
-      <div v-if="mensajeExito" class="toast-exito">
-        <i class="fas fa-check-circle"></i>
-        <span>{{ mensajeExito }}</span>
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalExito" class="modal-overlay">
+        <div class="modal-exito">
+          <div class="modal-header-exito">
+            <i class="fas fa-check-circle"></i>
+            <h3>¡Éxito!</h3>
+          </div>
+          <div class="modal-body-exito">
+            <p>{{ mensajeModalExito }}</p>
+          </div>
+          <div class="modal-footer-exito">
+            <button class="btn-modal-continuar" @click="handleContinuarExito">
+              Continuar
+            </button>
+          </div>
+        </div>
       </div>
     </Transition>
-    </div>
+    
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalError" class="modal-overlay">
+        <div class="modal-error"> <div class="modal-header-error">
+            <i class="fas fa-exclamation-triangle"></i> <h3>Error</h3>
+          </div>
+          <div class="modal-body-error">
+            <p>{{ mensajeModalError }}</p> </div>
+          <div class="modal-footer-error">
+            <button class="btn-modal-error" @click="handleContinuarError">
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import Titulo from '../../Titulo.vue';
 import FilaModificarGrupo from './FilaModificarGrupo.vue'; 
-
+const listaGruposRef = ref(null)
 const grupos = ref([])
 const loading = ref(true)
 
-// ----- INICIO: AÑADIDO (Lógica del Toast) -----
-const mensajeExito = ref('');
-let timerExito = null;
-
-/**
- * Muestra un mensaje de éxito sutil (toast) por 3 segundos.
- * @param {string} mensaje El texto a mostrar.
- */
-function mostrarMensajeExito(mensaje) {
-  mensajeExito.value = mensaje;
-  // Limpia el timer anterior si existía
-  if (timerExito) {
-    clearTimeout(timerExito);
-  }
-  // Crea un nuevo timer
-  timerExito = setTimeout(() => {
-    mensajeExito.value = '';
-  }, 3000); // Desaparece después de 3 segundos
-}
-// ----- FIN: AÑADIDO -----
+// ----- Refs para los Modales (Reemplaza al Toast) -----
+const mostrarModalExito = ref(false);
+const mensajeModalExito = ref('');
+const mostrarModalError = ref(false);
+const mensajeModalError = ref('');
+// ----- Fin Refs Modales -----
 
 import {
   obtenerHorariosCompletos,
@@ -82,66 +97,46 @@ onMounted(async () => {
     grupos.value = data;
   } catch (error) {
     console.error("Error al cargar los horarios desde la API:", error);
+    // Mostramos el error en el modal al cargar la página
+    mensajeModalError.value = error.response?.data?.detail || "No se pudieron cargar los grupos.";
+    mostrarModalError.value = true;
   } finally {
     loading.value = false;
   }
 })
 
-const anadirNuevoGrupo = () => {
+const anadirNuevoGrupo = async() => {
   const maxNro = Math.max(0, ...grupos.value.map(g => parseInt(g.nroGrupo) || 0));
   
   const nuevoGrupo = {
     nroGrupo: String(maxNro + 1),
     horaInicio: '09:00:00', 
-    horaFin: '10:00:00',   
+    horaFin: '10:00:00',  
     dias_asignados: [],
     _isNew: true 
   }
 
   grupos.value.push(nuevoGrupo)
-}
+  
 
-// const manejarGuardarGrupo = async (grupoModificado) => {
-//   console.log('Recibido para guardar:', grupoModificado)
+  // --- INICIO: SCROLL AUTOMÁTICO ---
+  // 1. Espera a que Vue actualice el DOM con la new fila
+  await nextTick();
 
-//   try {
-//     let mensaje = ''; // Mensaje por defecto
-//     if (grupoModificado._isNew) {
-//       console.log('Llamada a API para CREAR:', JSON.stringify(grupoModificado, null, 2))
-//       const index = grupos.value.findIndex(g => g._isNew && g.nroGrupo === grupoModificado.nroGrupo)
-//       if (index !== -1) {
-//         delete grupoModificado._isNew
-//         grupos.value[index] = grupoModificado; 
-//       }
-//       mensaje = 'Grupo añadido correctamente';
-
-//     } else {
-//       console.log('Llamada a API para ACTUALIZAR:', JSON.stringify(grupoModificado, null, 2))
-//       alert("MODIFICANDO/n", SON.stringify(grupoModificado, null, 2))
-//       const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
-      
-//       const grupoParaGuardar = { ...grupoModificado };
-//       delete grupoParaGuardar.originalNroGrupo;
-
-//       if (index !== -1) {
-//         grupos.value[index] = grupoParaGuardar;
-//       } else {
-//         const idx = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.nroGrupo);
-//         if (idx !== -1) grupos.value[idx] = grupoParaGuardar;
-//       }
-//       mensaje = 'Grupo modificado correctamente';
-//     }
+  // 2. Comprueba si la referencia al contenedor existe
+  if (listaGruposRef.value) {
+    // 3. Busca el último elemento hijo de la lista
+    const ultimoElemento = listaGruposRef.value.lastElementChild;
     
-//     // ----- AÑADIDO: Mostrar Toast -----
-//     mostrarMensajeExito(mensaje);
-
-//   } catch (error) {
-//     console.error("Error al guardar el grupo:", error)
-//     // TODO: Aquí podrías llamar a mostrarMensajeExito con un color de error
-//   }
-// }
-
-
+    // 4. Si existe, haz scroll hacia él
+    if (ultimoElemento) {
+      ultimoElemento.scrollIntoView({
+        behavior: 'smooth', // Para que sea un scroll suave
+        block: 'center'     // Intenta centrarlo en la pantalla
+      });
+    }
+  }
+}
 
 const manejarGuardarGrupo = async (grupoModificado) => {
   console.log('Recibido para guardar:', grupoModificado);
@@ -154,7 +149,7 @@ const manejarGuardarGrupo = async (grupoModificado) => {
     if (grupoModificado._isNew) {
       const grupoParaCrear = { ...grupoModificado };
       delete grupoParaCrear._isNew; 
-      delete grupoParaCrear.originalNroGrupo; // Quitar por si acaso
+      delete grupoParaCrear.originalNroGrupo;
 
       const grupoCreado = await crearHorarioGrupo(grupoParaCrear);
 
@@ -166,10 +161,7 @@ const manejarGuardarGrupo = async (grupoModificado) => {
 
     // --- LÓGICA DE ACTUALIZAR (MODIFICADA) ---
     } else {
-      // 1. NO borramos 'originalNroGrupo' del objeto
       const grupoParaGuardar = { ...grupoModificado };
-
-      // 2. Llamamos a la API con UN solo argumento
       const grupoActualizado = await actualizarHorarioGrupo(grupoParaGuardar);
 
       const index = grupos.value.findIndex(g => g.nroGrupo === grupoModificado.originalNroGrupo);
@@ -178,23 +170,25 @@ const manejarGuardarGrupo = async (grupoModificado) => {
       }
       mensaje = 'Grupo modificado correctamente';
     }
-
-  mostrarMensajeExito(mensaje);
+    
+    // --- Reemplaza Toast por Modal de Éxito ---
+    mensajeModalExito.value = mensaje;
+    mostrarModalExito.value = true;
 
   } catch (error) {
-  // mensaje que indica el error (Acá se muestra con modal)
-  console.error("Error al guardar el grupo:", error);
-
+    // --- Reemplaza Alert por Modal de Error ---
+    console.error("Error al guardar el grupo:", error);
     const errorMsg = error.response?.data?.detail || 'No se pudo guardar el grupo.';
-    alert(`Error: ${errorMsg}`); 
+    
+    mensajeModalError.value = errorMsg;
+    mostrarModalError.value = true;
+    // --- Fin Reemplazo ---
   } finally {
     // (loadingGuardar.value = false;)
   }
 }
 
 
-
-// === PI PARA ELIMINAR UN GRUPO ===
 const manejarEliminarGrupo = async (grupoParaEliminar) => {
   console.log('Recibido para eliminar:', grupoParaEliminar.nroGrupo);
 
@@ -203,41 +197,47 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
     return;
   }
 
-  // 1. Confirmación simple (puedes reemplazar esto por tu modal)
+  // TODO: Reemplazar esto por tu modal de confirmación global
   if (!window.confirm(`¿Estás seguro de que quieres eliminar el grupo ${grupoParaEliminar.horaInicio} - ${grupoParaEliminar.horaFin}? Esta acción no se puede deshacer.`)) {
-      return; // El usuario canceló
+      return; 
   }
 
-  // 2. Llamada a la API (reemplaza la simulación)
   try {
-    // (Opcional: puedes poner un estado de 'cargando' aquí si lo deseas)
     const exito = await eliminarHorarioGrupo(grupoParaEliminar.nroGrupo);
 
-    // 3. Si la API responde con éxito (true / 204)
     if (exito) {
-      // Actualiza la lista local (elimina el grupo de la UI)
       grupos.value = grupos.value.filter(g => g.nroGrupo !== grupoParaEliminar.nroGrupo);
-      mostrarMensajeExito('Grupo eliminado correctamente');
+      
+      // --- Reemplaza Toast por Modal de Éxito ---
+      mensajeModalExito.value = 'Grupo eliminado correctamente';
+      mostrarModalExito.value = true;
     } else {
-      // Esto no debería ocurrir si la API lanza un error, pero es un fallback
-      alert('Hubo un problema, pero el servidor no reportó un error.');
+      throw new Error("El servidor no reportó un error, pero la eliminación falló.");
     }
 
   } catch (error) {
-    // 4. Manejo de errores de la API (ej. 404, 400, 500)
+    // --- Reemplaza Alert por Modal de Error ---
     console.error("Error al eliminar el grupo:", error);
     const errorMsg = error.response?.data?.detail || 'Error desconocido al eliminar el grupo.';
     
-    // Muestra el error de la API (puedes usar tu modal de error aquí)
-    alert(`Error: ${errorMsg}`); 
-    // O si tienes una función: mostrarMensajeError(errorMsg);
-  
-  } finally {
-     // (Opcional: quitar el estado de 'cargando' si lo pusiste)
+    mensajeModalError.value = errorMsg;
+    mostrarModalError.value = true;
+    // --- Fin Reemplazo ---
   }
 }
 
+// ----- Funciones para cerrar los modales -----
+const handleContinuarExito = () => {
+  mostrarModalExito.value = false;
+  // Opcional: podrías querer recargar la lista
+  // onMounted(); 
+}
 
+const handleContinuarError = () => {
+  mostrarModalError.value = false;
+  // Opcional: recargar la lista para refrescar el estado
+  // onMounted();
+}
 
 </script>
 
@@ -255,7 +255,6 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
   min-height: 80vh;
   overflow-y: auto;
   box-sizing: border-box;
-  /* Necesario para que el toast (si es absolute) se posicione bien */
   position: relative; 
 }
 
@@ -279,7 +278,7 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
 
 .btn-anadir {
   padding: 0.8rem 1.5rem;
-  background-color: #4CAF50; 
+  background-color: #343a40; /* <-- CAMBIADO A GRIS OSCURO */
   color: white;
   border: none;
   border-radius: 8px; 
@@ -294,7 +293,7 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
 }
 
 .btn-anadir:hover {
-  background-color: #388E3C; 
+  background-color: #23272b; /* <-- CAMBIADO A GRIS MÁS OSCURO */
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -329,38 +328,8 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
   gap: 1rem; 
 }
 
-/* ----- INICIO: AÑADIDO (Estilos del Toast) ----- */
-.toast-exito {
-  position: fixed; /* Flota sobre todo */
-  top: 80px; /* Debajo de tu header principal */
-  right: 20px;
-  background-color: #28a745; /* Verde éxito */
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  z-index: 1000;
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-/* Animación para el toast */
-.toast-fade-enter-active {
-  transition: all 0.3s ease-out;
-}
-.toast-fade-leave-active {
-  transition: all 0.4s ease-in;
-}
-.toast-fade-enter-from,
-.toast-fade-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-/* ----- FIN: AÑADIDO ----- */
-
+/* ----- ESTILOS DEL TOAST ELIMINADOS ----- */
+/* (Ya no se usan) */
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -380,13 +349,9 @@ const manejarEliminarGrupo = async (grupoParaEliminar) => {
     width: 100%;
     justify-content: center;
   }
-  /* Ajusta el toast en móviles */
-  .toast-exito {
-    top: 10px;
-    right: 10px;
-    left: 10px;
-    text-align: center;
-    justify-content: center;
-  }
 }
+
+/* Los estilos de .modal-overlay, .modal-exito, .modal-error
+  y .modal-fade se cargan desde el CSS GLOBAL.
+*/
 </style>

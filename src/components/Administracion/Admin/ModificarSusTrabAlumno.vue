@@ -25,6 +25,7 @@
             <h3 class="titulo-seccion-formulario">Nivel</h3>
             <ListadoNiveles v-model="datosModificados.nivel" />
           </div>
+
           <div class="seccion-formulario" v-show="debeMostrarHorarios">
             <h3 class="titulo-seccion-formulario">Horarios</h3>
             <p v-if="suscripcionCambiada" class="advertencia-horarios">
@@ -74,7 +75,7 @@
         </div>
       </div>
     </div>
-    </div>
+  </div>
 </template>
 
 <script setup>
@@ -86,24 +87,26 @@ import ListadoNiveles from './ListadoNiveles.vue';
 
 const props = defineProps({
   alumno: Object,
-  horarioAlumno: Object
+  horarioAlumno: Object // Espera { horarios: [...] }
 });
 
 const emit = defineEmits(['guardar-cambios', 'cancelar']);
 
-// Estado local
+// --- Estado Local ---
 const datosModificados = ref({
   suscripcion: '',
   trabajoactual: '',
   nivel: ''
 });
-const horariosModificados = ref([]);
+const horariosModificados = ref([]); 
 const suscripcionOriginal = ref('');
 const trabajoOriginal = ref('');
 const nivelOriginal = ref('');
 const mostrarConfirmacion = ref(false);
 
-const horariosConfirmadosDespuesDeCambio = ref(true);
+const horariosConfirmadosDespuesDeCambio = ref(true); 
+
+// --- Computed Properties ---
 
 const suscripcionCambiada = computed(() => {
   return datosModificados.value.suscripcion !== suscripcionOriginal.value;
@@ -117,18 +120,14 @@ const formularioValido = computed(() => {
   const baseValido = datosModificados.value.suscripcion &&
                       datosModificados.value.trabajoactual &&
                       datosModificados.value.nivel;
-
   if (!baseValido) return false;
-
   if (datosModificados.value.suscripcion === 'Día Libre') {
     return true;
   }
-
-  if (suscripcionCambiada.value) {
-    return horariosConfirmadosDespuesDeCambio.value;
+  if (!suscripcionCambiada.value) {
+    return true;
   }
-
-  return true;
+  return horariosConfirmadosDespuesDeCambio.value;
 });
 
 const hayCambios = () => {
@@ -137,11 +136,22 @@ const hayCambios = () => {
   const horariosModificadosSorted = JSON.stringify([...(horariosModificados.value.horarios || [])].sort(sortFn));
   const horariosOriginalesSorted = JSON.stringify([...(props.horarioAlumno.horarios || [])].sort(sortFn));
 
-  return datosModificados.value.suscripcion !== suscripcionOriginal.value ||
-        datosModificados.value.trabajoactual !== trabajoOriginal.value ||
-        datosModificados.value.nivel !== nivelOriginal.value ||
-        (!suscripcionCambiada.value && horariosModificadosSorted !== horariosOriginalesSorted);
+  // Compara si los datos base cambiaron
+  const datosBaseCambiados = datosModificados.value.suscripcion !== suscripcionOriginal.value ||
+                           datosModificados.value.trabajoactual !== trabajoOriginal.value ||
+                           datosModificados.value.nivel !== nivelOriginal.value;
+
+  // Si la suscripción cambió, los horarios *deben* ser diferentes (incluso si están vacíos)
+  if (suscripcionCambiada.value) {
+    return datosBaseCambiados || (horariosModificadosSorted !== horariosOriginalesSorted);
+  }
+  
+  // Si la suscripción no cambió, no nos importa si los horarios cambiaron (ya que no se deberían poder cambiar)
+  return datosBaseCambiados;
 };
+
+
+// --- Funciones de Normalización y Montaje ---
 
 const normalizarNombreTrabajo = (nombre) => {
   if (!nombre) return nombre;
@@ -165,35 +175,43 @@ onMounted(() => {
       nivelOriginal.value = props.alumno.nivel || '';
   }
   if (props.horarioAlumno) {
-      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno || { horarios: [] }));
+      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
+  } else {
+      horariosModificados.value = { horarios: [] };
   }
   horariosConfirmadosDespuesDeCambio.value = true;
 });
+
+// --- LÓGICA DE ACTUALIZACIÓN (Watch y Handlers) ---
 
 watch(() => datosModificados.value.suscripcion, (nuevaSuscripcion, viejaSuscripcion) => {
-  if (viejaSuscripcion !== undefined && nuevaSuscripcion !== suscripcionOriginal.value) {
-    console.log('Suscripción cambiada -> Reseteando horarios y requiriendo confirmación.');
+  if (viejaSuscripcion === undefined) {
+    return; 
+  }
+  if (nuevaSuscripcion !== suscripcionOriginal.value) {
+    console.log('Suscripción cambiada -> Forzando re-selección de horarios.');
     horariosConfirmadosDespuesDeCambio.value = false;
     horariosModificados.value = { horarios: [] };
-  } else if (nuevaSuscripcion === suscripcionOriginal.value && viejaSuscripcion !== undefined) {
-      console.log('Suscripción volvió a la original -> Reseteando a horarios originales y requiriendo confirmación.')
-      horariosConfirmadosDespuesDeCambio.value = false;
-      horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno || { horarios: [] })); 
+  } else if (nuevaSuscripcion === suscripcionOriginal.value) {
+    console.log('Suscripción volvió a la original -> Restaurando horarios originales.');
+    horariosConfirmadosDespuesDeCambio.value = true;
+    horariosModificados.value = JSON.parse(JSON.stringify(props.horarioAlumno));
   }
 });
 
-const actualizarHorarios = (nuevosHorarios) => {
-  console.log('Horarios actualizados y confirmados desde TablaHorarios:', nuevosHorarios);
-  horariosModificados.value = JSON.parse(JSON.stringify(nuevosHorarios));
+const actualizarHorarios = (nuevosHorariosObjeto) => {
+  console.log('Horarios actualizados y confirmados desde TablaHorarios:', nuevosHorariosObjeto);
+  horariosModificados.value = JSON.parse(JSON.stringify(nuevosHorariosObjeto));
   horariosConfirmadosDespuesDeCambio.value = true;
 };
+
+// --- Lógica de Guardado (CORREGIDA) ---
 
 const confirmarGuardar = () => {
   if (!hayCambios()) {
     emit('cancelar');
     return;
   }
-
   if (!formularioValido.value) {
     if (suscripcionCambiada.value && !horariosConfirmadosDespuesDeCambio.value && datosModificados.value.suscripcion !== 'Día Libre') {
         alert('La suscripción cambió. Debes seleccionar y guardar los nuevos horarios usando el botón "Guardar Cambios" dentro de la tabla de horarios.');
@@ -207,20 +225,47 @@ const confirmarGuardar = () => {
   mostrarConfirmacion.value = true;
 };
 
+/**
+ * Se llama desde el modal de confirmación.
+ * Prepara y emite el payload final con la ESTRUCTURA CORRECTA.
+ */
 const guardarCambios = () => {
   mostrarConfirmacion.value = false;
   try {
-    const horariosAEnviar = datosModificados.value.suscripcion === 'Día Libre' ? [] : (horariosModificados.value.horarios || []);
+    
+    // 1. Define el array de horarios que se va a enviar
+    let horariosArrayFinal = [];
+
+    // 2. Comprueba si la suscripción se cambió
+    if (suscripcionCambiada.value) {
+      
+      // Si cambió y es "Día Libre", envía un array vacío
+      if (datosModificados.value.suscripcion === 'Día Libre') {
+        horariosArrayFinal = [];
+      } else {
+        // Si cambió y NO es "Día Libre", extrae el array de 'horariosModificados'
+        horariosArrayFinal = horariosModificados.value.horarios || [];
+      }
+
+    } else {
+      // Si la suscripción NO cambió, envía los horarios originales que vinieron del padre
+      horariosArrayFinal = props.horarioAlumno.horarios || [];
+    }
+
+    // 3. Construye el payload con la ESTRUCTURA CORRECTA
     const datosEnviar = {
       alumno: {
         suscripcion: datosModificados.value.suscripcion,
         trabajoactual: datosModificados.value.trabajoactual,
         nivel: datosModificados.value.nivel
       },
-      horarios: horariosAEnviar
+      // Asigna el ARRAY (horariosArrayFinal) a la clave 'horarios'
+      horarios: horariosArrayFinal 
     };
-    console.log('Guardando cambios:', datosEnviar);
+
+    console.log('Guardando cambios (Payload Corregido):', datosEnviar);
     emit('guardar-cambios', datosEnviar);
+
   } catch (error) {
     console.error('Error al guardar cambios:', error);
     alert('Error al guardar los cambios. Por favor, intenta nuevamente.');
@@ -233,7 +278,7 @@ const cancelar = () => { emit('cancelar'); };
 </script>
 
 <style scoped>
-/* Estilos generales del componente (sin cambios) */
+/* Tus estilos (sin cambios) */
 .contenedor-modificar-sustrab {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
@@ -280,7 +325,6 @@ const cancelar = () => { emit('cancelar'); };
   padding-bottom: 0.5rem;
 }
 
-/* Estilos de Horarios, Botones (sin cambios) */
 .advertencia-horarios {
   background: #FFF3E0;
   border: 1px solid #FF9800;
@@ -346,8 +390,6 @@ const cancelar = () => { emit('cancelar'); };
   cursor: not-allowed; 
   transform: none; 
 }
-
-/* ----- ESTILOS DE MODAL ELIMINADOS DE AQUÍ ----- */
 
 @media (max-width: 768px) { 
   .contenedor-modificar-sustrab { padding: 1rem; } 

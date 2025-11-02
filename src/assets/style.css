@@ -818,3 +818,79 @@ html {
     flex-direction: column;
   }
 }
+/* =============================================== */
+/* ===    ESTILOS GLOBALES PARA MODAL DE ERROR   === */
+/* =============================================== */
+/* NOTA: Esto asume que ya tienes .modal-overlay 
+  y .modal-fade en tu CSS global.
+*/
+
+.modal-error {
+  background: white;
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  border-top: 5px solid #F44336; /* Borde rojo de error */
+}
+
+.modal-header-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header-error i {
+  font-size: 3rem;
+  color: #F44336; /* Rojo */
+}
+
+.modal-header-error h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+.modal-body-error {
+  margin-bottom: 2rem;
+}
+
+.modal-body-error p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #495057;
+  line-height: 1.5;
+  /* Permite que los mensajes largos de la API se corten */
+  word-wrap: break-word; 
+}
+
+.modal-footer-error {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-modal-error {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background: #F44336; /* Rojo */
+  color: white;
+}
+
+.btn-modal-error:hover {
+  background: #D32F2F; /* Rojo oscuro */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
