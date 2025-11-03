@@ -8,12 +8,11 @@
     <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBotón">
       <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
         <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
-      <i class="fas fa-plus"></i>
+          <i class="fas fa-plus"></i>
           Agregar Nueva Suscripción
         </button>
       </div>
     </transition>
-
     <transition name="slide-down" @after-leave="transicionEnProgreso = false">
       <AgregarModificar
         v-if="mostrarFormulario"
@@ -32,28 +31,80 @@
       @eliminar="eliminarSuscripcion"
     />
 
-    <transition name="slide-in">
-      <div v-if="mensajeConfirmacion" class="mensaje-confirmacion-global">
-        <div class="contenido-mensaje-global">
-      <i class="fas fa-check-circle"></i>
-          <span>{{ mensajeConfirmacion }}</span>
-          <button class="btn-cerrar-mensaje-global" @click="mensajeConfirmacion = ''">
-          <i class="fas fa-times"></i>
-          </button>
-        </div>
-      </div>
-    </transition>
-
     <div v-if="suscripcionNuevaGuardada" style="margin-top: 2rem; padding: 1rem; border: 1px dashed blue; background: #eef;">
         <strong>Suscripción Nueva Guardada (Temporal):</strong>
         <pre>{{ suscripcionNuevaGuardada }}</pre>
     </div>
 
-  </div>
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalExito" class="modal-overlay">
+        <div class="modal-exito">
+          <div class="modal-header-exito">
+            <i class="fas fa-check-circle"></i>
+            <h3>¡Éxito!</h3>
+          </div>
+          <div class="modal-body-exito">
+            <p>{{ mensajeModalExito }}</p>
+          </div>
+          <div class="modal-footer-exito">
+            <button class="btn-modal-continuar" @click="handleContinuarExito">
+              Continuar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+    
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalError" class="modal-overlay">
+        <div class="modal-error">
+          <div class="modal-header-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error</h3>
+          </div>
+          <div class="modal-body-error">
+            <p>{{ mensajeModalError }}</p>
+          </div>
+          <div class="modal-footer-error">
+            <button class="btn-modal-error" @click="handleContinuarError">
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalConfirmacion" class="modal-overlay">
+        <div class="modal-confirmacion">
+          <div class="modal-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Confirmar Eliminación</h3>
+          </div>
+          <div class="modal-body">
+            <p v-if="suscripcionAEliminar">
+              ¿Estás seguro que deseas eliminar la suscripción 
+              <strong>"{{ suscripcionAEliminar.descripcion }}"</strong>?
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.95rem; color: #495057;">
+              Esta acción no se puede deshacer.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-modal btn-cancelar-modal" @click="handleCancelarEliminacion">
+              Cancelar
+            </button>
+            <button class="btn-modal btn-confirmar-modal" @click="handleConfirmarEliminacion">
+              Sí, Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+    </div>
 </template>
 
 <script setup>
-// --- SCRIPT (SIN CAMBIOS) ---
 import { ref, computed, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
 import Items from '../Items.vue';
@@ -66,6 +117,15 @@ import {
   actualizarPrecioSuscripcion
 } from '@/api/services/suscripcionesService';
 
+// --- Refs de Modales (NUEVO) ---
+const mostrarModalExito = ref(false);
+const mensajeModalExito = ref('');
+const mostrarModalError = ref(false);
+const mensajeModalError = ref('');
+const mostrarModalConfirmacion = ref(false);
+const suscripcionAEliminar = ref(null); // Para guardar la suscripción antes de confirmar
+
+// --- Refs existentes ---
 const configFormBase = {
   tituloSingular: 'Suscripción',
   layout: 'inline',
@@ -83,13 +143,15 @@ const configLista = ref({
 const suscripciones = ref([]);
 const mostrarFormulario = ref(false);
 const suscripcionEditando = ref(null);
-const mensajeConfirmacion = ref('');
+// const mensajeConfirmacion = ref(''); // <-- REEMPLAZADO por modales
 const transicionEnProgreso = ref(false);
 const datosFormulario = ref({ descripcion: '', precio: '' });
-const suscripcionNuevaGuardada = ref(null);
+const suscripcionNuevaGuardada = ref(null); // (Bloque debug)
 
-const cargando = ref(true); // Para saber cuándo mostrar un spinner (si lo deseas)
-const errorCarga = ref(null); // Para almacenar un mensaje de error
+const cargando = ref(true);
+const errorCarga = ref(null);
+
+// --- Funciones (Modificadas) ---
 
 const configFormularioComputada = computed(() => {
   const esEdicion = suscripcionEditando.value !== null;
@@ -102,61 +164,34 @@ const configFormularioComputada = computed(() => {
   };
 });
 
-const parsePriceString = (priceString) => {
-    if (typeof priceString !== 'string') return NaN;
-    const cleanedString = priceString.replace(/\./g, '').replace(',', '.');
-    const number = parseFloat(cleanedString);
-    return isNaN(number) ? NaN : number;
-};
-
-
 const cargarSuscripciones = async () => {
-  // 1. Establecer estado de carga
   cargando.value = true;
   errorCarga.value = null;
-  
   try {
-    // 2. Llamar al servicio de la API
     const data = await obtenerSuscripciones();
-
-    // 3. Validar que la respuesta sea un array
     if (!Array.isArray(data)) {
       throw new Error("La respuesta de la API no es un array de suscripciones.");
     }
-
-    // 4. Mapear la respuesta de la API a la estructura interna del componente
     suscripciones.value = data.map((item, index) => {
-      
-      // Valida que el precio sea un número
-      const precioNum = (typeof item.precio === 'number' && !isNaN(item.precio)) 
-        ? item.precio 
-        : 0;
-      
-      // Valida que el nombre exista
+      const precioNum = (typeof item.precio === 'number' && !isNaN(item.precio)) ? item.precio : 0;
       const descripcionApi = item.nombreSuscripcion || 'Suscripción sin nombre';
-
-      // Crea el objeto que espera el componente (usando 'descripcion')
       return { 
-        // Si la API no provee un ID único, usamos la descripción (si es única) o el índice
         id: item.idSuscripcion || descripcionApi || index + 1, 
-        descripcion: descripcionApi, // <-- Aquí está el mapeo clave
+        descripcion: descripcionApi,
         precio: precioNum 
       };
     });
-
     console.log('Suscripciones cargadas (mapeadas) desde la API:', suscripciones.value);
-
   } catch (error) {
-    // 5. Manejar errores
     console.error('Error cargando suscripciones desde la API:', error);
     errorCarga.value = 'No se pudieron cargar las suscripciones.';
-    
+    // Mostramos error al cargar
+    mensajeModalError.value = error.response?.data?.detail || errorCarga.value;
+    mostrarModalError.value = true;
   } finally {
-    // 6. Finalizar la carga
     cargando.value = false;
   }
 };
-
 
 const iniciarTransicionAFormulario = () => {
   datosFormulario.value = { descripcion: '', precio: '' };
@@ -164,9 +199,7 @@ const iniciarTransicionAFormulario = () => {
   suscripcionNuevaGuardada.value = null;
   transicionEnProgreso.value = true;
 };
-
 const mostrarFormularioDespuesDeBotón = () => { mostrarFormulario.value = true; };
-
 const iniciarTransicionABoton = () => {
   mostrarFormulario.value = false;
   suscripcionEditando.value = null;
@@ -184,8 +217,9 @@ const editarSuscripcion = (suscripcion) => {
   mostrarFormulario.value = true;
 };
 
+// --- guardarSuscripcion (MODIFICADO) ---
 const guardarSuscripcion = async (datosRecibidos) => {
-  // --- 1. Validaciones (Sin cambios) ---
+  // 1. Validaciones
   const claveCampo1 = configFormularioComputada.value.campo1.key;
   const claveCampo2 = configFormularioComputada.value.campo2.key;
   const valorCampo1 = datosRecibidos[claveCampo1];
@@ -193,161 +227,125 @@ const guardarSuscripcion = async (datosRecibidos) => {
 
   if (valorCampo1 === '' || valorCampo1 === null || valorCampo1 === undefined ||
       valorCampo2 === '' || valorCampo2 === null || valorCampo2 === undefined) {
-    mensajeConfirmacion.value = 'Por favor completa todos los campos';
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    mensajeModalError.value = 'Por favor completa todos los campos';
+    mostrarModalError.value = true;
     return;
   }
   const precioNum = parseFloat(valorCampo2);
   if (isNaN(precioNum) || precioNum < 0) {
-    mensajeConfirmacion.value = 'El precio debe ser un número válido mayor o igual a 0.';
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    mensajeModalError.value = 'El precio debe ser un número válido mayor o igual a 0.';
+    mostrarModalError.value = true;
     return;
   }
 
-  // --- 2. Lógica de API ---
+  // 2. Lógica de API
   try {
     let mensaje = '';
 
     if (suscripcionEditando.value !== null) {
-      // --- MODO ACTUALIZACIÓN (PUT/PATCH) ---
-      
+      // --- MODO ACTUALIZACIÓN ---
       const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value);
-      if (index === -1) {
-        throw new Error("No se pudo encontrar la suscripción para actualizar.");
-      }
+      if (index === -1) throw new Error("No se pudo encontrar la suscripción para actualizar.");
       
-      // Este es el nombre que la API usa como ID en la URL
       const nombreSuscripcion = suscripciones.value[index].descripcion;
-
-      console.log(`Llamando a API para ACTUALIZAR: ${nombreSuscripcion} con precio: ${precioNum}`);
-      
-      // ¡CORRECCIÓN! 
-      // Llamamos al servicio de PATCH con el nombre de la suscripción y el NUEVO precio del formulario.
       await actualizarPrecioSuscripcion(nombreSuscripcion, precioNum);
-      
       mensaje = 'Precio de suscripción actualizado';
-
     } else {
-      // --- MODO CREACIÓN (POST) ---
-      
-      // Validaciones de días y duplicados (Sin cambios)
+      // --- MODO CREACIÓN ---
       const diasNum = parseInt(valorCampo1);
       if (isNaN(diasNum) || diasNum <= 0) {
-        mensajeConfirmacion.value = 'La cantidad de días debe ser un número entero mayor a 0.';
-        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
-        return; // Salir aquí, esto es una validación, no un error de API
+        mensajeModalError.value = 'La cantidad de días debe ser un número entero mayor a 0.';
+        mostrarModalError.value = true;
+        return;
       }
-      
       const descripcionFormateada = `${diasNum} ${diasNum === 1 ? 'día' : 'días'} a la semana`;
-      
-      // Comprobación de duplicados (insensible a mayúsculas para ser más robusto)
       if (suscripciones.value.some(s => s.descripcion.toLowerCase() === descripcionFormateada.toLowerCase())) {
-        mensajeConfirmacion.value = `La suscripción "${descripcionFormateada}" ya existe.`;
-        setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
-        return; // Salir aquí, validación
+        mensajeModalError.value = `La suscripción "${descripcionFormateada}" ya existe.`;
+        mostrarModalError.value = true;
+        return;
       }
-      
-      // Prepara el body para la API (como espera el servicio)
       const nuevaSub = { 
         nombreSuscripcion: descripcionFormateada, 
         precio: precioNum 
       };
-      
-      // ¡Llamada a la API de Crear!
-      console.log("Llamando a API para CREAR suscripción:", nuevaSub);
       await crearSuscripcion(nuevaSub);
-      
       mensaje = 'Suscripción creada correctamente';
     }
 
-    // --- 3. Acciones de Éxito (Si el try no falló) ---
+    // --- 3. Acciones de Éxito ---
     iniciarTransicionABoton(); // Cierra el formulario
-    mensajeConfirmacion.value = mensaje; // Muestra el toast de éxito
-    await cargarSuscripciones(); // Recarga la lista desde la API
-    
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    await cargarSuscripciones(); // Recarga la lista
+    mensajeModalExito.value = mensaje; // Prepara el mensaje
+    mostrarModalExito.value = true; // Muestra el modal de éxito
 
   } catch (error) {
     // --- 4. Manejo de Errores de API ---
     console.error("Error al guardar la suscripción:", error);
-    // Extrae el mensaje de error específico de la API si está disponible
     const errorMsg = error.response?.data?.detail || 'No se pudo completar la operación.';
-    
-    // Muestra el error en el toast (o un alert si prefieres)
-    mensajeConfirmacion.value = `Error: ${errorMsg}`;
-    
-    // Damos más tiempo para leer el error
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 5000); 
+    mensajeModalError.value = errorMsg;
+    mostrarModalError.value = true;
   }
-  
-  // Se movió la lógica de "éxito" (cerrar form, recargar) DENTRO del try
 };
 
-// const eliminarSuscripcion = (id) => {
-//   if (confirm('¿Estás seguro de que quieres eliminar esta suscripción?')) {
-//       console.log("Llamando a API para ELIMINAR suscripción con ID:", id);
-//       suscripciones.value = suscripciones.value.filter(s => s.id !== id);
-//       mensajeConfirmacion.value = 'Suscripción eliminada correctamente';
-//       setTimeout(() => {
-//         mensajeConfirmacion.value = ''
-//       }, 3000);
-//   }
-// };
-
-const eliminarSuscripcion = async (id) => {
-  alert(JSON.stringify(id, null, 2));
-  // 2a. Encontrar el objeto suscripción usando el ID
-  const suscripcionAEliminar = suscripciones.value.find(s => s.id === id);
-
-  if (!suscripcionAEliminar) {
-    console.error("No se encontró la suscripción a eliminar con ID:", id);
-    alert("Error: No se pudo encontrar la suscripción.");
+// --- eliminarSuscripcion (MODIFICADO) ---
+const eliminarSuscripcion = (id) => {
+  const suscripcion = suscripciones.value.find(s => s.id === id);
+  if (!suscripcion) {
+    mensajeModalError.value = "Error: No se pudo encontrar la suscripción.";
+    mostrarModalError.value = true;
     return;
   }
+  
+  // Guarda la suscripción a eliminar y muestra el modal
+  suscripcionAEliminar.value = suscripcion;
+  mostrarModalConfirmacion.value = true;
+};
 
-  // 2b. Obtener el nombre que espera la API (que es la 'descripcion' en tu UI)
-  const nombreParaAPI = suscripcionAEliminar.descripcion;
+// --- Nuevas funciones handler ---
+const handleContinuarExito = () => {
+  mostrarModalExito.value = false;
+  mensajeModalExito.value = '';
+};
 
-  if (confirm(`¿Estás seguro de que quieres eliminar la suscripción "${nombreParaAPI}"?`)) {
-    
-    // (Opcional: puedes activar un estado de carga específico para este ítem)
+const handleContinuarError = () => {
+  mostrarModalError.value = false;
+  mensajeModalError.value = '';
+};
 
-    try {
-      console.log(`Llamando a API para ELIMINAR suscripción: ${nombreParaAPI}`);
-      
-      // 2c. Llamar a la API con el nombre/descripción
-      const exito = await eliminarSuscripcionAPI(nombreParaAPI);
+const handleCancelarEliminacion = () => {
+  mostrarModalConfirmacion.value = false;
+  suscripcionAEliminar.value = null;
+};
 
-      // 2d. Si la API responde con éxito (true / 204)
-      if (exito) {
-        // Actualizar la UI (filtrar la lista local)
-        // suscripciones.value = suscripciones.value.filter(s => s.id !== id);
-        
-        // Mostrar mensaje de éxito
-        mensajeConfirmacion.value = 'Suscripción eliminada correctamente';
-        setTimeout(() => {
-          mensajeConfirmacion.value = '';
-        }, 3000);
-      } else {
-        console.warn("La API de eliminar no devolvió un estado de éxito esperado (ej: 204).");
-        alert("La suscripción no se pudo eliminar, respuesta inesperada del servidor.");
-      }
+const handleConfirmarEliminacion = async () => {
+  if (!suscripcionAEliminar.value) return;
 
-    } catch (error) {
-      // 2e. Manejar errores si la API falla (ej: 404, 500)
-      console.error("Error al eliminar la suscripción:", error);
-      const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la suscripción.';
-      alert(`Error: ${errorMsg}`); // Muestra el error de la API
-    } finally {
-      await cargarSuscripciones()
-      // (Opcional: desactivar el estado de carga)
+  const nombreParaAPI = suscripcionAEliminar.value.descripcion;
+  mostrarModalConfirmacion.value = false; // Cierra el modal de confirmación
+
+  try {
+    console.log(`Llamando a API para ELIMINAR suscripción: ${nombreParaAPI}`);
+    const exito = await eliminarSuscripcionAPI(nombreParaAPI);
+
+    if (exito) {
+      await cargarSuscripciones(); // Recarga la lista
+      mensajeModalExito.value = 'Suscripción eliminada correctamente';
+      mostrarModalExito.value = true;
+    } else {
+      throw new Error("La API de eliminar no devolvió un estado de éxito.");
     }
+  } catch (error) {
+    console.error("Error al eliminar la suscripción:", error);
+    const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la suscripción.';
+    mensajeModalError.value = errorMsg;
+    mostrarModalError.value = true;
+  } finally {
+    suscripcionAEliminar.value = null; // Limpia la selección
   }
 };
 
 onMounted(cargarSuscripciones);
 </script>
-
 
 <style scoped>
 /* --- ESTILOS LOCALES (Limpiados) --- */
@@ -377,10 +375,7 @@ onMounted(cargarSuscripciones);
   letter-spacing: 0.5px;
 }
 
-/* Los estilos para .contenedor-boton-agregar, .btn-agregar,
-  .mensaje-confirmacion, .contenido-mensaje, .btn-cerrar-mensaje
-  y sus :hover AHORA ESTÁN EN EL CSS GLOBAL.
-*/
+/* Los estilos de toast/confirmación global se eliminaron de aquí */
 
 /* Animaciones secuenciales */
 .fade-scale-enter-active {
@@ -413,37 +408,16 @@ onMounted(cargarSuscripciones);
   transform: translateY(-10px);
 }
 
-/* Animación mensaje confirmación */
-.slide-in-enter-active {
-  transition: all 0.3s ease-out;
-}
-.slide-in-leave-active {
-  transition: all 0.2s ease-in;
-}
-.slide-in-enter-from {
-  transform: translateX(100%);
-  opacity: 0;
-}
-.slide-in-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-
 /* Responsive */
 @media (max-width: 768px) {
   .contenedor-suscripciones {
     padding: 1.5rem;
   }
-  
-  /* .mensaje-confirmacion (global) ya es responsive */
 }
 
 @media (max-width: 480px) {
   .contenedor-suscripciones {
     padding: 1rem;
   }
-  
-  /* .btn-agregar (global) ya es responsive */
 }
 </style>

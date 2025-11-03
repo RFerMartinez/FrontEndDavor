@@ -13,7 +13,6 @@
         </button>
       </div>
     </transition>
-
     <transition name="slide-down" @after-leave="transicionEnProgreso = false">
       <AgregarModificar v-if="mostrarFormulario" v-model="nuevoTrabajo" :es-edicion="trabajoEditando !== null"
         :config="configFormulario" @guardar="guardarTrabajo" @cancelar="iniciarTransicionABoton" />
@@ -22,22 +21,75 @@
     <Items :items="trabajos" :config="configLista" empty-message="No hay metodologías cargadas"
       empty-icon="fas fa-dumbbell" @editar="editarTrabajo" @eliminar="eliminarTrabajo" />
 
-    <transition name="slide-in">
-      <div v-if="mensajeConfirmacion" class="mensaje-confirmacion-global">
-        <div class="contenido-mensaje-global">
-          <i class="fas fa-check-circle"></i>
-          <span>{{ mensajeConfirmacion }}</span>
-          <button class="btn-cerrar-mensaje-global" @click="mensajeConfirmacion = ''">
-            <i class="fas fa-times"></i>
-          </button>
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalExito" class="modal-overlay">
+        <div class="modal-exito">
+          <div class="modal-header-exito">
+            <i class="fas fa-check-circle"></i>
+            <h3>¡Éxito!</h3>
+          </div>
+          <div class="modal-body-exito">
+            <p>{{ mensajeModalExito }}</p>
+          </div>
+          <div class="modal-footer-exito">
+            <button class="btn-modal-continuar" @click="handleContinuarExito">
+              Continuar
+            </button>
+          </div>
         </div>
       </div>
-    </transition>
-  </div>
+    </Transition>
+    
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalError" class="modal-overlay">
+        <div class="modal-error">
+          <div class="modal-header-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Error</h3>
+          </div>
+          <div class="modal-body-error">
+            <p>{{ mensajeModalError }}</p>
+          </div>
+          <div class="modal-footer-error">
+            <button class="btn-modal-error" @click="handleContinuarError">
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="modal-fade">
+      <div v-if="mostrarModalConfirmacion" class="modal-overlay">
+        <div class="modal-confirmacion">
+          <div class="modal-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Confirmar Eliminación</h3>
+          </div>
+          <div class="modal-body">
+            <p v-if="trabajoAEliminar">
+              ¿Estás seguro que deseas eliminar la metodología 
+              <strong>"{{ trabajoAEliminar.nombre }}"</strong>?
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.95rem; color: #495057;">
+              Esta acción no se puede deshacer.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-modal btn-cancelar-modal" @click="handleCancelarEliminacion">
+              Cancelar
+            </button>
+            <button class="btn-modal btn-confirmar-modal" @click="handleConfirmarEliminacion">
+              Sí, Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+    </div>
 </template>
 
 <script setup>
-// --- SCRIPT (SIN CAMBIOS) ---
 import { ref, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
 import Items from '../Items.vue';
@@ -50,37 +102,44 @@ import {
   actualizarTrabajo as actualizarTrabajoAPI
 } from '@/api/services/trabajoService';
 
-// Configuración (ahora incluye contexto)
+// --- Refs de Modales (NUEVO) ---
+const mostrarModalExito = ref(false);
+const mensajeModalExito = ref('');
+const mostrarModalError = ref(false);
+const mensajeModalError = ref('');
+const mostrarModalConfirmacion = ref(false);
+const trabajoAEliminar = ref(null); // Para guardar el trabajo antes de confirmar
+
+// --- Refs existentes ---
 const configFormulario = {
   tituloSingular: 'Metodología',
   layout: 'stacked',
-  contexto: 'trabajos', // <-- CONTEXTO
+  contexto: 'trabajos',
   campo1: { key: 'nombre', label: 'Nombre:', placeholder: 'Ej: Musculación', esTextarea: false, tipoInput: 'text', readonly: false },
   campo2: { key: 'descripcion', label: 'Descripción:', placeholder: 'Describe la metodología...', esTextarea: true, tipoInput: 'text', readonly: false }
 };
 const configLista = {
-  contexto: 'trabajos', // <-- CONTEXTO
+  contexto: 'trabajos',
   key1: 'nombre',
   showKey2: false,
   key2: 'descripcion',
   styleKey2: 'descripcion'
-  // formatoPrecio: false (no se necesita)
 };
 
 const trabajos = ref([]);
 const mostrarFormulario = ref(false);
 const trabajoEditando = ref(null);
-const mensajeConfirmacion = ref('');
+// const mensajeConfirmacion = ref(''); // <-- REEMPLAZADO por modales
 const transicionEnProgreso = ref(false);
-
-
-const cargando = ref(true); // Para el estado de carga
-const errorCarga = ref(null); // Para manejar errores de la API
+const cargando = ref(true);
+const errorCarga = ref(null);
 
 const nuevoTrabajo = ref({
   nombre: '',
   descripcion: ''
 });
+
+// --- Funciones (Modificadas) ---
 
 const cargarTrabajos = async () => {
   cargando.value = true;
@@ -90,16 +149,18 @@ const cargarTrabajos = async () => {
     if (!Array.isArray(data)) {
       throw new Error("La API no devolvió un formato de trabajos válido.");
     }
-    // Mapea la API a la UI (nombreTrabajo -> nombre)
     trabajos.value = data.map((item, index) => ({
-      id: item.id || item.nombreTrabajo || index + 1, // ID para el v-for de Vue
-      nombre: item.nombreTrabajo, // 'nombre' que espera la UI
+      id: item.id || item.nombreTrabajo || index + 1,
+      nombre: item.nombreTrabajo,
       descripcion: item.descripcion || ''
     }));
     console.log('Trabajos cargados desde la API:', trabajos.value);
   } catch (error) {
     console.error('Error cargando trabajos desde la API:', error);
     errorCarga.value = "No se pudieron cargar las metodologías.";
+    // Mostramos error al cargar
+    mensajeModalError.value = error.response?.data?.detail || errorCarga.value;
+    mostrarModalError.value = true;
   } finally {
     cargando.value = false;
   }
@@ -115,11 +176,9 @@ const iniciarTransicionAFormulario = () => {
   transicionEnProgreso.value = true;
   scrollArribaInmediato();
 };
-
 const mostrarFormularioDespuesDeBoton = () => {
   mostrarFormulario.value = true;
 };
-
 const iniciarTransicionABoton = () => {
   mostrarFormulario.value = false;
   trabajoEditando.value = null;
@@ -136,18 +195,17 @@ const editarTrabajo = (trabajo) => {
   scrollArribaInmediato();
 };
 
+// --- guardarTrabajo (MODIFICADO) ---
 const guardarTrabajo = async (datosRecibidos) => {
-  // 1. Validación (Sin cambios)
+  // 1. Validación
   if (!datosRecibidos.nombre) {
-    mensajeConfirmacion.value = 'Por favor completa el campo Nombre';
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+    mensajeModalError.value = 'Por favor completa el campo Nombre';
+    mostrarModalError.value = true;
     return;
   }
 
   try {
     let mensaje = '';
-
-    // 2. Prepara el body para la API (usando 'nombreTrabajo' como espera la API)
     const datosParaAPI = {
       nombreTrabajo: datosRecibidos.nombre,
       descripcion: datosRecibidos.descripcion
@@ -157,69 +215,85 @@ const guardarTrabajo = async (datosRecibidos) => {
       // --- LÓGICA DE ACTUALIZACIÓN (PUT) ---
       const index = trabajos.value.findIndex(t => t.id === trabajoEditando.value);
       if (index === -1) throw new Error("No se encontró el trabajo original.");
-
-      const nombreOriginal = trabajos.value[index].nombre; // El 'jobName' (nombre actual)
-
+      const nombreOriginal = trabajos.value[index].nombre;
       await actualizarTrabajoAPI(nombreOriginal, datosParaAPI);
       mensaje = 'Metodología actualizada correctamente';
-
     } else {
       // --- LÓGICA DE CREACIÓN (POST) ---
-      // Validación de duplicados (se mantiene)
       if (trabajos.value.some(t => t.nombre.toLowerCase() === datosRecibidos.nombre.toLowerCase())) {
-        // ... (tu lógica de error de duplicado) ...
+        mensajeModalError.value = `La metodología "${datosRecibidos.nombre}" ya existe.`;
+        mostrarModalError.value = true;
         return;
       }
-
       await crearTrabajoAPI(datosParaAPI);
       mensaje = 'Metodología creada correctamente';
     }
 
-    // --- Lógica de éxito (común para ambos) ---
+    // --- Lógica de éxito ---
     iniciarTransicionABoton(); // Cierra el formulario
-    mensajeConfirmacion.value = mensaje; // Muestra el toast
-    setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
-
-    // 3. ¡LA LÍNEA CLAVE! Refresca la lista desde la API.
-    await cargarTrabajos();
+    await cargarTrabajos(); // Recarga la lista
+    mensajeModalExito.value = mensaje; // Prepara el mensaje
+    mostrarModalExito.value = true; // Muestra el modal
 
   } catch (error) {
+    // --- Lógica de error ---
     console.error("Error al guardar el trabajo:", error);
     const errorMsg = error.response?.data?.detail || 'No se pudo guardar la metodología.';
-    alert(`Error: ${errorMsg}`);
+    mensajeModalError.value = errorMsg;
+    mostrarModalError.value = true;
   }
 };
 
+// --- eliminarTrabajo (MODIFICADO) ---
 const eliminarTrabajo = async (id) => {
-  // 1. Encontrar el trabajo para obtener su nombre (el ID de la API)
-  const trabajoAEliminar = trabajos.value.find(t => t.id === id);
-
-  if (!trabajoAEliminar) {
-    alert("Error: No se pudo encontrar el trabajo.");
+  const trabajo = trabajos.value.find(t => t.id === id);
+  if (!trabajo) {
+    mensajeModalError.value = "Error: No se pudo encontrar el trabajo.";
+    mostrarModalError.value = true;
     return;
   }
+  
+  // Guarda el trabajo a eliminar y muestra el modal
+  trabajoAEliminar.value = trabajo;
+  mostrarModalConfirmacion.value = true;
+};
 
-  const nombreParaAPI = trabajoAEliminar.nombre;
-  alert(`ALERTA: ${nombreParaAPI}`)
-  // 2. Confirmar con el usuario
-  if (confirm(`¿Estás seguro de que quieres eliminar la metodología "${nombreParaAPI}"?`)) {
-    try {
-      // 3. Llamar a la API
-      await eliminarTrabajoAPI(nombreParaAPI);
+// --- Nuevas funciones handler ---
+const handleContinuarExito = () => {
+  mostrarModalExito.value = false;
+  mensajeModalExito.value = '';
+};
 
-      // 4. Mostrar mensaje de éxito
-      mensajeConfirmacion.value = 'Metodología eliminada correctamente';
-      setTimeout(() => { mensajeConfirmacion.value = '' }, 3000);
+const handleContinuarError = () => {
+  mostrarModalError.value = false;
+  mensajeModalError.value = '';
+};
 
-      // 5. ¡LA LÍNEA CLAVE! Refresca la lista desde la API.
-      await cargarTrabajos();
+const handleCancelarEliminacion = () => {
+  mostrarModalConfirmacion.value = false;
+  trabajoAEliminar.value = null;
+};
 
-    } catch (error) {
-      // 6. Manejar errores de API
-      console.error("Error al eliminar el trabajo:", error);
-      const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la metodología.';
-      alert(`Error: ${errorMsg}`);
-    }
+const handleConfirmarEliminacion = async () => {
+  if (!trabajoAEliminar.value) return;
+
+  const nombreParaAPI = trabajoAEliminar.value.nombre;
+  mostrarModalConfirmacion.value = false;
+
+  try {
+    await eliminarTrabajoAPI(nombreParaAPI);
+    
+    await cargarTrabajos(); // Recarga la lista
+    mensajeModalExito.value = 'Metodología eliminada correctamente';
+    mostrarModalExito.value = true;
+
+  } catch (error) {
+    console.error("Error al eliminar el trabajo:", error);
+    const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la metodología.';
+    mensajeModalError.value = errorMsg;
+    mostrarModalError.value = true;
+  } finally {
+    trabajoAEliminar.value = null;
   }
 };
 
@@ -254,82 +328,48 @@ onMounted(cargarTrabajos);
   letter-spacing: 0.5px;
 }
 
-/* Estilos para .contenedor-boton-agregar, .btn-agregar,
-  .mensaje-confirmacion, .contenido-mensaje, .btn-cerrar-mensaje
-  AHORA ESTÁN EN EL CSS GLOBAL.
-*/
+/* Estilos de toast/confirmación global eliminados */
 
 /* Animaciones secuenciales */
 .fade-scale-enter-active {
   transition: all 0.2s ease-out;
 }
-
 .fade-scale-leave-active {
   transition: all 0.2s ease-in;
 }
-
 .fade-scale-enter-from {
   opacity: 0;
   transform: scale(0.9);
 }
-
 .fade-scale-leave-to {
   opacity: 0;
   transform: scale(0.9);
 }
-
 .slide-down-enter-active {
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-
 .slide-down-leave-active {
   transition: all 0.25s cubic-bezier(0.55, 0.055, 0.675, 0.19);
 }
-
 .slide-down-enter-from {
   opacity: 0;
   transform: translateY(-15px);
 }
-
 .slide-down-leave-to {
   opacity: 0;
   transform: translateY(-8px);
 }
-
-/* Animación mensaje confirmación */
-.slide-in-enter-active {
-  transition: all 0.25s ease-out;
-}
-
-.slide-in-leave-active {
-  transition: all 0.2s ease-in;
-}
-
-.slide-in-enter-from {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.slide-in-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
 
 /* Responsive */
 @media (max-width: 768px) {
   .contenedor-trabajos {
     padding: 1.5rem;
   }
-
-  /* .mensaje-confirmacion (global) ya es responsive */
 }
 
 @media (max-width: 480px) {
   .contenedor-trabajos {
     padding: 1rem;
   }
-
-  /* .btn-agregar (global) ya es responsive */
 }
 </style>
