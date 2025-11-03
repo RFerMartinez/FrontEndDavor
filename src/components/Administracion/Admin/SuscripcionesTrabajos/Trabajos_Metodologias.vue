@@ -5,22 +5,32 @@
       <p class="subtitulo">Gestiona los tipos de entrenamiento disponibles para los alumnos</p>
     </div>
 
-    <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBoton">
-      <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
-        <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
-          <i class="fas fa-plus"></i>
-          Agregar Nueva Metodología
-        </button>
-      </div>
-    </transition>
-    <transition name="slide-down" @after-leave="transicionEnProgreso = false">
-      <AgregarModificar v-if="mostrarFormulario" v-model="nuevoTrabajo" :es-edicion="trabajoEditando !== null"
-        :config="configFormulario" @guardar="guardarTrabajo" @cancelar="iniciarTransicionABoton" />
-    </transition>
+    <div v-if="cargando" class="loading-container">
+      <div class="spinner"></div>
+      <span>Cargando metodologías...</span>
+    </div>
+    <template v-else>
+      <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBoton">
+        <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
+          <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
+            <i class="fas fa-plus"></i>
+            Agregar Nueva Metodología
+          </button>
+        </div>
+      </transition>
+      
+      <transition 
+        name="slide-down" 
+        @after-leave="transicionEnProgreso = false"
+        @after-enter="transicionEnProgreso = false"
+      >
+        <AgregarModificar v-if="mostrarFormulario" v-model="nuevoTrabajo" :es-edicion="trabajoEditando !== null"
+          :config="configFormulario" @guardar="guardarTrabajo" @cancelar="iniciarTransicionABoton" />
+      </transition>
 
-    <Items :items="trabajos" :config="configLista" empty-message="No hay metodologías cargadas"
-      empty-icon="fas fa-dumbbell" @editar="editarTrabajo" @eliminar="eliminarTrabajo" />
-
+      <Items :items="trabajos" :config="configLista" empty-message="No hay metodologías cargadas"
+        empty-icon="fas fa-dumbbell" @editar="editarTrabajo" @eliminar="eliminarTrabajo" />
+    </template>
     <Transition name="modal-fade">
       <div v-if="mostrarModalExito" class="modal-overlay">
         <div class="modal-exito">
@@ -90,6 +100,7 @@
 </template>
 
 <script setup>
+// Script (sin cambios en la lógica, ya tenías 'cargando')
 import { ref, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
 import Items from '../Items.vue';
@@ -102,13 +113,13 @@ import {
   actualizarTrabajo as actualizarTrabajoAPI
 } from '@/api/services/trabajoService';
 
-// --- Refs de Modales (NUEVO) ---
+// --- Refs de Modales
 const mostrarModalExito = ref(false);
 const mensajeModalExito = ref('');
 const mostrarModalError = ref(false);
 const mensajeModalError = ref('');
 const mostrarModalConfirmacion = ref(false);
-const trabajoAEliminar = ref(null); // Para guardar el trabajo antes de confirmar
+const trabajoAEliminar = ref(null);
 
 // --- Refs existentes ---
 const configFormulario = {
@@ -129,9 +140,8 @@ const configLista = {
 const trabajos = ref([]);
 const mostrarFormulario = ref(false);
 const trabajoEditando = ref(null);
-// const mensajeConfirmacion = ref(''); // <-- REEMPLAZADO por modales
 const transicionEnProgreso = ref(false);
-const cargando = ref(true);
+const cargando = ref(true); // <-- Ya tenías este ref
 const errorCarga = ref(null);
 
 const nuevoTrabajo = ref({
@@ -139,10 +149,8 @@ const nuevoTrabajo = ref({
   descripcion: ''
 });
 
-// --- Funciones (Modificadas) ---
-
 const cargarTrabajos = async () => {
-  cargando.value = true;
+  cargando.value = true; // <-- Se activa la carga
   errorCarga.value = null;
   try {
     const data = await obtenerTrabajosAPI();
@@ -154,22 +162,20 @@ const cargarTrabajos = async () => {
       nombre: item.nombreTrabajo,
       descripcion: item.descripcion || ''
     }));
-    console.log('Trabajos cargados desde la API:', trabajos.value);
   } catch (error) {
     console.error('Error cargando trabajos desde la API:', error);
     errorCarga.value = "No se pudieron cargar las metodologías.";
-    // Mostramos error al cargar
     mensajeModalError.value = error.response?.data?.detail || errorCarga.value;
     mostrarModalError.value = true;
   } finally {
-    cargando.value = false;
+    cargando.value = false; // <-- Se desactiva la carga
   }
 };
 
+// ... (resto de funciones sin cambios) ...
 const scrollArribaInmediato = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-
 const iniciarTransicionAFormulario = () => {
   nuevoTrabajo.value = { nombre: '', descripcion: '' };
   trabajoEditando.value = null;
@@ -180,11 +186,11 @@ const mostrarFormularioDespuesDeBoton = () => {
   mostrarFormulario.value = true;
 };
 const iniciarTransicionABoton = () => {
+  transicionEnProgreso.value = true; 
   mostrarFormulario.value = false;
   trabajoEditando.value = null;
   nuevoTrabajo.value = { nombre: '', descripcion: '' };
 };
-
 const editarTrabajo = (trabajo) => {
   nuevoTrabajo.value = { ...trabajo };
   trabajoEditando.value = trabajo.id;
@@ -194,32 +200,25 @@ const editarTrabajo = (trabajo) => {
   mostrarFormulario.value = true;
   scrollArribaInmediato();
 };
-
-// --- guardarTrabajo (MODIFICADO) ---
 const guardarTrabajo = async (datosRecibidos) => {
-  // 1. Validación
   if (!datosRecibidos.nombre) {
     mensajeModalError.value = 'Por favor completa el campo Nombre';
     mostrarModalError.value = true;
     return;
   }
-
   try {
     let mensaje = '';
     const datosParaAPI = {
       nombreTrabajo: datosRecibidos.nombre,
       descripcion: datosRecibidos.descripcion
     };
-
     if (trabajoEditando.value) {
-      // --- LÓGICA DE ACTUALIZACIÓN (PUT) ---
       const index = trabajos.value.findIndex(t => t.id === trabajoEditando.value);
       if (index === -1) throw new Error("No se encontró el trabajo original.");
       const nombreOriginal = trabajos.value[index].nombre;
       await actualizarTrabajoAPI(nombreOriginal, datosParaAPI);
       mensaje = 'Metodología actualizada correctamente';
     } else {
-      // --- LÓGICA DE CREACIÓN (POST) ---
       if (trabajos.value.some(t => t.nombre.toLowerCase() === datosRecibidos.nombre.toLowerCase())) {
         mensajeModalError.value = `La metodología "${datosRecibidos.nombre}" ya existe.`;
         mostrarModalError.value = true;
@@ -228,23 +227,16 @@ const guardarTrabajo = async (datosRecibidos) => {
       await crearTrabajoAPI(datosParaAPI);
       mensaje = 'Metodología creada correctamente';
     }
-
-    // --- Lógica de éxito ---
-    iniciarTransicionABoton(); // Cierra el formulario
-    await cargarTrabajos(); // Recarga la lista
-    mensajeModalExito.value = mensaje; // Prepara el mensaje
-    mostrarModalExito.value = true; // Muestra el modal
-
+    await cargarTrabajos(); 
+    mensajeModalExito.value = mensaje; 
+    mostrarModalExito.value = true; 
   } catch (error) {
-    // --- Lógica de error ---
     console.error("Error al guardar el trabajo:", error);
     const errorMsg = error.response?.data?.detail || 'No se pudo guardar la metodología.';
     mensajeModalError.value = errorMsg;
     mostrarModalError.value = true;
   }
 };
-
-// --- eliminarTrabajo (MODIFICADO) ---
 const eliminarTrabajo = async (id) => {
   const trabajo = trabajos.value.find(t => t.id === id);
   if (!trabajo) {
@@ -252,41 +244,33 @@ const eliminarTrabajo = async (id) => {
     mostrarModalError.value = true;
     return;
   }
-  
-  // Guarda el trabajo a eliminar y muestra el modal
   trabajoAEliminar.value = trabajo;
   mostrarModalConfirmacion.value = true;
 };
-
-// --- Nuevas funciones handler ---
 const handleContinuarExito = () => {
   mostrarModalExito.value = false;
   mensajeModalExito.value = '';
+  if (mostrarFormulario.value) {
+    iniciarTransicionABoton();
+  }
 };
-
 const handleContinuarError = () => {
   mostrarModalError.value = false;
   mensajeModalError.value = '';
 };
-
 const handleCancelarEliminacion = () => {
   mostrarModalConfirmacion.value = false;
   trabajoAEliminar.value = null;
 };
-
 const handleConfirmarEliminacion = async () => {
   if (!trabajoAEliminar.value) return;
-
   const nombreParaAPI = trabajoAEliminar.value.nombre;
   mostrarModalConfirmacion.value = false;
-
   try {
     await eliminarTrabajoAPI(nombreParaAPI);
-    
-    await cargarTrabajos(); // Recarga la lista
+    await cargarTrabajos(); 
     mensajeModalExito.value = 'Metodología eliminada correctamente';
     mostrarModalExito.value = true;
-
   } catch (error) {
     console.error("Error al eliminar el trabajo:", error);
     const errorMsg = error.response?.data?.detail || 'No se pudo eliminar la metodología.';
@@ -296,13 +280,11 @@ const handleConfirmarEliminacion = async () => {
     trabajoAEliminar.value = null;
   }
 };
-
 onMounted(cargarTrabajos);
 </script>
 
 <style scoped>
-/* --- ESTILOS LOCALES (Limpiados) --- */
-
+/* Estilos locales (sin cambios) */
 .contenedor-trabajos {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
@@ -314,23 +296,18 @@ onMounted(cargarTrabajos);
   min-height: 80vh;
   overflow-y: auto;
   box-sizing: border-box;
+  position: relative;
 }
-
 .encabezado-trabajos {
   text-align: center;
   margin-bottom: 2rem;
 }
-
 .subtitulo {
   color: #666;
   font-size: 1.1rem;
   font-weight: 300;
   letter-spacing: 0.5px;
 }
-
-/* Estilos de toast/confirmación global eliminados */
-
-/* Animaciones secuenciales */
 .fade-scale-enter-active {
   transition: all 0.2s ease-out;
 }
@@ -359,14 +336,11 @@ onMounted(cargarTrabajos);
   opacity: 0;
   transform: translateY(-8px);
 }
-
-/* Responsive */
 @media (max-width: 768px) {
   .contenedor-trabajos {
     padding: 1.5rem;
   }
 }
-
 @media (max-width: 480px) {
   .contenedor-trabajos {
     padding: 1rem;

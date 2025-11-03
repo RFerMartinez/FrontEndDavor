@@ -5,37 +5,47 @@
       <p class="subtitulo">Gestiona las suscripciones disponibles para los alumnos</p>
     </div>
 
-    <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBotón">
-      <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
-        <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
-          <i class="fas fa-plus"></i>
-          Agregar Nueva Suscripción
-        </button>
-      </div>
-    </transition>
-    <transition name="slide-down" @after-leave="transicionEnProgreso = false">
-      <AgregarModificar
-        v-if="mostrarFormulario"
-        v-model="datosFormulario" :es-edicion="suscripcionEditando !== null"
-        :config="configFormularioComputada" @guardar="guardarSuscripcion"
-        @cancelar="iniciarTransicionABoton"
-      />
-    </transition>
-
-    <Items
-      :items="suscripciones"
-      :config="configLista"
-      empty-message="No hay suscripciones cargadas"
-      empty-icon="fas fa-info-circle"
-      @editar="editarSuscripcion"
-      @eliminar="eliminarSuscripcion"
-    />
-
-    <div v-if="suscripcionNuevaGuardada" style="margin-top: 2rem; padding: 1rem; border: 1px dashed blue; background: #eef;">
-        <strong>Suscripción Nueva Guardada (Temporal):</strong>
-        <pre>{{ suscripcionNuevaGuardada }}</pre>
+    <div v-if="cargando" class="loading-container">
+      <div class="spinner"></div>
+      <span>Cargando suscripciones...</span>
     </div>
+    <template v-else>
+      <transition name="fade-scale" @after-leave="mostrarFormularioDespuesDeBotón">
+        <div v-if="!mostrarFormulario && !transicionEnProgreso" class="contenedor-boton-agregar">
+          <button class="btn-agregar-global" @click="iniciarTransicionAFormulario">
+            <i class="fas fa-plus"></i>
+            Agregar Nueva Suscripción
+          </button>
+        </div>
+      </transition>
+      
+      <transition 
+        name="slide-down" 
+        @after-leave="transicionEnProgreso = false"
+        @after-enter="transicionEnProgreso = false"
+      >
+        <AgregarModificar
+          v-if="mostrarFormulario"
+          v-model="datosFormulario" :es-edicion="suscripcionEditando !== null"
+          :config="configFormularioComputada" @guardar="guardarSuscripcion"
+          @cancelar="iniciarTransicionABoton"
+        />
+      </transition>
 
+      <Items
+        :items="suscripciones"
+        :config="configLista"
+        empty-message="No hay suscripciones cargadas"
+        empty-icon="fas fa-info-circle"
+        @editar="editarSuscripcion"
+        @eliminar="eliminarSuscripcion"
+      />
+
+      <div v-if="suscripcionNuevaGuardada" style="margin-top: 2rem; padding: 1rem; border: 1px dashed blue; background: #eef;">
+          <strong>Suscripción Nueva Guardada (Temporal):</strong>
+          <pre>{{ suscripcionNuevaGuardada }}</pre>
+      </div>
+    </template>
     <Transition name="modal-fade">
       <div v-if="mostrarModalExito" class="modal-overlay">
         <div class="modal-exito">
@@ -105,6 +115,7 @@
 </template>
 
 <script setup>
+// Script (sin cambios en la lógica, ya tenías 'cargando')
 import { ref, computed, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
 import Items from '../Items.vue';
@@ -117,13 +128,13 @@ import {
   actualizarPrecioSuscripcion
 } from '@/api/services/suscripcionesService';
 
-// --- Refs de Modales (NUEVO) ---
+// --- Refs de Modales
 const mostrarModalExito = ref(false);
 const mensajeModalExito = ref('');
 const mostrarModalError = ref(false);
 const mensajeModalError = ref('');
 const mostrarModalConfirmacion = ref(false);
-const suscripcionAEliminar = ref(null); // Para guardar la suscripción antes de confirmar
+const suscripcionAEliminar = ref(null);
 
 // --- Refs existentes ---
 const configFormBase = {
@@ -143,15 +154,12 @@ const configLista = ref({
 const suscripciones = ref([]);
 const mostrarFormulario = ref(false);
 const suscripcionEditando = ref(null);
-// const mensajeConfirmacion = ref(''); // <-- REEMPLAZADO por modales
 const transicionEnProgreso = ref(false);
 const datosFormulario = ref({ descripcion: '', precio: '' });
-const suscripcionNuevaGuardada = ref(null); // (Bloque debug)
+const suscripcionNuevaGuardada = ref(null);
 
-const cargando = ref(true);
+const cargando = ref(true); // <-- Ya tenías este ref
 const errorCarga = ref(null);
-
-// --- Funciones (Modificadas) ---
 
 const configFormularioComputada = computed(() => {
   const esEdicion = suscripcionEditando.value !== null;
@@ -165,7 +173,7 @@ const configFormularioComputada = computed(() => {
 });
 
 const cargarSuscripciones = async () => {
-  cargando.value = true;
+  cargando.value = true; // <-- Se activa la carga
   errorCarga.value = null;
   try {
     const data = await obtenerSuscripciones();
@@ -181,18 +189,17 @@ const cargarSuscripciones = async () => {
         precio: precioNum 
       };
     });
-    console.log('Suscripciones cargadas (mapeadas) desde la API:', suscripciones.value);
   } catch (error) {
     console.error('Error cargando suscripciones desde la API:', error);
     errorCarga.value = 'No se pudieron cargar las suscripciones.';
-    // Mostramos error al cargar
     mensajeModalError.value = error.response?.data?.detail || errorCarga.value;
     mostrarModalError.value = true;
   } finally {
-    cargando.value = false;
+    cargando.value = false; // <-- Se desactiva la carga
   }
 };
 
+// ... (resto de funciones sin cambios) ...
 const iniciarTransicionAFormulario = () => {
   datosFormulario.value = { descripcion: '', precio: '' };
   suscripcionEditando.value = null;
@@ -201,11 +208,11 @@ const iniciarTransicionAFormulario = () => {
 };
 const mostrarFormularioDespuesDeBotón = () => { mostrarFormulario.value = true; };
 const iniciarTransicionABoton = () => {
+  transicionEnProgreso.value = true; 
   mostrarFormulario.value = false;
   suscripcionEditando.value = null;
   datosFormulario.value = { descripcion: '', precio: '' };
 };
-
 const editarSuscripcion = (suscripcion) => {
   datosFormulario.value = {
       descripcion: suscripcion.descripcion,
@@ -216,10 +223,7 @@ const editarSuscripcion = (suscripcion) => {
   if (!mostrarFormulario.value) { transicionEnProgreso.value = true; }
   mostrarFormulario.value = true;
 };
-
-// --- guardarSuscripcion (MODIFICADO) ---
 const guardarSuscripcion = async (datosRecibidos) => {
-  // 1. Validaciones
   const claveCampo1 = configFormularioComputada.value.campo1.key;
   const claveCampo2 = configFormularioComputada.value.campo2.key;
   const valorCampo1 = datosRecibidos[claveCampo1];
@@ -237,21 +241,15 @@ const guardarSuscripcion = async (datosRecibidos) => {
     mostrarModalError.value = true;
     return;
   }
-
-  // 2. Lógica de API
   try {
     let mensaje = '';
-
     if (suscripcionEditando.value !== null) {
-      // --- MODO ACTUALIZACIÓN ---
       const index = suscripciones.value.findIndex(s => s.id === suscripcionEditando.value);
       if (index === -1) throw new Error("No se pudo encontrar la suscripción para actualizar.");
-      
       const nombreSuscripcion = suscripciones.value[index].descripcion;
       await actualizarPrecioSuscripcion(nombreSuscripcion, precioNum);
       mensaje = 'Precio de suscripción actualizado';
     } else {
-      // --- MODO CREACIÓN ---
       const diasNum = parseInt(valorCampo1);
       if (isNaN(diasNum) || diasNum <= 0) {
         mensajeModalError.value = 'La cantidad de días debe ser un número entero mayor a 0.';
@@ -271,23 +269,16 @@ const guardarSuscripcion = async (datosRecibidos) => {
       await crearSuscripcion(nuevaSub);
       mensaje = 'Suscripción creada correctamente';
     }
-
-    // --- 3. Acciones de Éxito ---
-    iniciarTransicionABoton(); // Cierra el formulario
-    await cargarSuscripciones(); // Recarga la lista
-    mensajeModalExito.value = mensaje; // Prepara el mensaje
-    mostrarModalExito.value = true; // Muestra el modal de éxito
-
+    await cargarSuscripciones();
+    mensajeModalExito.value = mensaje;
+    mostrarModalExito.value = true;
   } catch (error) {
-    // --- 4. Manejo de Errores de API ---
     console.error("Error al guardar la suscripción:", error);
     const errorMsg = error.response?.data?.detail || 'No se pudo completar la operación.';
     mensajeModalError.value = errorMsg;
     mostrarModalError.value = true;
   }
 };
-
-// --- eliminarSuscripcion (MODIFICADO) ---
 const eliminarSuscripcion = (id) => {
   const suscripcion = suscripciones.value.find(s => s.id === id);
   if (!suscripcion) {
@@ -295,40 +286,32 @@ const eliminarSuscripcion = (id) => {
     mostrarModalError.value = true;
     return;
   }
-  
-  // Guarda la suscripción a eliminar y muestra el modal
   suscripcionAEliminar.value = suscripcion;
   mostrarModalConfirmacion.value = true;
 };
-
-// --- Nuevas funciones handler ---
 const handleContinuarExito = () => {
   mostrarModalExito.value = false;
   mensajeModalExito.value = '';
+  if (mostrarFormulario.value) {
+    iniciarTransicionABoton();
+  }
 };
-
 const handleContinuarError = () => {
   mostrarModalError.value = false;
   mensajeModalError.value = '';
 };
-
 const handleCancelarEliminacion = () => {
   mostrarModalConfirmacion.value = false;
   suscripcionAEliminar.value = null;
 };
-
 const handleConfirmarEliminacion = async () => {
   if (!suscripcionAEliminar.value) return;
-
   const nombreParaAPI = suscripcionAEliminar.value.descripcion;
-  mostrarModalConfirmacion.value = false; // Cierra el modal de confirmación
-
+  mostrarModalConfirmacion.value = false; 
   try {
-    console.log(`Llamando a API para ELIMINAR suscripción: ${nombreParaAPI}`);
     const exito = await eliminarSuscripcionAPI(nombreParaAPI);
-
     if (exito) {
-      await cargarSuscripciones(); // Recarga la lista
+      await cargarSuscripciones(); 
       mensajeModalExito.value = 'Suscripción eliminada correctamente';
       mostrarModalExito.value = true;
     } else {
@@ -340,16 +323,14 @@ const handleConfirmarEliminacion = async () => {
     mensajeModalError.value = errorMsg;
     mostrarModalError.value = true;
   } finally {
-    suscripcionAEliminar.value = null; // Limpia la selección
+    suscripcionAEliminar.value = null;
   }
 };
-
 onMounted(cargarSuscripciones);
 </script>
 
 <style scoped>
-/* --- ESTILOS LOCALES (Limpiados) --- */
-
+/* Estilos locales (sin cambios) */
 .contenedor-suscripciones {
   padding: 2rem;
   background-color: rgba(255, 255, 255, 0.85);
@@ -361,23 +342,18 @@ onMounted(cargarSuscripciones);
   min-height: 80vh;
   overflow-y: auto;
   box-sizing: border-box;
+  position: relative;
 }
-
 .encabezado-suscripciones {
   text-align: center;
   margin-bottom: 2rem;
 }
-
 .subtitulo {
   color: #666;
   font-size: 1.1rem;
   font-weight: 300;
   letter-spacing: 0.5px;
 }
-
-/* Los estilos de toast/confirmación global se eliminaron de aquí */
-
-/* Animaciones secuenciales */
 .fade-scale-enter-active {
   transition: all 0.3s ease-out;
 }
@@ -392,7 +368,6 @@ onMounted(cargarSuscripciones);
   opacity: 0;
   transform: scale(0.8);
 }
-
 .slide-down-enter-active {
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -407,14 +382,11 @@ onMounted(cargarSuscripciones);
   opacity: 0;
   transform: translateY(-10px);
 }
-
-/* Responsive */
 @media (max-width: 768px) {
   .contenedor-suscripciones {
     padding: 1.5rem;
   }
 }
-
 @media (max-width: 480px) {
   .contenedor-suscripciones {
     padding: 1rem;

@@ -471,344 +471,331 @@ const guardarModificacionCuota = async (cuotaModificada) => {
 <style scoped>
 /* ESTILOS ORIGINALES COMPLETOS */
 .contenedor-info-alumno {
-padding: 2rem;
-background-color: rgba(255, 255, 255, 0.85);
-border-radius: 20px;
-width: 100%;
-max-width: none;
-margin: 0;
-box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-min-height: 80vh;
-overflow-y: auto;
-box-sizing: border-box;
-position: relative;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  min-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .encabezado-info {
-display: grid; 
-grid-template-columns: 1fr auto 1fr; 
-align-items: center;
-margin-bottom: 2rem;
-flex-wrap: wrap; 
-gap: 1rem;
+  display: grid; 
+  grid-template-columns: 1fr auto 1fr; 
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap; 
+  gap: 1rem;
 }
 .encabezado-info .btn-volver-global {
-justify-self: start; 
+  justify-self: start; 
 }
 
 .tarjeta-alumno {
-background: white;
-border-radius: 15px;
-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-overflow: hidden;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-/* --- CORRECCIÓN --- */
-/* Quitamos el padding de la tarjeta principal */
 .tarjeta-contenido {
-/* padding: 2rem; */ /* <- Eliminado */
-padding: 0; /* <- Añadido */
+  padding: 0;
 }
 
 .separador-seccion {
-height: 1px;
-background: linear-gradient(to right, transparent, #e0e0e0, transparent);
-/* Añadimos margen horizontal para que no toque los bordes */
-margin: 2rem 2rem; 
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+  margin: 2rem 2rem; 
 }
 
-/* --- CORRECCIÓN --- */
-/* Añadimos padding a las secciones internas */
 .seccion-info {
-margin-bottom: 2.5rem;
-padding: 1.5rem 2rem; /* Añadido padding horizontal */
-background: #fafafa;
-border-radius: 10px;
-border: 1px solid #f0f0f0;
-/* Las tablas ahora están dentro de la sección blanca, 
-   así que ajustamos el margen para que no se peguen */
-margin-left: 2rem;
-margin-right: 2rem;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem 2rem;
+  background: #fafafa;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  margin-left: 2rem;
+  margin-right: 2rem;
 }
 .seccion-info .titulo-seccion {
-display: flex;
-align-items: center;
-gap: 0.8rem;
-font-size: 1.3rem;
-color: #2c3e50;
-margin-bottom: 1.5rem;
-font-weight: 600;
-border-bottom: 2px solid #d32f2f;
-padding-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.3rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  border-bottom: 2px solid #d32f2f;
+  padding-bottom: 0.5rem;
 }
 .seccion-info .titulo-seccion i { color: #d32f2f; }
 
-
 .seccion-info:last-child {
-margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .sin-alumno {
-text-align: center;
-padding: 4rem 2rem;
-color: #6c757d;
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6c757d;
 }
 .sin-alumno i { margin-bottom: 1.5rem; color: #e9ecef; }
 .sin-alumno h3 { margin-bottom: 1rem; color: #495057; font-size: 1.5rem; }
 .sin-alumno p { margin-bottom: 2rem; font-size: 1rem; }
 
-/* --- CORRECCIÓN --- */
-/* Añadimos padding a la sección de botones */
 .seccion-botones { 
-margin-top: 3rem; 
-padding: 2rem; /* Añadido padding */
-border-top: 2px solid #e0e0e0; 
+  margin-top: 3rem; 
+  padding: 2rem;
+  border-top: 2px solid #e0e0e0; 
 }
-.botones-accion { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-.btn-accion { display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 1.5rem; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }
+.botones-accion { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 1rem; 
+}
+.btn-accion { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 0.5rem; 
+  padding: 1rem 1.5rem; 
+  border: none; 
+  border-radius: 10px; 
+  font-family: 'Poppins', sans-serif; 
+  font-weight: 600; 
+  font-size: 1rem; 
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+}
 .btn-modificar { background: #2196F3; color: white; }
 .btn-modificar:hover { background: #1976D2; transform: translateY(-2px); }
 .btn-suscripcion { background: #FF9800; color: white; }
 .btn-suscripcion:hover { background: #F57C00; transform: translateY(-2px); }
 .btn-estado-activo { 
-background: #4CAF50; /* Verde */
-color: white; 
+  background: #4CAF50; /* Verde */
+  color: white; 
 }
 .btn-estado-activo:hover { 
-background: #388E3C; 
-transform: translateY(-2px); 
+  background: #388E3C; 
+  transform: translateY(-2px); 
 }
-
 .btn-estado-inactivo { 
-background: #FF7043; /* Naranja Intenso (Distinto del rojo F44336 de eliminar) */ 
-color: white; 
+  background: #FF7043; /* Naranja Intenso */ 
+  color: white; 
 }
 .btn-estado-inactivo:hover { 
-background: #F4511E; /* Naranja más oscuro */ 
-transform: translateY(-2px); 
+  background: #F4511E; /* Naranja más oscuro */ 
+  transform: translateY(-2px); 
 }
 .btn-eliminar { background: #F44336; color: white; }
 .btn-eliminar:hover { background: #D32F2F; transform: translateY(-2px); }
 
-/* ----- INICIO: Estilos para Modales (Confirmación y Éxito) ----- */
+/* ----- Estilos para Modales (Locales de este componente) ----- */
 .modal-confirmacion {
-border-top: 5px solid #E65100 !important;
+  border-top: 5px solid #E65100 !important;
 }
 .modal-header-advertencia {
-flex-direction: column; 
-align-items: center; 
-padding-top: 1.5rem; 
-padding-bottom: 0.5rem; 
-border-bottom: none; 
+  flex-direction: column; 
+  align-items: center; 
+  padding-top: 1.5rem; 
+  padding-bottom: 0.5rem; 
+  border-bottom: none; 
 }
-
 .modal-header-advertencia i {
-color: #E65100; 
-font-size: 3.5rem; 
-margin-bottom: 0.8rem; 
+  color: #E65100; 
+  font-size: 3.5rem; 
+  margin-bottom: 0.8rem; 
 }
-
 .modal-header-advertencia h3 {
-font-size: 1.6rem; 
-font-weight: 600;
-color: #333; 
-margin: 0;
-text-align: center;
+  font-size: 1.6rem; 
+  font-weight: 600;
+  color: #333; 
+  margin: 0;
+  text-align: center;
 }
-
 .modal-body-exito p:not(.advertencia-modal) {
-font-size: 1.05rem; 
-line-height: 1.5;
-color: #444;
-text-align: center; 
+  font-size: 1.05rem; 
+  line-height: 1.5;
+  color: #444;
+  text-align: center; 
 }
-
 .advertencia-modal {
-font-size: 0.95rem; 
-font-weight: 500;
-color: #B71C1C; 
-background-color: #FFEBEE; 
-padding: 1rem 1.2rem; 
-border-radius: 10px; 
-border: 1px solid #FFCDD2;
-margin-top: 1.5rem; 
-text-align: center; 
-max-width: 90%; 
-margin-left: auto; 
-margin-right: auto; 
-box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
+  font-size: 0.95rem; 
+  font-weight: 500;
+  color: #B71C1C; 
+  background-color: #FFEBEE; 
+  padding: 1rem 1.2rem; 
+  border-radius: 10px; 
+  border: 1px solid #FFCDD2;
+  margin-top: 1.5rem; 
+  text-align: center; 
+  max-width: 90%; 
+  margin-left: auto; 
+  margin-right: auto; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
 }
-
 .modal-footer-exito {
-justify-content: center; 
-gap: 1.2rem; 
-padding-top: 1.5rem; 
-padding-bottom: 1.5rem; 
-border-top: none; 
-background: none; 
+  justify-content: center; 
+  gap: 1.2rem; 
+  padding-top: 1.5rem; 
+  padding-bottom: 1.5rem; 
+  border-top: none; 
+  background: none; 
 }
-
 .btn-modal-cancelar, .btn-modal-confirmar {
-font-family: 'Poppins', sans-serif;
-font-weight: 600;
-font-size: 1rem; 
-padding: 0.8rem 1.8rem; 
-border-radius: 30px; 
-border: none;
-cursor: pointer;
-transition: all 0.2s ease-in-out; 
-box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1rem; 
+  padding: 0.8rem 1.8rem; 
+  border-radius: 30px; 
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
 }
-
 .btn-modal-cancelar {
-background: #EEEEEE; 
-color: #555;
+  background: #EEEEEE; 
+  color: #555;
 }
 .btn-modal-cancelar:hover {
-background: #D5D5D5;
-transform: translateY(-1px); 
-box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background: #D5D5D5;
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
-
 .btn-confirmar-normal {
-background-color: #4CAF50; 
-color: white;
+  background-color: #4CAF50; 
+  color: white;
 }
 .btn-confirmar-normal:hover {
-background-color: #388E3C;
-transform: translateY(-1px); 
-box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background-color: #388E3C;
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
-
 .btn-confirmar-peligro {
-background-color: #F44336; 
-color: white;
+  background-color: #F44336; 
+  color: white;
 }
 .btn-confirmar-peligro:hover {
-background-color: #D32F2F;
-transform: translateY(-1px); 
-box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background-color: #D32F2F;
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 @media (max-width: 600px) {
-.modal-footer-exito {
-flex-direction: column; 
-gap: 0.8rem; 
+  .modal-footer-exito {
+    flex-direction: column; 
+    gap: 0.8rem; 
+  }
+  .btn-modal-cancelar, .btn-modal-confirmar {
+    width: 100%; 
+  }
 }
-.btn-modal-cancelar, .btn-modal-confirmar {
-width: 100%; 
-}
+/* ----- FIN Estilos Modales ----- */
+
+/* --- RESPONSIVE --- */
+/* (Esta regla estaba mal anidada, ahora está separada) */
+@media (max-width: 1560px) { 
+  .botones-accion { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 1rem; 
+  } 
 }
 
-/* ----- FIN: Estilos para Modales ----- */
+/* Para tablets y pantallas medianas */
+@media (max-width: 768px) {
+  /*
+    ===== CORRECCIÓN APLICADA AQUÍ =====
+    Reduce el padding del contenedor principal para dar
+    más espacio a los componentes hijos.
+  */
+  .contenedor-info-alumno { 
+    padding: 1rem; /* Antes era 1.5rem */
+  } 
 
-@media (max-width: 1560px) 
-{ 
-.botones-accion { 
-grid-template-columns: repeat(2, 1fr); 
-gap: 1rem; } 
-}
+  .encabezado-info {
+    display: flex; 
+    flex-direction: column;
+    text-align: center;
+    align-items: stretch;
+    grid-template-columns: none; 
+  }
+  .encabezado-info .btn-volver-global {
+    justify-content: center;
+    margin-bottom: 1rem;
+    justify-self: auto;
+  }
 
-/* --- INICIO DE CAMBIOS RESPONSIVE --- */
-@media (max-width: 768px) 
-{
-.contenedor-info-alumno { 
-padding: 1.5rem; 
-} 
+  /* Reduce el padding de la tarjeta (vista info) */
+  .tarjeta-contenido { 
+    padding: 1rem; /* Antes era 1.5rem */
+  }
 
-.encabezado-info {
-display: flex; 
-flex-direction: column;
-text-align: center;
-align-items: stretch;
-grid-template-columns: none; 
-}
-.encabezado-info .btn-volver-global {
-justify-content: center;
-margin-bottom: 1rem;
-justify-self: auto;
-}
+  .separador-seccion { 
+    margin: 1.5rem 0; 
+  }
 
-/* CORRECCIÓN: 
-  La tarjeta blanca SÍ mantiene su padding horizontal.
-*/
-.tarjeta-contenido { 
-padding: 1.5rem; 
-}
+  .seccion-info { 
+    padding: 1rem 0; 
+    border: none;
+    background: none; 
+    margin-left: 0;
+    margin-right: 0;
+  }
 
-.separador-seccion { 
-margin: 1.5rem 0; 
-}
+  .seccion-info .titulo-seccion {
+    /* Ajusta el padding para que coincida con el nuevo padding de la tarjeta */
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 
-/* CORRECCIÓN: 
-  La sección de la tabla QUITA su padding horizontal
-  y su fondo para que la tabla se expanda.
-*/
-.seccion-info { 
-padding: 1rem 0; 
-border: none;
-background: none; 
-/* CORRECCIÓN: Quitamos márgenes laterales */
-margin-left: 0;
-margin-right: 0;
-}
+  .seccion-botones {
+    padding: 2rem 1rem 0 1rem; /* Ajustado */
+  }
 
-/* CORRECCIÓN: 
-  Añadimos padding horizontal SÓLO al título de la sección,
-  para que coincida con el padding de .tarjeta-contenido
-*/
-.seccion-info .titulo-seccion {
-padding-left: 1.5rem;
-padding-right: 1.5rem;
+  .botones-accion { 
+    grid-template-columns: 1fr; 
+  }
+  .btn-accion { 
+    padding: 0.8rem 1rem; 
+    font-size: 0.9rem; 
+  }
 }
 
-/* CORRECCIÓN: 
-  Añadimos padding a la sección de botones en móvil
-*/
-.seccion-botones {
-  padding: 2rem 1.5rem 0 1.5rem;
-}
-
-.botones-accion { 
-grid-template-columns: 1fr; 
-}
-.btn-accion { 
-padding: 0.8rem 1rem; 
-font-size: 0.9rem; 
-}
-.mensaje-confirmacion { 
-top: 10px; 
-right: 10px; 
-left: 10px; 
-}
-}
-
+/* Para celulares */
 @media (max-width: 480px) {
-.contenedor-info-alumno { 
-padding: 1rem; 
-} 
+  /*
+    ===== CORRECCIÓN APLICADA AQUÍ =====
+    Reduce el padding aún más en celulares.
+  */
+  .contenedor-info-alumno { 
+    padding: 0.5rem; /* Antes era 1rem */
+  } 
 
-.tarjeta-contenido { 
-padding: 1rem; 
-}
+  .tarjeta-contenido { 
+    padding: 0.5rem; /* Antes era 1rem */
+  }
 
-.separador-seccion { margin: 1rem 0; }
+  .separador-seccion { 
+    margin: 1rem 0; 
+  }
 
-.seccion-info { 
-padding: 0.8rem 0; 
-}
+  .seccion-info { 
+    padding: 0.8rem 0; 
+  }
 
-.seccion-info .titulo-seccion {
-padding-left: 1rem;
-padding-right: 1rem;
-}
+  .seccion-info .titulo-seccion {
+    padding-left: 0.5rem; /* Ajustado */
+    padding-right: 0.5rem; /* Ajustado */
+  }
 
-/* CORRECCIÓN: 
-  Añadimos padding a la sección de botones en móvil
-*/
-.seccion-botones {
-  padding: 2rem 1rem 0 1rem;
-}
+  .seccion-botones {
+    padding: 2rem 0.5rem 0 0.5rem; /* Ajustado */
+  }
 }
 /* --- FIN DE CAMBIOS RESPONSIVE --- */
 </style>

@@ -52,6 +52,9 @@
               class="input-estilizado"
               title="Este dato debe ser único para cada grupo y no se puede saltear."
               aria-label="Número de Grupo, debe ser único y no puede saltearse."
+              
+              :disabled="!props.grupo._isNew"
+              
             />
           </div>
 
@@ -400,6 +403,8 @@ watchEffect(() => {
 .input-estilizado[type="text"] {
   max-width: 200px; 
 }
+
+/* ===== ESTILO PARA INPUT DESHABILITADO ===== */
 .input-estilizado:disabled {
   background: #f0f0f0;
   color: #999;
