@@ -156,13 +156,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import Estado from '../Estado.vue'
-import TablaCuota from '../Usuario/TablaCuotas.vue'
-import TablaHorarios from '../TablaHorarios.vue'
+import TablaCuota from '../../Tablas y Filas/TablaCuotas/TablaCuotas.vue'
+import TablaHorarios from '../../TablaHorarios.vue'
 import ModificarDatosAlumno from './ModificarDatosAlumno.vue'
 import ModificarSusTrabAlumno from './ModificarSusTrabAlumno.vue'
-import DetallePersona from './DetallePersona.vue'; // <-- Importado
-import Titulo from '../Titulo.vue';
+import DetallePersona from '../DetallePersona.vue'; // <-- Importado
+import Titulo from '../../Titulo.vue';
 import ModificarCuota from './ModificarCuota.vue'; // <-- AÑADE ESTA LÍNEA (ajusta la ruta si es necesario)
 
 // ... (debajo de 'const cuotas = ref([])')

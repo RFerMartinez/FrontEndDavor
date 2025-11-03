@@ -121,7 +121,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import BotonAccion from './BotonAccion.vue';
-import Estado from '../Estado.vue';
+import Estado from '../../Estado.vue';
 
 const props = defineProps({
   cuota: Object,

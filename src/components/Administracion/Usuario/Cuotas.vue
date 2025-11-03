@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import TablaCuotas from './TablaCuotas.vue'
+import TablaCuotas from '../Tablas y Filas/TablaCuotas/TablaCuotas.vue'
 import Titulo from '../Titulo.vue'
 
 // Función del servidor para obtener las cuotas (ferchu)

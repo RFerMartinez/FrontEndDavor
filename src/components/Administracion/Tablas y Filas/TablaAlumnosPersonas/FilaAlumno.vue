@@ -135,7 +135,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import Estado from '../Estado.vue'; // Ajusta la ruta
+import Estado from '../../Estado.vue'; // Ajusta la ruta
 
 const props = defineProps({
   alumno: Object,

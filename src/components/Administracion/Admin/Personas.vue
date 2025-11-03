@@ -48,7 +48,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import TablaAlumnos from './TablaAlumnos.vue'; 
+import TablaAlumnos from '../Tablas y Filas/TablaAlumnosPersonas/TablaAlumnos.vue'; 
 import Titulo from '../Titulo.vue';
 import { filterItems } from '@/utils/formatters'; 
 import { listarPersonas } from '@/api/services/personaService';
