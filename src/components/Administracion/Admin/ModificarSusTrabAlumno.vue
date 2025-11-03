@@ -138,8 +138,8 @@ const hayCambios = () => {
 
   // Compara si los datos base cambiaron
   const datosBaseCambiados = datosModificados.value.suscripcion !== suscripcionOriginal.value ||
-                           datosModificados.value.trabajoactual !== trabajoOriginal.value ||
-                           datosModificados.value.nivel !== nivelOriginal.value;
+                          datosModificados.value.trabajoactual !== trabajoOriginal.value ||
+                          datosModificados.value.nivel !== nivelOriginal.value;
 
   // Si la suscripción cambió, los horarios *deben* ser diferentes (incluso si están vacíos)
   if (suscripcionCambiada.value) {

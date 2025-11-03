@@ -368,23 +368,13 @@ const manejarGuardarDatos = async (datosActualizados) => {
 }
 
 
-const DatosModificadosAlumno = ref(null)
+
+
 const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
-    DatosModificadosAlumno.value = datosActualizados.alumno;
     
     if (datosActualizados.horarios) {
-        
-        // --- AQUÍ ESTÁ LA CORRECCIÓN ---
-        // No reemplaces el objeto 'horariosAlumno', 
-        // actualiza su propiedad interna 'horarios'.
-        horariosAlumno.value.horarios = JSON.parse(JSON.stringify(datosActualizados.horarios, null, 2));
-        // --- FIN DE LA CORRECCIÓN ---
-
-        console.log('InfoAlumno DatosModificados:',JSON.stringify(datosActualizados, null, 2));
-        console.log('AlumnoModificado:', JSON.stringify(DatosModificadosAlumno, null, 2));
-        
-        // Ahora este console.log mostrará el objeto { horarios: [...] }
-        console.log('HorariosModificados', horariosAlumno); 
+      // Ahora este console.log mostrará el objeto { horarios: [...] }
+      console.log('HorariosModificados', JSON.stringify(datosActualizados, null, 2)); 
     }
     
     // El resto de tu lógica para el modal está bien
