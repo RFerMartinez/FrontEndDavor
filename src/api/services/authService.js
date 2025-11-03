@@ -10,7 +10,7 @@ import { saveUser, removeUser, getUser as getUserFromStorage } from '../storage/
  * @param {string} password - La contraseña.
  */
 export const login = async (username, password) => {
-    // removeUser();
+    removeUser();
     try {
         const params = new URLSearchParams();
         params.append('username', username);

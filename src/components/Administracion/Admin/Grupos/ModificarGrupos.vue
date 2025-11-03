@@ -178,7 +178,7 @@ const manejarGuardarGrupo = async (grupoModificado) => {
   } catch (error) {
     // --- Reemplaza Alert por Modal de Error ---
     console.error("Error al guardar el grupo:", error);
-    const errorMsg = error.response?.data?.detail || 'No se pudo guardar el grupo.';
+    const errorMsg = error.response?.data?.error || 'No se pudo guardar el grupo.';
     
     mensajeModalError.value = errorMsg;
     mostrarModalError.value = true;

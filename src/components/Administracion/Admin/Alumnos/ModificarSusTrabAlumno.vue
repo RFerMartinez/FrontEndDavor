@@ -80,10 +80,10 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import TablaHorarios from '../TablaHorarios.vue';
-import ListadoSuscripciones from './ListadoSuscripciones.vue';
-import ListadoTrabajos from './ListadoTrabajos.vue';
-import ListadoNiveles from './ListadoNiveles.vue';
+import TablaHorarios from '../../TablaHorarios.vue';
+import ListadoSuscripciones from '../Listados/ListadoSuscripciones.vue';
+import ListadoTrabajos from '../Listados/ListadoTrabajos.vue';
+import ListadoNiveles from '../Listados/ListadoNiveles.vue';
 
 const props = defineProps({
   alumno: Object,
@@ -138,8 +138,8 @@ const hayCambios = () => {
 
   // Compara si los datos base cambiaron
   const datosBaseCambiados = datosModificados.value.suscripcion !== suscripcionOriginal.value ||
-                           datosModificados.value.trabajoactual !== trabajoOriginal.value ||
-                           datosModificados.value.nivel !== nivelOriginal.value;
+                          datosModificados.value.trabajoactual !== trabajoOriginal.value ||
+                          datosModificados.value.nivel !== nivelOriginal.value;
 
   // Si la suscripción cambió, los horarios *deben* ser diferentes (incluso si están vacíos)
   if (suscripcionCambiada.value) {
@@ -393,8 +393,58 @@ const cancelar = () => { emit('cancelar'); };
   transform: none; 
 }
 
+/* ===== INICIO: CORRECCIÓN RESPONSIVE ===== */
+
 @media (max-width: 768px) { 
-  .contenedor-modificar-sustrab { padding: 1rem; } 
-  .botones-formulario { flex-direction: column; } 
+  /* Quitamos el padding del contenedor hijo para que 
+    herede el padding del padre (InfoAlumno) 
+  */
+  .contenedor-modificar-sustrab { 
+    padding: 0; 
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    min-height: auto; /* Deja que el contenido defina la altura */
+  } 
+  
+  /* Reducimos el padding interno del contenido */
+  .contenido-modificacion {
+    padding: 1rem;
+  }
+  
+  /* Reducimos el padding del header */
+  .header-modificacion {
+    padding: 1.5rem;
+  }
+  
+  /* Reducimos el padding de la tabla */
+  .contenedor-tabla-horarios {
+    padding: 0.5rem;
+  }
+  
+  .botones-formulario { 
+    flex-direction: column; 
+  } 
 }
+
+@media (max-width: 480px) {
+  /* Reducimos aún más el padding en celulares */
+  .contenido-modificacion {
+    padding: 0.5rem;
+  }
+  
+  .header-modificacion {
+    padding: 1.5rem 1rem;
+  }
+  
+  /* Quitamos el padding y bordes del contenedor de la tabla
+    para darle el máximo espacio posible.
+  */
+  .contenedor-tabla-horarios {
+    padding: 0;
+    border: none;
+    background: none;
+  }
+}
+/* ===== FIN: CORRECCIÓN RESPONSIVE ===== */
 </style>

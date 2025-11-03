@@ -106,9 +106,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import TablaAlumnos from './TablaAlumnos.vue';
+import TablaAlumnos from '../../Tablas y Filas/TablaAlumnosPersonas/TablaAlumnos.vue';
 import { obtenerTodosLosAlumnos } from '@/api/services/alumnoService';
-import Titulo from '../Titulo.vue';
+import Titulo from '../../Titulo.vue';
 import { filterItems } from '@/utils/formatters';
 
 const alumnos = ref([]);

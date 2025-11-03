@@ -105,8 +105,8 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import ListadoSuscripciones from './ListadoSuscripciones.vue';
-import ListadoTrabajos from './ListadoTrabajos.vue';
+import ListadoSuscripciones from '../Listados/ListadoSuscripciones.vue';
+import ListadoTrabajos from '../Listados/ListadoTrabajos.vue';
 
 const props = defineProps({
   cuotaOriginal: {

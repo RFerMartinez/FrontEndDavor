@@ -224,9 +224,9 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import ListadoSuscripciones from './ListadoSuscripciones.vue';
-import ListadoTrabajos from './ListadoTrabajos.vue';
-import ListadoNiveles from './ListadoNiveles.vue';
+import ListadoSuscripciones from './Listados/ListadoSuscripciones.vue';
+import ListadoTrabajos from './Listados/ListadoTrabajos.vue';
+import ListadoNiveles from './Listados/ListadoNiveles.vue';
 import TablaHorarios from '../TablaHorarios.vue';
 import Titulo from '../Titulo.vue';
 

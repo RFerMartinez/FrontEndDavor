@@ -6,9 +6,9 @@
 
     <div class="campos-formulario" :class="{ 'stacked': config.layout === 'stacked' }">
 
+      <!-- Campo 1 (sin cambios) -->
       <div class="campo">
         <label :for="config.campo1.key">{{ config.campo1.label }}</label>
-
         <div v-if="esContextoSuscripciones && esEdicion" class="readonly-text-display">
           {{ itemLocal[config.campo1.key] }}
         </div>
@@ -37,6 +37,7 @@
         </template>
       </div>
 
+      <!-- Campo 2 (sin cambios) -->
       <div class="campo">
         <label :for="config.campo2.key">{{ config.campo2.label }}</label>
         <input
@@ -64,7 +65,8 @@
     </div>
 
     <div class="botones-formulario">
-      <button class="btn btn-guardar" @click="emitirGuardar">
+      <!-- MODIFICADO: @click ahora llama a "intentarGuardar" -->
+      <button class="btn btn-guardar" @click="intentarGuardar">
         <i class="fas fa-save"></i>
         {{ esEdicion ? 'Actualizar' : 'Guardar' }}
       </button>
@@ -74,10 +76,37 @@
       </button>
     </div>
   </div>
+
+  <!-- ========= V V V MODAL DE CONFIRMACIÓN AÑADIDO V V V ========= -->
+  <Transition name="modal-fade">
+    <div v-if="mostrarConfirmacion" class="modal-overlay">
+      <div class="modal-confirmacion"> <!-- <-- Clase global -->
+        <div class="modal-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <!-- El título es dinámico -->
+          <h3>{{ esEdicion ? 'Confirmar Edición' : 'Confirmar Creación' }}</h3>
+        </div>
+        <div class="modal-body">
+          <!-- El mensaje es dinámico -->
+          <p>{{ mensajeConfirmacion }}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal btn-cancelar-modal" @click="cancelarConfirmacion">
+            Cancelar
+          </button>
+          <button class="btn-modal btn-confirmar-modal" @click="confirmarGuardar">
+            Sí, Guardar
+          </button>
+        </div>
+      </div>
+    </div>
+  </Transition>
+  <!-- ========= ^ ^ ^ FIN MODAL DE CONFIRMACIÓN ^ ^ ^ ========= -->
+
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue'; // <-- AÑADIDO 'ref'
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
@@ -93,13 +122,59 @@ const itemLocal = computed({
   set: (value) => { emit('update:modelValue', value); }
 });
 
-// --- NUEVO: Computed para saber si es contexto suscripciones ---
-// (Reintroducido porque es necesario en el template)
 const esContextoSuscripciones = computed(() => props.config.contexto === 'suscripciones');
-// --- FIN NUEVO ---
 
-// Emitir guardar
-const emitirGuardar = () => { emit('guardar', itemLocal.value); };
+// --- INICIO: LÓGICA DEL MODAL DE CONFIRMACIÓN ---
+
+const mostrarConfirmacion = ref(false);
+
+/**
+ * Crea el mensaje dinámico para el modal de confirmación.
+ */
+const mensajeConfirmacion = computed(() => {
+  // Determina el "sujeto" (Suscripción o Metodología)
+  const esSuscripcion = props.config.contexto === 'suscripciones';
+  const tipoItem = esSuscripcion ? 'suscripción' : 'metodología';
+  
+  if (props.esEdicion) {
+    return `¿Estás seguro que deseas guardar los cambios en la ${tipoItem}?`;
+  } else {
+    return `¿Estás seguro que deseas crear la nueva ${tipoItem}?`;
+  }
+});
+
+/**
+ * (1) Se llama al hacer clic en el botón "Guardar" / "Actualizar".
+ * Solo muestra el modal.
+ */
+const intentarGuardar = () => {
+  // Aquí puedes añadir validaciones básicas si quieres (ej. que no esté vacío)
+  // if (!itemLocal.value[props.config.campo1.key] || !itemLocal.value[props.config.campo2.key]) {
+  //   alert('Por favor, complete todos los campos.');
+  //   return;
+  // }
+  
+  // Muestra el modal de confirmación
+  mostrarConfirmacion.value = true;
+};
+
+/**
+ * (2) Se llama al hacer clic en "Cancelar" DENTRO del modal.
+ */
+const cancelarConfirmacion = () => {
+  mostrarConfirmacion.value = false;
+};
+
+/**
+ * (3) Se llama al hacer clic en "Sí, Guardar" DENTRO del modal.
+ * Esta era tu función 'emitirGuardar' original.
+ */
+const confirmarGuardar = () => {
+  mostrarConfirmacion.value = false;
+  emit('guardar', itemLocal.value); 
+};
+// --- FIN: LÓGICA DEL MODAL ---
+
 </script>
 
 <style scoped>
