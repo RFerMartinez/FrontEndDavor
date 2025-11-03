@@ -56,8 +56,8 @@
 // --- SCRIPT (SIN CAMBIOS) ---
 import { ref, computed, onMounted } from 'vue';
 import AgregarModificar from './AgregarModificar.vue';
-import Items from './Items.vue';
-import Titulo from '../Titulo.vue';
+import Items from '../Items.vue';
+import Titulo from '../../Titulo.vue';
 
 import {
   obtenerSuscripciones,

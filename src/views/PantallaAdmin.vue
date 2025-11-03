@@ -186,8 +186,8 @@ import Sidebar from '@/components/Administracion/Sidebar.vue'
 import NavbarMobile from '@/components/Administracion/NavBarMobile.vue'
 import Alumnos from '@/components/Administracion/Admin/Alumnos.vue'
 import InfoAlumno from '@/components/Administracion/Admin/InfoAlumno.vue'
-import Suscripciones from '@/components/Administracion/Admin/Suscripciones.vue'
-import Trabajos_Metodologias from '@/components/Administracion/Admin/Trabajos_Metodologias.vue'
+import Suscripciones from '@/components/Administracion/Admin/SuscripcionesTrabajos/Suscripciones.vue'
+import Trabajos_Metodologias from '@/components/Administracion/Admin/SuscripcionesTrabajos/Trabajos_Metodologias.vue'
 import Dashboard from '@/components/Administracion/Admin/Dashboard.vue'
 import NuevoAlumno from '@/components/Administracion/Admin/NuevoAlumno.vue';
 import ModificarGrupos from '@/components/Administracion/Admin/Grupos/ModificarGrupos.vue';
