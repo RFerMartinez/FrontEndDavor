@@ -65,6 +65,14 @@
           <i class="fas fa-calendar-alt icon"></i>
           Modificar Grupos
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'avisos' }"
+          @click="cambiarVista('avisos')"
+        >
+          <i class="fas fa-envelope-square icon"></i>
+          Avisos
+        </button>
       </Sidebar>
 
       <NavbarMobile
@@ -129,6 +137,14 @@
           <i class="fas fa-calendar-alt icon"></i>
           Modificar Grupos
         </button>
+        <button
+          class="menu-btn"
+          :class="{ activo: vistaActiva === 'avisos' }"
+          @click="cambiarVista('avisos')"
+        >
+          <i class="fas fa-envelope-square icon"></i>
+          Avisos
+        </button>
       </NavbarMobile>
 
       <div class="contenido" :class="{ 'contenido-mobile': isMobile, 'sidebar-collapsed': isSidebarCollapsed && !isMobile }">
@@ -191,6 +207,7 @@ import Trabajos_Metodologias from '@/components/Administracion/Admin/Suscripcion
 import Dashboard from '@/components/Administracion/Admin/Dashboard.vue'
 import NuevoAlumno from '@/components/Administracion/Admin/NuevoAlumno.vue';
 import ModificarGrupos from '@/components/Administracion/Admin/Grupos/ModificarGrupos.vue';
+import Avisos from '@/components/Administracion/Admin/Avisos/AdminAvisos.vue';
 // *** ===================== NUEVO: Importar Personas e IngresoPersona ===================== ***
 // *** USA TUS RUTAS CORRECTAS ***
 import Personas from '@/components/Administracion/Admin/Personas.vue'
@@ -294,6 +311,7 @@ const vistaComponente = computed(() => {
     case 'dashboard': return Dashboard; 
     case 'nuevoalumno': return NuevoAlumno;
     case 'modificarGrupos': return ModificarGrupos;
+    case 'avisos': return Avisos;
     default: return Dashboard;
   }
 })

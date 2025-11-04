@@ -31,6 +31,12 @@
             Reclamos
           </span>
         </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'avisos' }" @click="vistaActiva = 'avisos'">
+          <span class="texto-btn">
+            <i class="fas fa-envelope-square icon"></i>
+            Avisos
+          </span>
+        </button>
       </Sidebar>
 
       <NavbarMobile
@@ -56,6 +62,12 @@
         <button class="menu-btn" :class="{ activo: vistaActiva === 'reclamos' }" @click="cambiarVista('reclamos')">
           <i class="fas fa-exclamation-circle icon"></i>
           Reclamos
+        </button>
+        <button class="menu-btn" :class="{ activo: vistaActiva === 'avisos' }" @click="vistaActiva = 'avisos'">
+          <span class="texto-btn">
+            <i class="fas fa-envelope-square icon"></i>
+            Avisos
+          </span>
         </button>
       </NavbarMobile>
 
@@ -102,6 +114,7 @@ import InformacionPersonal from '@/components/Administracion/Usuario/Informacion
 import Cuotas from '@/components/Administracion/Usuario/Cuotas.vue';
 import Reclamos from '@/components/Administracion/Usuario/Reclamos.vue';
 import Horarios from '@/components/Administracion/Usuario/MisHorarios.vue';
+import UsuarioAvisos from '@/components/Administracion/Usuario/UsuarioAvisos.vue';
 import { getUser } from '@/api/storage/userStorage';
 
 
@@ -166,6 +179,7 @@ const vistaComponente = computed(() => {
     case 'cuotas': return Cuotas;
     case 'reclamos': return Reclamos;
     case 'horarios': return Horarios;
+    case 'avisos': return UsuarioAvisos;
     default: return InformacionPersonal;
   }
 });
