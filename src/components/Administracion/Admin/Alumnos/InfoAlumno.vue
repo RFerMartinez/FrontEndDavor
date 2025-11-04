@@ -155,6 +155,39 @@
 </template>
 
 <script setup>
+/**
+ * Compara dos listas de horarios para ver si son idénticas en contenido.
+ * @param {Array} horariosA - Lista de horarios [{ dia: 'Lunes', nroGrupo: '1' }]
+ * @param {Array} horariosB - Otra lista de horarios
+ * @returns {boolean} - True si son iguales, false si no.
+ */
+function sonHorariosIguales(horariosA, horariosB) {
+  if (!horariosA || !horariosB) {
+      // Maneja el caso de que uno sea nulo o undefined
+      return !horariosA && !horariosB;
+  }
+
+  if (horariosA.length !== horariosB.length) {
+      return false; // Diferente cantidad
+  }
+
+  // Normaliza y crea un Set para comparación
+  // Usamos trim() para limpiar espacios como "4 " -> "4"
+  const setA = new Set(
+      horariosA.map(h => `${h.dia}|${h.nroGrupo.trim()}`)
+  );
+
+  for (const h of horariosB) {
+      if (!setA.has(`${h.dia}|${h.nroGrupo.trim()}`)) {
+      // Si un horario de B no está en A, no son iguales
+      return false;
+      }
+  }
+
+  return true; // Si pasó todas las pruebas, son iguales
+}
+
+
 import { ref, computed, onMounted } from 'vue'
 import TablaCuota from '../../Tablas y Filas/TablaCuotas/TablaCuotas.vue'
 import TablaHorarios from '../../Tablas y Filas/TablaHorario/TablaHorarios.vue'
@@ -367,19 +400,59 @@ const manejarGuardarDatos = async (datosActualizados) => {
 }
 
 
+import {
+  actualizarPlanAlumno,
+  guardarModificacionesPlanYHorarios
+} from '@/api/services/alumnoService'
+// actualizarHorariosAlumno()
+// obtenerHorariosPorDni()
 
+const manejarGuardarSuscripcionTrabajo = async (datosActualizados) => {
+  // datosActualizados es el JSON: { alumno: {...}, horarios: [...] }
 
-const manejarGuardarSuscripcionTrabajo = (datosActualizados) => {
+  // Habilitamos el estado de carga
+  loading.value = true; 
+
+  try {
+    // 1. Obtenemos los 3 argumentos que necesitamos
+    const dni = alumno.value.dni;
+    const alumnoOriginal = alumno.value; // 'alumno.value' tiene los datos ANTES de la modificación
+    const nuevosDatos = datosActualizados; // El payload del evento
     
-    if (datosActualizados.horarios) {
-      // Ahora este console.log mostrará el objeto { horarios: [...] }
-      console.log('HorariosModificados', JSON.stringify(datosActualizados, null, 2)); 
+    // 2. Llamamos a la función orquestadora que creamos en el service
+    // Esta función HARÁ AMBAS llamadas a la API (plan y horarios)
+    // si es necesario, y ya incluye la lógica de comparación.
+    const { planActualizado, horariosActualizados } = await guardarModificacionesPlanYHorarios(
+      dni,
+      alumnoOriginal,
+      nuevosDatos
+    );
+
+    // 3. Si todo sale bien, cerramos el formulario y mostramos el modal de éxito
+    mostrandoModificacion.value = null; // Ocultar el formulario
+    
+    // Personalizar el mensaje basado en lo que se hizo
+    if (planActualizado && horariosActualizados) {
+      mensajeModalExito.value = 'El plan y los horarios se actualizaron correctamente.';
+    } else if (planActualizado) {
+      mensajeModalExito.value = 'El plan se actualizó. Los horarios no necesitaron cambios.';
     }
     
-    // El resto de tu lógica para el modal está bien
-    mostrandoModificacion.value = null;
-    mensajeModalExito.value = 'La suscripción, trabajo y nivel se actualizaron correctamente';
     mostrarModalExito.value = true;
+    
+    // NOTA: Tu función 'handleContinuarExito' se encargará de
+    // recargar los datos del alumno (con 'cargarDatosCompletosAlumno')
+    // cuando el usuario cierre el modal de éxito. ¡Eso está perfecto!
+
+  } catch (error) {
+    // 4. Si algo falla (la API de plan o la de horarios), mostramos un error
+    console.error("Error al guardar modificaciones de suscripción/trabajo:", error);
+    alert(`Error al guardar: ${error.message || 'Ocurrió un error inesperado.'}`);
+    
+  } finally {
+    // 5. Pase lo que pase, quitamos el estado de carga
+    loading.value = false;
+  }
 }
 
 

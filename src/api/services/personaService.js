@@ -53,3 +53,22 @@ export const obtenerPersonaPorDni = async (dni) => {
         return null; // Devuelve null para otros errores también
     }
 };
+
+/**
+ * Elimina a una persona del sistema (solo si no es alumno, empleado o admin).
+ * Requiere token de administrador.
+ * @param {string} dni - DNI de la persona a eliminar.
+ */
+export const eliminarPersona = async (dni) => {
+    try {
+        // 3. Usa 'api.delete'. El endpoint relativo es '/personas/{dni}'
+        // Esta llamada devuelve 204 No Content, por lo que response.data será undefined.
+        const response = await api.delete(`/personas/${dni}`);
+        return response.data; // Devuelve undefined en caso de éxito
+    } catch (error) {
+        // 4. Si falla (ej: 403, 404, 400 por regla de negocio), lanza el error
+        console.error(`Error al eliminar la persona ${dni}:`, error.response?.data || error.message);
+        throw error; // Lanza el error para que el componente Vue pueda mostrar una alerta
+    }
+};
+

@@ -51,7 +51,11 @@ import { ref, computed, onMounted } from 'vue';
 import TablaAlumnos from '../Tablas y Filas/TablaAlumnosPersonas/TablaAlumnos.vue'; 
 import Titulo from '../Titulo.vue';
 import { filterItems } from '@/utils/formatters'; 
-import { listarPersonas } from '@/api/services/personaService';
+
+import {
+  listarPersonas,
+  eliminarPersona
+} from '@/api/services/personaService';
 
 const emit = defineEmits(['verIngreso']);
 
@@ -62,9 +66,9 @@ const terminoBusqueda = ref('');
 const loading = ref(true); // MODIFICADO: Empezar en true
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-onMounted(async () => {
+const listarFromApi = async () => {
   loading.value = true; // (Ya está en true, pero es buena práctica)
-  await sleep(1000);
+  // await sleep(1000);
   try {
     const respuestaAlumnos = await listarPersonas();
     personas.value = respuestaAlumnos;
@@ -73,17 +77,16 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+}
+
+onMounted(async () => {
+  listarFromApi();
 });
 
 const personasFiltradas = computed(() => {
   if (loading.value || !Array.isArray(personas.value)) { return []; } // Devuelve vacío si está cargando
   return filterItems(personas.value, terminoBusqueda.value);
 });
-
-
-// --- LÓGICA DE PAGINACIÓN ELIMINADA ---
-// Se eliminaron: paginaActual, totalPaginas, personasPaginadas, numerosPaginas
-// Se eliminó: cambiarPagina
 
 // --- MÉTODOS DE FILTROS SIMPLIFICADOS ---
 const aplicarFiltros = () => {
@@ -99,14 +102,18 @@ const emitVerIngreso = (persona) => {
   emit('verIngreso', persona);
 }
 
-const manejarEliminarPersona = (persona) => {
-  console.log("Personas.vue: Recibido evento para eliminar a:", persona);
+const manejarEliminarPersona = async (persona) => {
   if (confirm(`¿Estás seguro de eliminar a ${persona.nombre} ${persona.apellido}?`)) {
-     console.log(`Llamando a API para eliminar DNI: ${persona.dni}`);
-     // Lógica de API...
-     // personas.value = personas.value.filter(p => p.dni !== persona.dni);
+    try {
+      await eliminarPersona(persona.dni);
+    } catch (error) {
+      console.error(`Error al eliminar DNI ${persona.dni}:`, error);
+    } finally {
+      listarFromApi();
+      console.log("se eliminó correctamente a la persona:", persona.dni);
+    }
   } else {
-     console.log('Eliminación cancelada.');
+    console.log('Eliminación cancelada.');
   }
 };
 </script>

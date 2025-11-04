@@ -87,11 +87,9 @@ import {
   actualizarHorarioGrupo
 } from '@/api/services/horarioService';
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-onMounted(async () => {
+const listarGrupoFromAPI = async () => {
   loading.value = true
-  await sleep(500);
   try {
     const data = await obtenerHorariosCompletos(); 
     grupos.value = data;
@@ -103,6 +101,10 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+}
+
+onMounted(async () => {
+  listarGrupoFromAPI();
 })
 
 const anadirNuevoGrupo = async() => {
@@ -184,6 +186,7 @@ const manejarGuardarGrupo = async (grupoModificado) => {
     mostrarModalError.value = true;
     // --- Fin Reemplazo ---
   } finally {
+    await listarGrupoFromAPI();
     // (loadingGuardar.value = false;)
   }
 }
