@@ -227,7 +227,7 @@ import { ref, computed, watch } from 'vue';
 import ListadoSuscripciones from './Listados/ListadoSuscripciones.vue';
 import ListadoTrabajos from './Listados/ListadoTrabajos.vue';
 import ListadoNiveles from './Listados/ListadoNiveles.vue';
-import TablaHorarios from '../TablaHorarios.vue';
+import TablaHorarios from '../Tablas y Filas/TablaHorario/TablaHorarios.vue';
 import Titulo from '../Titulo.vue';
 
 const emit = defineEmits(['cancelarIngreso','nuevoIngresoConfirmado']);

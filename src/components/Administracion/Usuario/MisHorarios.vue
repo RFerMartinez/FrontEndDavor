@@ -14,7 +14,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import Titulo from '../Titulo.vue';
-import TablaHorarios from '../TablaHorarios.vue'; // <-- 3. Importar TablaHorarios
+import TablaHorarios from '../Tablas y Filas/TablaHorario/TablaHorarios.vue'; // <-- 3. Importar TablaHorarios
 
 import { obtenerHorarioCurrentUser } from '@/api/services/alumnoService';
 

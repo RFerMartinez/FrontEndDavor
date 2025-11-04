@@ -80,7 +80,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import TablaHorarios from '../../TablaHorarios.vue';
+import TablaHorarios from '../../Tablas y Filas/TablaHorario/TablaHorarios.vue';
 import ListadoSuscripciones from '../Listados/ListadoSuscripciones.vue';
 import ListadoTrabajos from '../Listados/ListadoTrabajos.vue';
 import ListadoNiveles from '../Listados/ListadoNiveles.vue';
